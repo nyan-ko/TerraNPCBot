@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace rt.Packets {
-    public class Class1 : PacketBase {
+    public class Packet0x1 : PacketBase {
 
-        public Class1 (int protocol) : base(0x1, new List<byte>()){
-
+        public Packet0x1 (int protocol) : base(0x1, new List<byte>()){
+            _data.Add()
         }
     }
 }
