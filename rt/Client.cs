@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -13,6 +14,7 @@ namespace rt {
         /// Manages connections for the bot.
         /// </summary>
         string _address;
+        int _port;
         bool _running;
 
         Player _player;
@@ -26,7 +28,8 @@ namespace rt {
         public static Client GetClient(string host, Player plr, EventManager eventManager, int port = 7777) {
 
             Client c = new Client();
-            c._address = $"{host} {port}";
+            c._address = host;
+            c._port = port;
             c._player = plr;
             c._eventManager = eventManager;
 
@@ -59,10 +62,32 @@ namespace rt {
             }
         } // more code needed
 
-        public void SendPackets() {
+        public void SendPackets() { 
             while (_running) {
                 if (_writeQueue.Count > 0) {
                     
+                }
+            }
+        }  // python uses socket send()
+
+        /// <summary>
+        /// Connects to the server.
+        /// </summary>
+        public void Start() {
+            if (!_writeThread.IsAlive && !_readThread.IsAlive) {
+
+                IPHostEntry hostInfo = Dns.GetHostEntry(Dns.GetHostName());
+                IPAddress address = IPAddress.Parse(_address);
+                IPEndPoint endPoint = new IPEndPoint(address, _port);
+
+                var client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
+                try {
+
+                    client.Connect(endPoint);
+                }
+                catch {
+
                 }
             }
         }
