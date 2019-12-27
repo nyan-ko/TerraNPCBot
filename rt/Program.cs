@@ -13,8 +13,6 @@ namespace rt
 {
     [ApiVersion(2, 1)]
     public class Program {
-        public void BotGetData(PacketBase packet) {
-
-        }
+        
     }
 }

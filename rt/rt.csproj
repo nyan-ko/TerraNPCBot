@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bot.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="Packets\Packet0x1.cs" />
