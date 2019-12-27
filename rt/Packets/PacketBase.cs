@@ -3,15 +3,16 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net.Sockets;
 using System.Threading.Tasks;
 
 namespace rt {
     public class PacketBase {
 
-        public uint _packetType;  // type of packet in hex, see multiplayer packet structure
-        public List<byte> _data;  
+        private uint _packetType;  // type of packet in hex, see multiplayer packet structure
+        private List<byte> _data;  
 
-        public PacketBase(uint packetType, List<byte> data) {
+        public PacketBase(uint packetType, List<byte> data = null) {
             _packetType = packetType;
             _data = data;
         }
@@ -28,6 +29,7 @@ namespace rt {
                 bitsOfBytes = Encoding.UTF8.GetBytes(data);
             }
             catch (ArgumentNullException ex) {
+                Console.Write($"'AddData' failed. Could not get bytes from data: {ex}");
                 TShockAPI.TShock.Log.Write($"'AddData' failed. Could not get bytes from data: {ex}", System.Diagnostics.TraceLevel.Error);
                 return;
             }
@@ -39,7 +41,8 @@ namespace rt {
                     _data.AddRange(bitsOfBytes);
                 }
                 catch (ArgumentNullException ex) {
-                    TShockAPI.TShock.Log.Write($"'AddData' failed. {ex}, {ex.Source}", System.Diagnostics.TraceLevel.Error);
+                    Console.WriteLine($"Exception with AddData: {ex}, {ex.Source}");
+                    TShockAPI.TShock.Log.Write($"Exception thrown with AddData(data, pascalString): {ex}, {ex.Source}", System.Diagnostics.TraceLevel.Error);
                     return;
                 }
             }
@@ -50,9 +53,22 @@ namespace rt {
 
         // not big endian compatible yet
         public void AddStructuredData<T> (int data) {
-            var tempData = ConvertFromType<T>(data);
+            var tempData = ConvertToType<T>(data);
             if (tempData == null) return;
             _data.AddRange(tempData);
+        }
+
+        public void Send(Socket socket) {
+            try {
+                var packet = ConvertToType<ushort>(_data.Count + 3);  // adding 3 to include length of packet (2 bytes) and type (1 byte)
+                packet.AddRange(ConvertToType<byte>((int)_packetType));
+                packet.AddRange(_data);
+
+                socket.Send(packet.ToArray());
+            }
+            catch (Exception ex) {
+                TShockAPI.TShock.Log.Write($"Exception thrown with Send(Socket): {ex}", System.Diagnostics.TraceLevel.Error);
+            }
         }
 
         /// <summary>
@@ -61,27 +77,46 @@ namespace rt {
         /// <typeparam name="T">Type to cast data as.</typeparam>
         /// <param name="data">What do you think this is?</param>
         /// <returns></returns>
-        public byte[] ConvertFromType<T> (int data) {
-            byte[] dada = null;
+        public static List<byte> ConvertToType<T> (int data) {
+            List<byte> dada = null;
             switch (Type.GetTypeCode(typeof(T))) {
                 case TypeCode.UInt32:  // long?
-                    dada = BitConverter.GetBytes((uint)data);
+                    dada = BitConverter.GetBytes((uint)data).ToList();
                     break;
                 case TypeCode.UInt16:  // short?
-                    dada = BitConverter.GetBytes((ushort)data);
+                    dada = BitConverter.GetBytes((ushort)data).ToList();
                     break;
                 case TypeCode.Byte:  // char?
-                    dada = BitConverter.GetBytes((byte)data);
+                    dada = BitConverter.GetBytes((byte)data).ToList();
                     break;
                 case TypeCode.SByte:  // alt char
-                    dada = BitConverter.GetBytes((sbyte)data);
+                    dada = BitConverter.GetBytes((sbyte)data).ToList();
                     break;
             }
-            return dada == null ? null : dada;
+            return dada;
         }
 
-        public void LittleEndianifier(byte[] bites) {
+        public static void LittleEndianifier(byte[] bites) {
             
+        }
+
+        /// <summary>
+        /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
+        /// </summary>
+        /// <param name="reader"></param>
+        public static void Parse(BinaryReader reader) {
+            PacketBase packet;
+
+            var length = reader.ReadInt16();
+            var type = reader.ReadByte();
+            switch (type) {
+                case 0x1:  // connect req
+                    break;
+                case 0x2:  // disconnect
+
+                    break;
+
+            }
         }
     }
 }

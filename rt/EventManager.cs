@@ -10,7 +10,7 @@ namespace rt {
         /// <summary>
         /// delegates for each packet, creating new bot hooks onto packets
         /// </summary>
-        public delegate void OnChat();
+        public delegate void PacketReceived(PacketBase packed);
     }
     enum Events {
 

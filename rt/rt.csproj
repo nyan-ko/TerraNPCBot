@@ -52,7 +52,8 @@
   <ItemGroup>
     <Compile Include="Client.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Packets\Packet1.cs" />
+    <Compile Include="Packets\Packet0x1.cs" />
+    <Compile Include="Packets\Packet0x2.cs" />
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
