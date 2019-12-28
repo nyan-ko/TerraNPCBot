@@ -6,13 +6,20 @@ using System.Threading.Tasks;
 
 namespace rt {
     public class EventManager {
+        public Dictionary<Events, Action<Bot, PacketBase>> _listenReact;
 
-        /// <summary>
-        /// delegates for each packet, creating new bot hooks onto packets
-        /// </summary>
-        public delegate void PacketReceived(PacketBase packed);
-    }
-    enum Events {
+        public EventManager() {
+            _listenReact = new Dictionary<Events, Action<Bot, PacketBase>>();
+        }
 
+        public void Move() {
+
+        }
     }
+    public enum Events {
+        Disconnect = 0x2,
+        ReceivedID = 0x3,
+        WorldInfo = 0x8
+    }
+
 }

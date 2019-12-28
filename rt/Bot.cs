@@ -13,18 +13,49 @@ namespace rt {
         private EventManager _manager;
         private Player _player;
         private Client _client;
+        private World _world;
 
         public Bot(string address, string name = "Michael_Jackson", int port = 7777, int protocol = 194) {
             _protocol = protocol;
             _manager = new EventManager();
+            {
+                _manager._listenReact.Add(Events.Disconnect, Stop);
+                _manager._listenReact.Add(Events.ReceivedID, ReceivedPlayerID);
+                _manager._listenReact.Add(Events.WorldInfo, Initalize);
+            }  // default listeners
             _player = new Player(name);
-            _client = Client.GetClient(address, _player, _manager, port);
-
-
+            _world = new World();
+            _client = Client.GetClient(address, this, _player, _world, _manager, port);
         }
 
-        public void BotGetData(PacketBase packet) {
+        public void Start() {
+            _client.Start();
+            _client.AddPackets(new Packets.Packet1(_protocol));
+        }
 
+        public void Stop(Bot b, PacketBase p) {
+            _client.Stop();
+        }  // hammer time
+
+        public void ReceivedPlayerID(Bot b, PacketBase p) {
+            _client.AddPackets(new Packets.Packet4(_player));
+            _client.AddPackets(new Packets.Packet16(_player));
+            _client.AddPackets(new Packets.Packet42(_player));
+            _client.AddPackets(new Packets.Packet50(_player));
+            for (int i = 0; i < 83; i++) 
+                _client.AddPackets(new Packets.Packet5(_player, i));           
+            _client.AddPackets(new Packets.Packet6());
+        }
+
+        public void Initalize(Bot b, PacketBase p) {
+            if (_player.Initialized && !_player.LoggedIn) {
+                _player.LoggedIn = true;
+                _client.AddPackets(new Packets.Packet12(_player.PlayerID));
+            }
+            if (!_player.Initialized) {
+                _player.Initialized = true;
+                _client.AddPackets(new Packets.Packet8());
+            }
         }
     }
 }

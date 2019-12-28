@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace rt.Packets {
-    class Packet0x2 : PacketBase {
-        public Packet0x2 (string reason) : base(0x2, new List<byte>()) {
+    public class Packet6 : PacketBase {
+        public Packet6() : base(0x6, new List<byte>()) {
 
         }
     }

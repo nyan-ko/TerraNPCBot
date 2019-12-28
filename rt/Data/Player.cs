@@ -11,22 +11,31 @@ namespace rt {
         /// <summary>
         /// Based off of playerinfo packet.
         /// </summary>
-        int PlayerID;
-        byte SkinVariant;
-        byte HairType;
-        string Name;
-        byte HairDye;
-        byte HVisuals1;
-        byte HVisuals2;
-        byte HMisc;
-        Color HairColor;
-        Color SkinColor;
-        Color EyeColor;
-        Color ShirtColor;
-        Color UnderShirtColor;
-        Color PantsColor;
-        Color ShoeColor;
-        byte Difficulty;
+        public int PlayerID;
+        public byte SkinVariant;
+        public byte HairType;
+        public string Name;
+        public byte HairDye;
+        public byte HVisuals1;
+        public byte HVisuals2;
+        public byte HMisc;
+        public Color HairColor;
+        public Color SkinColor;
+        public Color EyeColor;
+        public Color ShirtColor;
+        public Color UnderShirtColor;
+        public Color PantsColor;
+        public Color ShoeColor;
+        public byte Difficulty;
+
+        public uint MaxHP;
+        public uint CurHP;
+
+        public uint MaxMana;
+        public uint CurMana;
+
+        public bool Initialized;
+        public bool LoggedIn;
 
         public Player(string name) {
             PlayerID = 0;
@@ -45,6 +54,15 @@ namespace rt {
             PantsColor = new Color(255, 255, 255);
             ShoeColor = new Color(255, 255, 255);
             Difficulty = 0;
+
+            MaxHP = 400;
+            CurHP = 400;
+
+            MaxMana = 200;
+            CurMana = 150;
+
+            Initialized = false;
+            LoggedIn = false;
         }
     }
 }

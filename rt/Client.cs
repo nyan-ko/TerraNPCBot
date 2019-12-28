@@ -19,6 +19,7 @@ namespace rt {
         bool _running;
 
         Player _player;
+        World _world;
         EventManager _eventManager;
 
         Thread _writeThread;
@@ -29,11 +30,14 @@ namespace rt {
 
         Socket client;
 
-        public static Client GetClient(string host, Player plr, EventManager eventManager, int port = 7777) {
+        Bot bot;
+
+        public static Client GetClient(string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
             Client c = new Client();
             c._address = host;
             c._port = port;
             c._player = plr;
+            c._world = wrld;
             c._eventManager = eventManager;
 
             c._writeQueue = new List<PacketBase>();
@@ -61,7 +65,11 @@ namespace rt {
                     byte[] stream = new byte[bytes];
                     Array.Copy(_buffer, stream, bytes);
                     using (var reader = new BinaryReader(new MemoryStream(stream))) {
-                        PacketBase.Parse(reader);
+                        var packedPacket = PacketBase.Parse(reader, _player, _world);
+                        try {
+                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(bot, packedPacket);
+                        }
+                        catch { return; }
                     }
                 }
                 catch (Exception ex){

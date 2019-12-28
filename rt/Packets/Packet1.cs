@@ -5,8 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace rt.Packets {
-    public class Packet0x1 : PacketBase {
-        public Packet0x1 (int protocol) : base(0x1, new List<byte>()){
+    /// <summary>
+    /// Connect request (1)
+    /// </summary>
+    public class Packet1 : PacketBase {
+        public Packet1 (int protocol) : base(0x1, new List<byte>()){
             AddData($"Terraria{protocol}", true);
         }
     }

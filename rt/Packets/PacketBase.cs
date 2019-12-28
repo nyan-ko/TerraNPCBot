@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace rt {
     public class PacketBase {
 
-        private uint _packetType;  // type of packet in hex, see multiplayer packet structure
+        public uint _packetType;  // type of packet in hex, see multiplayer packet structure
         private List<byte> _data;  
 
         public PacketBase(uint packetType, List<byte> data = null) {
@@ -52,7 +52,7 @@ namespace rt {
         }
 
         // not big endian compatible yet
-        public void AddStructuredData<T> (int data) {
+        public void AddStructuredData<T> (float data) {
             var tempData = ConvertToType<T>(data);
             if (tempData == null) return;
             _data.AddRange(tempData);
@@ -77,13 +77,19 @@ namespace rt {
         /// <typeparam name="T">Type to cast data as.</typeparam>
         /// <param name="data">What do you think this is?</param>
         /// <returns></returns>
-        public static List<byte> ConvertToType<T> (int data) {
+        public static List<byte> ConvertToType<T> (float data) {
             List<byte> dada = null;
             switch (Type.GetTypeCode(typeof(T))) {
-                case TypeCode.UInt32:  // long?
+                case TypeCode.Int32:
+                    dada = BitConverter.GetBytes((int)data).ToList();
+                    break;
+                case TypeCode.UInt32:  // ulong?
                     dada = BitConverter.GetBytes((uint)data).ToList();
                     break;
-                case TypeCode.UInt16:  // short?
+                case TypeCode.Int16:
+                    dada = BitConverter.GetBytes((short)data).ToList();
+                    break;
+                case TypeCode.UInt16:  // ushort?
                     dada = BitConverter.GetBytes((ushort)data).ToList();
                     break;
                 case TypeCode.Byte:  // char?
@@ -91,6 +97,9 @@ namespace rt {
                     break;
                 case TypeCode.SByte:  // alt char
                     dada = BitConverter.GetBytes((sbyte)data).ToList();
+                    break;
+                case TypeCode.Single:  // float
+                    dada = BitConverter.GetBytes((float)data).ToList();
                     break;
             }
             return dada;
@@ -104,19 +113,33 @@ namespace rt {
         /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
         /// </summary>
         /// <param name="reader"></param>
-        public static void Parse(BinaryReader reader) {
-            PacketBase packet;
+        public static PacketBase Parse(BinaryReader reader, Player plr, World wrld) {
+            PacketBase packet = null;
 
             var length = reader.ReadInt16();
             var type = reader.ReadByte();
             switch (type) {
-                case 0x1:  // connect req
-                    break;
                 case 0x2:  // disconnect
-
+                    var reason = reader.ReadBytes((int)reader.BaseStream.Length);
+                    string r = Encoding.UTF8.GetString(reason);
+                    packet = new Packets.Packet2(r);
                     break;
-
+                case 0x3:  // continue connection
+                    var id = reader.ReadByte();
+                    packet = new Packets.Packet3(plr, id);
+                    break;
+                case 0x7:  // world info
+                    packet = new Packets.Packet7(wrld, plr,
+                            reader.ReadInt32(),
+                            reader.ReadByte(),
+                            reader.ReadByte(),
+                            reader.ReadInt16(),
+                            reader.ReadInt16(),
+                            reader.ReadInt16(),
+                            reader.ReadInt16());
+                    break;
             }
+            return packet;
         }
     }
 }

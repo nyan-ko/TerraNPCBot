@@ -53,12 +53,24 @@
     <Compile Include="Bot.cs" />
     <Compile Include="Client.cs" />
     <Compile Include="EventManager.cs" />
-    <Compile Include="Packets\Packet0x1.cs" />
-    <Compile Include="Packets\Packet0x2.cs" />
+    <Compile Include="Packets\Packet1.cs" />
+    <Compile Include="Packets\Packet16.cs" />
+    <Compile Include="Packets\Packet2.cs" />
+    <Compile Include="Packets\Packet3.cs" />
+    <Compile Include="Packets\Packet4.cs" />
+    <Compile Include="Packets\Packet5.cs" />
+    <Compile Include="Packets\Packet50.cs" />
+    <Compile Include="Packets\Packet6.cs" />
+    <Compile Include="Packets\Packet7.cs" />
+    <Compile Include="Packets\Packet8.cs" />
+    <Compile Include="Packets\Packet12.cs" />
+    <Compile Include="Packets\Packet42.cs" />
     <Compile Include="Packets\PacketBase.cs" />
-    <Compile Include="Player.cs" />
+    <Compile Include="Data\Player.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Packets\Packet13.cs" />
+    <Compile Include="Data\World.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
