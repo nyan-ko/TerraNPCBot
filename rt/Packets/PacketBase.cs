@@ -35,9 +35,9 @@ namespace rt {
             }
 
             if (pascalString) {
-                int length = data.Length;
+                var length = ConvertToType<short>(data.Length);
                 try {
-                    _data.AddRange(BitConverter.GetBytes((byte)length));
+                    _data.AddRange(length);
                     _data.AddRange(bitsOfBytes);
                 }
                 catch (ArgumentNullException ex) {
@@ -61,8 +61,10 @@ namespace rt {
         public void Send(Socket socket) {
             try {
                 var packet = ConvertToType<ushort>(_data.Count + 3);  // adding 3 to include length of packet (2 bytes) and type (1 byte)
-                packet.AddRange(ConvertToType<byte>((int)_packetType));
+                packet.AddRange(ConvertToType<byte>(_packetType));
                 packet.AddRange(_data);
+
+                TShockAPI.TShock.Log.Write(_data.Count.ToString(), System.Diagnostics.TraceLevel.Verbose);
 
                 socket.Send(packet.ToArray());
             }

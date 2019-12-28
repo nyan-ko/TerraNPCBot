@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 
 namespace rt {
     /// <summary>
@@ -16,7 +17,7 @@ namespace rt {
         private World _world;
 
         public Bot(string address, string name = "Michael_Jackson", int port = 7777, int protocol = 194) {
-            _protocol = protocol;
+            _protocol = Main.curRelease;
             _manager = new EventManager();
             {
                 _manager._listenReact.Add(Events.Disconnect, Stop);
