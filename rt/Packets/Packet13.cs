@@ -21,8 +21,8 @@ namespace rt.Packets {
                 Amanuensis.Write(posY);
                 Amanuensis.Write(vecX);
                 Amanuensis.Write(vecY);
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }

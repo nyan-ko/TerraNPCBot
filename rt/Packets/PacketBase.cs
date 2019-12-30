@@ -31,9 +31,11 @@ namespace rt {
 
         // not big endian compatible yet
         public void AddData(Stream stream) {
-            MemoryStream s = new MemoryStream();
-            stream.CopyTo(s);
-            _data.AddRange(s.ToArray());
+            using (MemoryStream s = new MemoryStream()) {
+                stream.Position = 0;
+                stream.CopyTo(s);
+                _data.AddRange(s.ToArray());
+            }
         }
 
         public void Send(Socket socket) {

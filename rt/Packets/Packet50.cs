@@ -14,8 +14,8 @@ namespace rt.Packets {
                 for (int i = 0; i < 22; i++) {
                     Amanuensis.Write((byte)0);
                 }
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }

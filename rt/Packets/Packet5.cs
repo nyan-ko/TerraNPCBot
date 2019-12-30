@@ -16,8 +16,8 @@ namespace rt.Packets {
                 Amanuensis.Write((ushort)0);
                 Amanuensis.Write((byte)0);
                 Amanuensis.Write((ushort)0);
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }

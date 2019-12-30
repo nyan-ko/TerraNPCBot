@@ -14,8 +14,8 @@ namespace rt.Packets {
                 Amanuensis.Write(plr.PlayerID);
                 Amanuensis.Write(plr.CurHP);
                 Amanuensis.Write(plr.MaxHP);
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }

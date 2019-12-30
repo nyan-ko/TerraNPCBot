@@ -30,7 +30,7 @@ namespace rt {
 
         Socket client;
 
-        Bot bot;
+        Bot _bot;
 
         public static Client GetClient(string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
             Client c = new Client();
@@ -39,6 +39,8 @@ namespace rt {
             c._player = plr;
             c._world = wrld;
             c._eventManager = eventManager;
+
+            c._bot = bot;
 
             c._writeQueue = new List<PacketBase>();
 
@@ -68,7 +70,7 @@ namespace rt {
                         var packedPacket = PacketBase.Parse(reader, _player, _world);
                         if (packedPacket == null) return;
                         try {
-                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(bot, packedPacket);
+                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(_bot, packedPacket);
                         }
                         catch { return; }
                     }
@@ -83,10 +85,14 @@ namespace rt {
         public void SendPackets() { 
             while (_running) {
                 if (_writeQueue.Count > 0) {
-                    _writeQueue[0].Send(client);
-                    _writeQueue.RemoveAt(0);
-                    _writeQueue.TrimExcess();  // just in case
-                    Thread.Sleep(1);
+                    try {
+                        _writeQueue[0].Send(client);
+                        _writeQueue.RemoveAt(0);
+                        _writeQueue.TrimExcess();  // just in case
+                    }
+                    catch {
+
+                    }
                 }
             }
         } 
@@ -94,7 +100,7 @@ namespace rt {
         /// <summary>
         /// Connects to the server. <para/>Using https://docs.microsoft.com/en-us/dotnet/framework/network-programming/synchronous-client-socket-example
         /// </summary>
-        public void Start() {
+        public bool Start() {
             if (!_writeThread.IsAlive && !_readThread.IsAlive) {
                 try {
                     IPHostEntry hostInfo = Dns.GetHostEntry(Dns.GetHostName());
@@ -113,16 +119,18 @@ namespace rt {
                         Console.WriteLine($"Exception thrown while connecting to the server: {ex.ToString()}");
                         TShockAPI.TShock.Log.Write($"Exception thrown while connecting to the server: {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
 
-                        return;
+                        return false;
                     }
                 }
                 catch (Exception ex) {
                     Console.WriteLine($"Exception thrown while getting server info: {ex.ToString()}");
                     TShockAPI.TShock.Log.Write($"Exception thrown while getting server info (Start()): {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
 
-                    return;
+                    return false;
                 }
+                return client.Connected;
             }
+            return false;
         }
 
         /// <summary>

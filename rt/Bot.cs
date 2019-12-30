@@ -16,7 +16,9 @@ namespace rt {
         private Client _client;
         private World _world;
 
-        public Bot(string address, int port = 7777, string name = "Michael_Jackson", int protocol = 194) {
+        private int _master;
+
+        public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson", int protocol = 194) {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {
@@ -26,12 +28,17 @@ namespace rt {
             }  // default listeners
             _player = new Player(name);
             _world = new World();
+            _master = owner;
             _client = Client.GetClient(address, this, _player, _world, _manager, port);
         }
 
-        public void Start() {
-            _client.Start();
-            _client.AddPackets(new Packets.Packet1(_protocol));
+        public bool Start() {
+            if (_client.Start()) {
+                _client.AddPackets(new Packets.Packet1(_protocol));
+                return true;
+            }
+            else
+                return false;
         }
 
         public void Stop(Bot b, PacketBase p) {
@@ -56,6 +63,7 @@ namespace rt {
             if (!_player.Initialized) {
                 _player.Initialized = true;
                 _client.AddPackets(new Packets.Packet8());
+                _client.AddPackets(new Packets.Packet12(_player.PlayerID));
             }
         }
     }

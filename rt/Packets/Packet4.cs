@@ -52,8 +52,8 @@ namespace rt.Packets {
                 Amanuensis.Write(plr.ShoeColor.B);
 
                 Amanuensis.Write(plr.Difficulty);
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }

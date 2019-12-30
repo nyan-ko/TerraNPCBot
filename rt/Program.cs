@@ -27,8 +27,10 @@ namespace rt
         }
 
         void Start(CommandArgs args) {
-            bot = new Bot("127.0.0.1");
-            bot.Start();
+            bot = new Bot("127.0.0.1", args.Player.Index);
+            if (!bot.Start()) {
+                args.Player.SendErrorMessage("Something went wrong. Retry?");
+            }
         }
 
         void Stop(CommandArgs args) {

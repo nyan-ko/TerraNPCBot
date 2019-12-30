@@ -39,8 +39,7 @@ namespace rt {
         public bool LoggedIn;
 
         public Player(string name) {
-            if (Netplay.FindNextOpenClientSlot() == -1) return;
-            PlayerID = (byte)Netplay.FindNextOpenClientSlot();
+            PlayerID = 0;
             SkinVariant = 0;
             HairType = 0;
             Name = name;

@@ -13,8 +13,8 @@ namespace rt.Packets {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(-1);
                 Amanuensis.Write(-1);
+                AddData(Amanuensis.BaseStream);
             }
-            AddData(Amanuensis.BaseStream);
         }
     }
 }
