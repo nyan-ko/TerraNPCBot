@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria;
 
 namespace rt {
     public class Player {
@@ -11,7 +12,7 @@ namespace rt {
         /// <summary>
         /// Based off of playerinfo packet.
         /// </summary>
-        public int PlayerID;
+        public byte PlayerID;
         public byte SkinVariant;
         public byte HairType;
         public string Name;
@@ -28,17 +29,18 @@ namespace rt {
         public Color ShoeColor;
         public byte Difficulty;
 
-        public uint MaxHP;
-        public uint CurHP;
+        public ushort MaxHP;
+        public ushort CurHP;
 
-        public uint MaxMana;
-        public uint CurMana;
+        public ushort MaxMana;
+        public ushort CurMana;
 
         public bool Initialized;
         public bool LoggedIn;
 
         public Player(string name) {
-            PlayerID = 0;
+            if (Netplay.FindNextOpenClientSlot() == -1) return;
+            PlayerID = (byte)Netplay.FindNextOpenClientSlot();
             SkinVariant = 0;
             HairType = 0;
             Name = name;
@@ -59,7 +61,7 @@ namespace rt {
             CurHP = 400;
 
             MaxMana = 200;
-            CurMana = 150;
+            CurMana = 200;
 
             Initialized = false;
             LoggedIn = false;

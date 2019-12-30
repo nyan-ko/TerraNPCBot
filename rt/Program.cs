@@ -32,7 +32,7 @@ namespace rt
         }
 
         void Stop(CommandArgs args) {
-            bot.Stop(null,null);
+            bot.Stop(null, null);
         }
     }
 }

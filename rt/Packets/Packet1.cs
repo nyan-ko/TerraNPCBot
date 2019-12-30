@@ -10,7 +10,7 @@ namespace rt.Packets {
     /// </summary>
     public class Packet1 : PacketBase {
         public Packet1 (int protocol) : base(0x1, new List<byte>()){
-            AddData($"Terraria{protocol}", true);
+            EncodeString($"Terraria{protocol}");
         }
     }
 }

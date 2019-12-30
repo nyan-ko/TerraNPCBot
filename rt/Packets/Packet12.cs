@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,10 +11,13 @@ namespace rt.Packets {
     /// Spawn player (12)
     /// </summary>
     public class Packet12 : PacketBase {
-        public Packet12(int id) : base(0xC, new List<byte>()) {
-            AddData(id.ToString());
-            AddStructuredData<short>(Main.spawnTileX);
-            AddStructuredData<short>(Main.spawnTileY);
+        public Packet12(int id) : base(0xC, new List<byte>()) { 
+            using (Amanuensis = new BinaryWriter(new MemoryStream())) {
+                Amanuensis.Write((byte)id);
+                Amanuensis.Write((short)Main.spawnTileX);
+                Amanuensis.Write((short)Main.spawnTileY);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

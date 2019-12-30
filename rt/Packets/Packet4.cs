@@ -10,44 +10,50 @@ namespace rt.Packets {
     /// </summary>
     public class Packet4 : PacketBase {
         public Packet4 (Player plr) : base(0x4, new List<byte>()) {
-            AddData(plr.PlayerID.ToString());
-            AddData(plr.SkinVariant.ToString());
-            AddData(plr.HairType.ToString());
-            AddData(plr.Name, true);
-            AddData(plr.HairDye.ToString());
-            AddData(plr.HVisuals1.ToString());
-            AddData(plr.HVisuals2.ToString());
-            AddData(plr.HMisc.ToString());
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                Amanuensis.Write(plr.PlayerID);
+                Amanuensis.Write(plr.SkinVariant);
+                Amanuensis.Write(plr.HairType);
+                AddData(Amanuensis.BaseStream);
 
-            AddData(plr.HairColor.R.ToString());
-            AddData(plr.HairColor.G.ToString());
-            AddData(plr.HairColor.B.ToString());
+                EncodeString(plr.Name);
 
-            AddData(plr.SkinColor.R.ToString());
-            AddData(plr.SkinColor.G.ToString());
-            AddData(plr.SkinColor.B.ToString());
+                Amanuensis.Write(plr.HairDye);
+                Amanuensis.Write(plr.HVisuals1);
+                Amanuensis.Write(plr.HVisuals2);
+                Amanuensis.Write(plr.HMisc);
 
-            AddData(plr.EyeColor.R.ToString());
-            AddData(plr.EyeColor.G.ToString());
-            AddData(plr.EyeColor.B.ToString());
+                Amanuensis.Write(plr.HairColor.R);
+                Amanuensis.Write(plr.HairColor.G);
+                Amanuensis.Write(plr.HairColor.B);
 
-            AddData(plr.ShirtColor.R.ToString());
-            AddData(plr.ShirtColor.G.ToString());
-            AddData(plr.ShirtColor.B.ToString());
+                Amanuensis.Write(plr.SkinColor.R);
+                Amanuensis.Write(plr.SkinColor.G);
+                Amanuensis.Write(plr.SkinColor.B);
 
-            AddData(plr.UnderShirtColor.R.ToString());
-            AddData(plr.UnderShirtColor.G.ToString());
-            AddData(plr.UnderShirtColor.B.ToString());
+                Amanuensis.Write(plr.EyeColor.R);
+                Amanuensis.Write(plr.EyeColor.G);
+                Amanuensis.Write(plr.EyeColor.B);
 
-            AddData(plr.PantsColor.R.ToString());
-            AddData(plr.PantsColor.G.ToString());
-            AddData(plr.PantsColor.B.ToString());
+                Amanuensis.Write(plr.ShirtColor.R);
+                Amanuensis.Write(plr.ShirtColor.G);
+                Amanuensis.Write(plr.ShirtColor.B);
 
-            AddData(plr.ShoeColor.R.ToString());
-            AddData(plr.ShoeColor.G.ToString());
-            AddData(plr.ShoeColor.B.ToString());
+                Amanuensis.Write(plr.UnderShirtColor.R);
+                Amanuensis.Write(plr.UnderShirtColor.G);
+                Amanuensis.Write(plr.UnderShirtColor.B);
 
-            AddData(plr.Difficulty.ToString());
+                Amanuensis.Write(plr.PantsColor.R);
+                Amanuensis.Write(plr.PantsColor.G);
+                Amanuensis.Write(plr.PantsColor.B);
+
+                Amanuensis.Write(plr.ShoeColor.R);
+                Amanuensis.Write(plr.ShoeColor.G);
+                Amanuensis.Write(plr.ShoeColor.B);
+
+                Amanuensis.Write(plr.Difficulty);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

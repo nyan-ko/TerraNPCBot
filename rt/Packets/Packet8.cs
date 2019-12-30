@@ -10,8 +10,11 @@ namespace rt.Packets {
     /// </summary>
     public class Packet8 : PacketBase {
         public Packet8() : base(0x8, new List<byte>()) {
-            AddStructuredData<int>(-1);
-            AddStructuredData<int>(-1);
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                Amanuensis.Write(-1);
+                Amanuensis.Write(-1);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

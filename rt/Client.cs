@@ -66,6 +66,7 @@ namespace rt {
                     Array.Copy(_buffer, stream, bytes);
                     using (var reader = new BinaryReader(new MemoryStream(stream))) {
                         var packedPacket = PacketBase.Parse(reader, _player, _world);
+                        if (packedPacket == null) return;
                         try {
                             _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(bot, packedPacket);
                         }
@@ -85,6 +86,7 @@ namespace rt {
                     _writeQueue[0].Send(client);
                     _writeQueue.RemoveAt(0);
                     _writeQueue.TrimExcess();  // just in case
+                    Thread.Sleep(1);
                 }
             }
         } 

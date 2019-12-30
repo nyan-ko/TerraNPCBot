@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,14 +12,17 @@ namespace rt.Packets {
     public class Packet13 : PacketBase {
         public Packet13(byte id, byte control, byte pulley, byte selected,
             float posX, float posY, float vecX, float vecY) : base(0xD, new List<byte>()) {
-            AddData(id.ToString());
-            AddData(control.ToString());
-            AddData(pulley.ToString());
-            AddData(selected.ToString());
-            AddStructuredData<float>(posX);
-            AddStructuredData<float>(posY);
-            AddStructuredData<float>(vecX);
-            AddStructuredData<float>(vecY);
+            using (Amanuensis = new BinaryWriter(new MemoryStream())) {
+                Amanuensis.Write(id);
+                Amanuensis.Write(control);
+                Amanuensis.Write(pulley);
+                Amanuensis.Write(selected);
+                Amanuensis.Write(posX);
+                Amanuensis.Write(posY);
+                Amanuensis.Write(vecX);
+                Amanuensis.Write(vecY);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

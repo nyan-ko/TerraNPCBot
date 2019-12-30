@@ -16,7 +16,7 @@ namespace rt {
         private Client _client;
         private World _world;
 
-        public Bot(string address, string name = "Michael_Jackson", int port = 7777, int protocol = 194) {
+        public Bot(string address, int port = 7777, string name = "Michael_Jackson", int protocol = 194) {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {
@@ -43,7 +43,7 @@ namespace rt {
             _client.AddPackets(new Packets.Packet16(_player));
             _client.AddPackets(new Packets.Packet42(_player));
             _client.AddPackets(new Packets.Packet50(_player));
-            for (int i = 0; i < 83; i++) 
+            for (byte i = 0; i < 83; i++) 
                 _client.AddPackets(new Packets.Packet5(_player, i));           
             _client.AddPackets(new Packets.Packet6());
         }

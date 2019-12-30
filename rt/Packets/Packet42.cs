@@ -10,9 +10,12 @@ namespace rt.Packets {
     /// </summary>
     public class Packet42 : PacketBase {
         public Packet42(Player plr) : base(0x2a, new List<byte>()) {
-            AddData(plr.PlayerID.ToString());
-            AddStructuredData<ushort>(plr.CurMana);
-            AddStructuredData<ushort>(plr.MaxMana);
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                Amanuensis.Write(plr.PlayerID);
+                Amanuensis.Write(plr.CurMana);
+                Amanuensis.Write(plr.MaxMana);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

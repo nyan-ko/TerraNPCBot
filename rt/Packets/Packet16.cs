@@ -10,9 +10,12 @@ namespace rt.Packets {
     /// </summary>
     public class Packet16 : PacketBase {
         public Packet16(Player plr) : base(0x10, new List<byte>()) {
-            AddData(plr.PlayerID.ToString());
-            AddStructuredData<ushort>(plr.CurHP);
-            AddStructuredData<ushort>(plr.MaxHP);
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                Amanuensis.Write(plr.PlayerID);
+                Amanuensis.Write(plr.CurHP);
+                Amanuensis.Write(plr.MaxHP);
+            }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }

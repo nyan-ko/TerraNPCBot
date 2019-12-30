@@ -15,7 +15,7 @@ namespace rt {
     public enum Events {
         Disconnect = 0x2,
         ReceivedID = 0x3,
-        WorldInfo = 0x8,
+        WorldInfo = 0x7,
 
         // more events in accordance with server-sent packets
     }

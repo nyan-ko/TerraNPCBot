@@ -10,10 +10,12 @@ namespace rt.Packets {
     /// </summary>
     public class Packet50 : PacketBase {
         public Packet50(Player plr) : base(0x32, new List<byte>()) {
-            AddData(plr.PlayerID.ToString());
-            for (int i = 0; i < 22; i++) {
-                AddData(0.ToString());
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                for (int i = 0; i < 22; i++) {
+                    Amanuensis.Write((byte)0);
+                }
             }
+            AddData(Amanuensis.BaseStream);
         }
     }
 }
