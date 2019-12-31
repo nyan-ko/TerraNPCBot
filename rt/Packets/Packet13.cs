@@ -25,4 +25,28 @@ namespace rt.Packets {
             }
         }
     }
+
+    public class Packet13Parser : ParsedPacketBase {
+        public byte id;
+        public byte control;
+        public byte pulley;
+        public byte selected;
+        public float posX;
+        public float posY;
+        public float vecX;
+        public float vecY;
+
+        public Packet13Parser(BinaryReader r) : base(0x11) {
+            using (r) {
+                id = r.ReadByte();
+                control = r.ReadByte();
+                pulley = r.ReadByte();
+                selected = r.ReadByte();
+                posX = r.ReadSingle();
+                posY = r.ReadSingle();
+                vecX = r.ReadSingle();
+                vecY = r.ReadSingle();
+            }
+        }
+    }
 }

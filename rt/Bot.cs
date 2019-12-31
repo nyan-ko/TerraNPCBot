@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Terraria;
 
 namespace rt {
@@ -12,13 +13,19 @@ namespace rt {
     public class Bot {
         private int _protocol;
         private EventManager _manager;
-        private Player _player;
-        private Client _client;
-        private World _world;
+        public Player _player;
+        public Client _client { get; }
+        public World _world;
 
-        private int _master;
+        public int _owner;
+        public bool _recording;
 
-        public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson", int protocol = 194) {
+        public List<RecordedPacket> _recordedPackets;
+
+        public Stopwatch _timerBetweenPackets;
+        public ParsedPacketBase _previousPacket;
+
+        public Bot(string address, int owner, string name = "Michael_Jackson", int port = 7777,  int protocol = 194) {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {
@@ -28,7 +35,7 @@ namespace rt {
             }  // default listeners
             _player = new Player(name);
             _world = new World();
-            _master = owner;
+            _owner = owner;
             _client = Client.GetClient(address, this, _player, _world, _manager, port);
         }
 
@@ -41,12 +48,12 @@ namespace rt {
                 return false;
         }
 
-        public void Stop(Bot b, PacketBase p) {
+        public void Stop(EventInfo i) {
             _client.Stop();
             NetMessage.SendData(2, _player.PlayerID);
         }  // hammer time
 
-        public void ReceivedPlayerID(Bot b, PacketBase p) {
+        public void ReceivedPlayerID(EventInfo e) {
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(_player));
             _client.AddPackets(new Packets.Packet42(_player));
@@ -56,7 +63,7 @@ namespace rt {
             _client.AddPackets(new Packets.Packet6());
         }
 
-        public void Initalize(Bot b, PacketBase p) {
+        public void Initalize(EventInfo i) {
             if (_player.Initialized && !_player.LoggedIn) {
                 _player.LoggedIn = true;
                 _client.AddPackets(new Packets.Packet12(_player.PlayerID));

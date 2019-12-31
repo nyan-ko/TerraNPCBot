@@ -6,13 +6,13 @@ using System.Threading.Tasks;
 
 namespace rt {
     public class EventManager {
-        public Dictionary<Events, Action<Bot, PacketBase>> _listenReact;
+        public Dictionary<Events, Action<EventInfo>> _listenReact;
 
         public EventManager() {
-            _listenReact = new Dictionary<Events, Action<Bot, PacketBase>>();
+            _listenReact = new Dictionary<Events, Action<EventInfo>>();
         }
 
-        public static void Move(Bot b, PacketBase p) {
+        public static void Move(Bot b, ParsedPacketBase p) {
 
         }
     }
@@ -22,6 +22,16 @@ namespace rt {
         WorldInfo = 0x7,
 
         // more events in accordance with server-sent packets
+    }
+
+    public class EventInfo {
+        public Bot b;
+        public ParsedPacketBase p;
+
+        public EventInfo(Bot s, ParsedPacketBase e) {
+            b = s;
+            p = e;
+        }
     }
 
 }

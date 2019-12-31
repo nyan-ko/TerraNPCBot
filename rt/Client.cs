@@ -28,7 +28,7 @@ namespace rt {
 
         List<PacketBase> _writeQueue;
 
-        Socket client;
+        Socket _client;
 
         Bot _bot;
 
@@ -63,14 +63,14 @@ namespace rt {
         public void ReadPackets() {
             while (_running) {
                 try {
-                    var bytes = client.Receive(_buffer);  // blocked until data is received
+                    var bytes = _client.Receive(_buffer);  // blocked until data is received
                     byte[] stream = new byte[bytes];
                     Array.Copy(_buffer, stream, bytes);
                     using (var reader = new BinaryReader(new MemoryStream(stream))) {
                         var packedPacket = PacketBase.Parse(reader, _player, _world);
                         if (packedPacket == null) return;
                         try {
-                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(_bot, packedPacket);
+                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(new EventInfo(_bot, packedPacket));
                         }
                         catch { return; }
                     }
@@ -80,13 +80,13 @@ namespace rt {
                     TShockAPI.TShock.Log.Write($"Exception thrown when reading packet: {ex}, {ex.Source}", System.Diagnostics.TraceLevel.Error);
                 }
             }
-        } // more code needed
+        }
 
         public void SendPackets() { 
             while (_running) {
                 if (_writeQueue.Count > 0) {
                     try {
-                        _writeQueue[0].Send(client);
+                        _writeQueue[0].Send(_client);
                         _writeQueue.RemoveAt(0);
                         _writeQueue.TrimExcess();  // just in case
                     }
@@ -107,10 +107,10 @@ namespace rt {
                     IPAddress address = IPAddress.Parse(_address);
                     IPEndPoint endPoint = new IPEndPoint(address, _port);
 
-                    client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    _client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                     try {
-                        client.Connect(endPoint);
+                        _client.Connect(endPoint);
                         _running = true;
                         _writeThread.Start();
                         _readThread.Start();
@@ -128,7 +128,7 @@ namespace rt {
 
                     return false;
                 }
-                return client.Connected;
+                return _client.Connected;
             }
             return false;
         }
