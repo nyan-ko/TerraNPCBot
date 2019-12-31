@@ -11,6 +11,10 @@ namespace rt {
         public EventManager() {
             _listenReact = new Dictionary<Events, Action<Bot, PacketBase>>();
         }
+
+        public static void Move(Bot b, PacketBase p) {
+
+        }
     }
     public enum Events {
         Disconnect = 0x2,

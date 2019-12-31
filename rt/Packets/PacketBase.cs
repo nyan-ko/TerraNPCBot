@@ -19,17 +19,9 @@ namespace rt {
         }
 
         /// <summary>
-        /// Encodes and adds data to a packet. Using UTF-8 for strings.
+        /// Adds data to a packet from a stream.
         /// </summary>
-        /// <param name="data">ok</param>
-        public void EncodeString(string data) {
-            byte[] bitsOfBytes = Encoding.UTF8.GetBytes(data);
-            var length = (byte)data.Length;
-            _data.Add(length);
-            _data.AddRange(bitsOfBytes);
-        }
-
-        // not big endian compatible yet
+        /// <param name="stream"></param>
         public void AddData(Stream stream) {
             using (MemoryStream s = new MemoryStream()) {
                 stream.Position = 0;
@@ -55,7 +47,7 @@ namespace rt {
             }
         }
 
-        // soon
+        // soon ?
         //public static void LittleEndianifier(byte[] bites) {
             
         //}

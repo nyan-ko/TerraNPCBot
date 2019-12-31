@@ -20,7 +20,7 @@ namespace rt {
 
         Player _player;
         World _world;
-        EventManager _eventManager;
+        public EventManager _eventManager;
 
         Thread _writeThread;
         Thread _readThread;

@@ -24,6 +24,9 @@ namespace rt
             Commands.ChatCommands.Add(new Command("", Start, "startbot"));
             Commands.ChatCommands.Add(new Command("", Stop, "stopbot"));
 
+            Commands.ChatCommands.Add(new Command("", Delegation, "s"));
+            Commands.ChatCommands.Add(new Command("", Record, "e"));
+
         }
 
         void Start(CommandArgs args) {
@@ -35,6 +38,14 @@ namespace rt
 
         void Stop(CommandArgs args) {
             bot.Stop(null, null);
+        }
+
+        void Delegation(CommandArgs args) {
+            
+        }
+
+        void Record(CommandArgs args) {
+
         }
     }
 }

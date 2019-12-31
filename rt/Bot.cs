@@ -43,6 +43,7 @@ namespace rt {
 
         public void Stop(Bot b, PacketBase p) {
             _client.Stop();
+            NetMessage.SendData(2, _player.PlayerID);
         }  // hammer time
 
         public void ReceivedPlayerID(Bot b, PacketBase p) {

@@ -55,6 +55,7 @@
     <Compile Include="EventManager.cs" />
     <Compile Include="Packets\Packet1.cs" />
     <Compile Include="Packets\Packet16.cs" />
+    <Compile Include="Packets\Packet17.cs" />
     <Compile Include="Packets\Packet2.cs" />
     <Compile Include="Packets\Packet3.cs" />
     <Compile Include="Packets\Packet4.cs" />

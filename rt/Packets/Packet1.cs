@@ -10,7 +10,10 @@ namespace rt.Packets {
     /// </summary>
     public class Packet1 : PacketBase {
         public Packet1 (int protocol) : base(0x1, new List<byte>()){
-            EncodeString($"Terraria{protocol}");
+            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+                Amanuensis.Write($"Terraria{protocol}");
+                AddData(Amanuensis.BaseStream);
+            }
         }
     }
 }

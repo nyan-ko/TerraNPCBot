@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using rt.Utils;
 
 namespace rt.Packets {
     /// <summary>
@@ -14,42 +15,27 @@ namespace rt.Packets {
                 Amanuensis.Write(plr.PlayerID);
                 Amanuensis.Write(plr.SkinVariant);
                 Amanuensis.Write(plr.HairType);
-                AddData(Amanuensis.BaseStream);
 
-                EncodeString(plr.Name);
+                Amanuensis.Write(plr.Name);
 
                 Amanuensis.Write(plr.HairDye);
                 Amanuensis.Write(plr.HVisuals1);
                 Amanuensis.Write(plr.HVisuals2);
                 Amanuensis.Write(plr.HMisc);
 
-                Amanuensis.Write(plr.HairColor.R);
-                Amanuensis.Write(plr.HairColor.G);
-                Amanuensis.Write(plr.HairColor.B);
+                Amanuensis.WriteColor(plr.HairColor);
 
-                Amanuensis.Write(plr.SkinColor.R);
-                Amanuensis.Write(plr.SkinColor.G);
-                Amanuensis.Write(plr.SkinColor.B);
+                Amanuensis.WriteColor(plr.SkinColor);
 
-                Amanuensis.Write(plr.EyeColor.R);
-                Amanuensis.Write(plr.EyeColor.G);
-                Amanuensis.Write(plr.EyeColor.B);
+                Amanuensis.WriteColor(plr.EyeColor);
 
-                Amanuensis.Write(plr.ShirtColor.R);
-                Amanuensis.Write(plr.ShirtColor.G);
-                Amanuensis.Write(plr.ShirtColor.B);
+                Amanuensis.WriteColor(plr.ShirtColor);
 
-                Amanuensis.Write(plr.UnderShirtColor.R);
-                Amanuensis.Write(plr.UnderShirtColor.G);
-                Amanuensis.Write(plr.UnderShirtColor.B);
+                Amanuensis.WriteColor(plr.UnderShirtColor);
 
-                Amanuensis.Write(plr.PantsColor.R);
-                Amanuensis.Write(plr.PantsColor.G);
-                Amanuensis.Write(plr.PantsColor.B);
+                Amanuensis.WriteColor(plr.PantsColor);
 
-                Amanuensis.Write(plr.ShoeColor.R);
-                Amanuensis.Write(plr.ShoeColor.G);
-                Amanuensis.Write(plr.ShoeColor.B);
+                Amanuensis.WriteColor(plr.ShoeColor);
 
                 Amanuensis.Write(plr.Difficulty);
                 AddData(Amanuensis.BaseStream);
