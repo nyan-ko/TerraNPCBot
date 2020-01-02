@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using Terraria;
 
 namespace rt {
+    /// <summary>
+    /// Based off of playerinfo packet. Used for bot.
+    /// </summary>
     public class Player {
 
-        /// <summary>
-        /// Based off of playerinfo packet.
-        /// </summary>
         public byte PlayerID;
         public byte SkinVariant;
         public byte HairType;
@@ -56,8 +56,8 @@ namespace rt {
             ShoeColor = new Color(255, 255, 255);
             Difficulty = 0;
 
-            MaxHP = 400;
-            CurHP = 400;
+            MaxHP = 420;
+            CurHP = 420;
 
             MaxMana = 200;
             CurMana = 200;

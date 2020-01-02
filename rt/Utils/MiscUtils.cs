@@ -13,5 +13,16 @@ namespace rt.Utils {
             writer.Write(color.G);
             writer.Write(color.B);
         }
+
+        public static void MultiMsg(this TSPlayer player, List<string> msgs, Microsoft.Xna.Framework.Color color) {
+            foreach (var x in msgs) {
+                player.SendMessage(x, color);
+            }
+            player.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
+        }
+
+        public static void GenericMsg(this TSPlayer pl) {
+
+        }
     }
 }

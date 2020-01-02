@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,9 +24,9 @@ namespace rt {
         public List<RecordedPacket> _recordedPackets;
 
         public Stopwatch _timerBetweenPackets;
-        public ParsedPacketBase _previousPacket;
+        public StreamInfo _previousPacket;
 
-        public Bot(string address, int owner, string name = "Michael_Jackson", int port = 7777,  int protocol = 194) {
+        public Bot(string address, int owner, string name = "Michael_Jackson", int port = 7777) {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {
@@ -50,7 +51,12 @@ namespace rt {
 
         public void Stop(EventInfo i) {
             _client.Stop();
-            NetMessage.SendData(2, _player.PlayerID);
+            try {
+                NetMessage.SendData(2, ID);
+            }
+            catch (ArgumentNullException) {
+                return;  // if bot has somehow already left the server
+            }  
         }  // hammer time
 
         public void ReceivedPlayerID(EventInfo e) {
@@ -66,13 +72,26 @@ namespace rt {
         public void Initalize(EventInfo i) {
             if (_player.Initialized && !_player.LoggedIn) {
                 _player.LoggedIn = true;
-                _client.AddPackets(new Packets.Packet12(_player.PlayerID));
+                _client.AddPackets(new Packets.Packet12(ID));
             }
             if (!_player.Initialized) {
                 _player.Initialized = true;
                 _client.AddPackets(new Packets.Packet8());
-                _client.AddPackets(new Packets.Packet12(_player.PlayerID));
+                _client.AddPackets(new Packets.Packet12(ID));
             }
+        }
+
+
+        public byte ID {
+            get { return _player.PlayerID; }
+        }
+
+        public string Name {
+            get { return _player.Name; }
+        }
+
+        public bool Running {
+            get { return _client._running; }
         }
     }
 }

@@ -16,7 +16,7 @@ namespace rt {
         /// </summary>
         string _address;
         int _port;
-        bool _running;
+        public bool _running;
 
         Player _player;
         World _world;
@@ -138,6 +138,8 @@ namespace rt {
         /// </summary>
         public void Stop() {
             _running = false;
+            _writeThread.Abort();
+            _readThread.Abort();
         }
     }
 }

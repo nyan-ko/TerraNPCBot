@@ -5,6 +5,7 @@ using System.Threading;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using rt.Utils;
 using TShockAPI;
 
 namespace rt.Program {
@@ -34,6 +35,9 @@ namespace rt.Program {
                                 case "play":
                                     Play(args);
                                     break;
+                                default:
+                                    args.Player.MultiMsg(Messages.Record, Color.Yellow);
+                                    break;
                             }
                         } // Flag101
                         break;
@@ -45,32 +49,56 @@ namespace rt.Program {
         }
 
         static void NewBot(CommandArgs args) {
-            BTSPlayer bp = Program.Players[args.Player.Index];
-            Bot bot = args.Parameters.Count > 0
-                ? new Bot("127.0.0.1", args.Player.Index, args.Parameters[0])
-                : new Bot("127.0.0.1", args.Player.Index);
-            bp._ownedBots.Add(bot);
-            bp._selected = bp._ownedBots.Count - 1;
+            Bot bot;
+            try {
+                BTSPlayer bp = Program.Players[args.Player.Index];
+                bot = args.Parameters.Count > 1
+                    ? new Bot("127.0.0.1", args.Player.Index, args.Parameters[1])
+                    : new Bot("127.0.0.1", args.Player.Index);
+                bp._ownedBots.Add(bot);
+                bp._selected = bp._ownedBots.Count - 1;
+            }
+            catch (Exception ex) {
+                args.Player.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
+                return;
+            }
 
             // something to prevent players going over their limit Flag102
-            // Flag101 Flag104
 
-            args.Player.SendMessage($"Created a new bot with name \"{bot._player.Name}\".", Color.Yellow);
+            args.Player.SendMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name), Color.Yellow);
         }
 
         static void StartBot(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
-            if (bot == null || !bot.Start()) {
-                args.Player.SendErrorMessage("Something went wrong. Retry?");  // more specific error messages later Flag101
-            } // Flag104
+            if (bot == null) {
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+            }
+            else if (bot.Running) {
+                args.Player.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
+                return;
+            }
+            else if (!bot.Start()) {
+                args.Player.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));
+            }
+            else {
+                args.Player.SendMessage(string.Format(Messages.BotSuccessStarted, bot.Name), Color.Green);
+            }
         }        
 
         static void StopBot(CommandArgs args) {
-            if (Program.Players[args.Player.Index]?.SelectedBot != null) {
-                Program.Players[args.Player.Index].SelectedBot.Stop(null);
-            } // Flag104
+            var bot = Program.Players[args.Player.Index]?.SelectedBot;
+            if (bot != null) {
+                if (bot.Running) {
+                    bot.Stop(null);
+
+                    args.Player.SendMessage(string.Format(Messages.BotSuccessStopped, bot.Name), Color.Green);
+                }
+                else {
+                    args.Player.SendMessage(string.Format(Messages.BotErrorNotRunning, bot.Name), Color.Red);
+                }
+            } 
             else {
-                // Flag101
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
@@ -85,6 +113,9 @@ namespace rt.Program {
                 bot._recording = true;
                 bot._recordedPackets = new List<RecordedPacket>();
             } // Flag104 Flag101
+            else {
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+            }
         }
 
         static void StopRecording(CommandArgs args) {
@@ -92,18 +123,24 @@ namespace rt.Program {
             if (bot != null) {
                 bot._recording = false;
             } // Flag104 Flag101
+            else {
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+            }
         }
 
         static void Play(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null && bot._recordedPackets.Count > 0) {
                 foreach (var p in bot._recordedPackets) {
-                    var packet = ParsedPacketBase.Write(p.packet);
+                    var packet = ParsedPacketBase.WriteFromRecorded(p.reader, bot, p.packetType);
                     if (packet == null) continue;
                     bot._client.AddPackets(packet);
                     Thread.Sleep(p.timeBeforeNextPacket);
                 }
             } // Flag101 Flag104
+            else {
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+            }
         }
     }
 }

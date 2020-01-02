@@ -19,7 +19,7 @@ namespace rt {
         public int _selected;
 
         public Bot SelectedBot {
-            get { return _ownedBots[_selected]; }
+            get { return _ownedBots.Count > 0 ? _ownedBots[_selected] : null; }
         }
     }
 }

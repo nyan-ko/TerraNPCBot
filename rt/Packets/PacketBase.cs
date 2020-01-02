@@ -12,9 +12,9 @@ namespace rt {
 
         public uint _packetType;
         private List<byte> _data;
-        public BinaryWriter Amanuensis;
+        protected BinaryWriter Amanuensis;
 
-        public PacketBase(uint packetType, List<byte> data = null) {
+        public PacketBase(uint packetType, List<byte> data) {
             _packetType = packetType;
             _data = data;
         }
@@ -23,7 +23,7 @@ namespace rt {
         /// Adds data to a packet from a stream.
         /// </summary>
         /// <param name="stream"></param>
-        public void AddData(Stream stream) {
+        protected void AddData(Stream stream) {
             using (MemoryStream s = new MemoryStream()) {
                 stream.Position = 0;
                 stream.CopyTo(s);
@@ -87,7 +87,7 @@ namespace rt {
                     case 0x7:  // world info
                         packet = new Packets.Packet7(reader, wrld, plr);
                         break;
-                    case 0x11: // player update
+                    case 0xD: // player update
                         packet = new Packets.Packet13Parser(reader);
                         break;
                 }
@@ -104,32 +104,35 @@ namespace rt {
             _packetType = packet;
         }
 
-        public static PacketBase Write(object p) {
+        public static PacketBase WriteFromRecorded(StreamInfo r, Bot b, int id) {
             PacketBase packet = null;
 
-            try {
-                var basePacket = (PacketBase)p;
+            using (var reader = new BinaryReader(new MemoryStream(r.Buffer, r.Index, r.Length))) {
+                try {
+                    switch (id) {
+                        case 0xD:
+                            reader.ReadByte();
+                            var num1 = reader.ReadByte();
+                            var num2 = reader.ReadByte();
+                            var num3 = reader.ReadByte();
+                            var num4 = reader.ReadSingle();
+                            var num5 = reader.ReadSingle();
+                            float num6 = 0.0F;
+                            float num7 = 0.0F;
+                            if ((num2 & 4) == 4) {
+                                num6 = reader.ReadSingle();
+                                num7 = reader.ReadSingle();
+                            }  // update velocity
 
-                switch (basePacket._packetType) {
-                    case 0x11: {
-                            var temp = (Packets.Packet13Parser)p;
-                            packet = new Packets.Packet13(temp.id,
-                                temp.control,
-                                temp.pulley,
-                                temp.selected,
-                                temp.posX,
-                                temp.posY,
-                                temp.vecX,
-                                temp.vecY);
-                        }
-                        break;
-                }  // Flag102
+                            packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);
+                            break;
+                    }  // Flag102
+                }
+                catch (Exception ex) {
+                    TShockAPI.TShock.Log.Write($"Exception thrown with writing packet from parsed data: {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
+                    return null;
+                }
             }
-            catch (Exception ex) {
-                TShockAPI.TShock.Log.Write($"Exception thrown with writing packet from parsed data: {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
-                return null;
-            }
-
             return packet;
         }
     }

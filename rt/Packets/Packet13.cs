@@ -44,8 +44,13 @@ namespace rt.Packets {
                 selected = r.ReadByte();
                 posX = r.ReadSingle();
                 posY = r.ReadSingle();
-                vecX = r.ReadSingle();
-                vecY = r.ReadSingle();
+                try {
+                    vecX = r.ReadSingle();
+                    vecY = r.ReadSingle();
+                }
+                catch (EndOfStreamException ex) {
+                    return;
+                }
             }
         }
     }
