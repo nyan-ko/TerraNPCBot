@@ -67,25 +67,25 @@ namespace rt {
 
         public void ReceivedPlayerID(EventInfo e) {
             _client.AddPackets(new Packets.Packet4(_player));
-            _client.AddPackets(new Packets.Packet16(_player));
+            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
             //_client.AddPackets(new Packets.Packet30(_player, false));
-            _client.AddPackets(new Packets.Packet42(_player));
+            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
             //_client.AddPackets(new Packets.Packet45(_player, 0));
-            _client.AddPackets(new Packets.Packet50(_player));
+            _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
             for (byte i = 0; i < NetItem.MaxInventory; i++) 
-                _client.AddPackets(new Packets.Packet5(_player, i));           
+                _client.AddPackets(new Packets.Packet5(ID, i));           
             _client.AddPackets(new Packets.Packet6());
         }
 
         public void Initalize(EventInfo i) {
             if (_player.Initialized && !_player.LoggedIn) {
                 _player.LoggedIn = true;
-                _client.AddPackets(new Packets.Packet12(ID));
+                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
             }
             if (!_player.Initialized) {
                 _player.Initialized = true;
                 _client.AddPackets(new Packets.Packet8());
-                _client.AddPackets(new Packets.Packet12(ID));
+                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
             }
         }
 

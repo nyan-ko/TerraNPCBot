@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 
 namespace rt.Packets {
     /// <summary>
-    /// Player inventory slot (5)
+    /// Update chest item (32)
     /// </summary>
-    public class Packet5 : PacketBase {
+    public class Packet32 : PacketBase {
         /// <summary>
-        /// Player inventory slot (5)
+        /// Update chest item (32)
         /// </summary>
-        public Packet5(byte plr, byte slot, short stack = 0, byte prefix = 0, short id = 0) : base(0x5, new List<byte>()) {
+        public Packet32(short id, byte slot, short stack, byte prefix, short netid) : base(32, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr);
+                Amanuensis.Write(id);
                 Amanuensis.Write(slot);
                 Amanuensis.Write(stack);
                 Amanuensis.Write(prefix);
-                Amanuensis.Write(id);
+                Amanuensis.Write(netid);
                 AddData(Amanuensis.BaseStream);
             }
         }

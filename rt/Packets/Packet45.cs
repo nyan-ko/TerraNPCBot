@@ -9,6 +9,9 @@ namespace rt.Packets {
     /// Player team (45)
     /// </summary>
     public class Packet45 : PacketBase {
+        /// <summary>
+        /// Player team (45)
+        /// </summary>
         public Packet45(Player plr, byte team) : base(45, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(plr.PlayerID);

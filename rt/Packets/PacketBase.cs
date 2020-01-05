@@ -104,23 +104,76 @@ namespace rt {
             using (var reader = new BinaryReader(new MemoryStream(r.Buffer))) {
                 try {
                     switch (r.Type) {
-                        case 13:
-                            reader.ReadByte();
-                            var num1 = reader.ReadByte();
-                            var num2 = reader.ReadByte();
-                            var num3 = reader.ReadByte();
-                            var num4 = reader.ReadSingle();
-                            var num5 = reader.ReadSingle();
-                            float num6 = 0.0F;
-                            float num7 = 0.0F;
-                            if ((num2 & 4) == 4) {
-                                num6 = reader.ReadSingle();
-                                num7 = reader.ReadSingle();
-                            }  // update velocity
+                        case 5: {
+                                reader.BaseStream.Position += 1;
+                                var slot = reader.ReadByte();
+                                var stack = reader.ReadInt16();
+                                var prefix = reader.ReadByte();
+                                var id = reader.ReadInt16();
 
-                            packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);
+                                packet = new Packets.Packet5(b.ID, slot, stack, prefix, id);
+                            }
+                            break;  // inv slot
+                        case 12: {
+                                reader.BaseStream.Position += 1;
+                                var spawnx = reader.ReadInt16();
+                                var spawny = reader.ReadInt16();
 
+                                packet = new Packets.Packet12(b.ID, spawnx, spawny);
+                            }
+                            break;  // player spawn
+                        case 13: {
+                                reader.BaseStream.Position += 1;
+                                var num1 = reader.ReadByte();
+                                var num2 = reader.ReadByte();
+                                var num3 = reader.ReadByte();
+                                var num4 = reader.ReadSingle();
+                                var num5 = reader.ReadSingle();
+                                float num6 = 0.0F;
+                                float num7 = 0.0F;
+                                if ((num2 & 4) == 4) {
+                                    num6 = reader.ReadSingle();
+                                    num7 = reader.ReadSingle();
+                                }  // update velocity
+
+                                packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);
+                            }
+                            break;  // player update
+                        case 16: {
+                                reader.BaseStream.Position += 1;
+                                var hp = reader.ReadInt16();
+                                var max = reader.ReadInt16();
+                                packet = new Packets.Packet16(b.ID, hp, max);
+                            }
+                            break;  // player hp
+                        case 17: {
+                                var action = reader.ReadByte();
+                                var x = reader.ReadInt16();
+                                var y = reader.ReadInt16();
+                                var var1 = reader.ReadInt16();
+                                var var2 = reader.ReadByte();
+
+                                packet = new Packets.Packet17(action, x, y, var1, var2);
+                            }
+                            break;  // door toggle
+                        case 19: {
+                                var action = reader.ReadByte();
+                                var x = reader.ReadInt16();
+                                var y = reader.ReadInt16();
+                                var dir = reader.ReadByte();
+
+                                packet = new Packets.Packet19(action, x, y, dir);
+                            }
                             break;
+                        case 30: {
+                                reader.BaseStream.Position += 1;
+                                var pvp = reader.ReadBoolean();
+
+                                packet = new Packets.Packet30(b.ID, pvp);
+                            }
+                            break;
+                        
+
                     }  // Flag102
                 }
                 catch (Exception ex) {

@@ -10,6 +10,9 @@ namespace rt.Packets {
     /// Player info (4)
     /// </summary>
     public class Packet4 : PacketBase {
+        /// <summary>
+        /// Player info (4)
+        /// </summary>
         public Packet4 (Player plr) : base(0x4, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(plr.PlayerID);

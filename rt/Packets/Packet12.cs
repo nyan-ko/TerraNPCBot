@@ -11,11 +11,14 @@ namespace rt.Packets {
     /// Spawn player (12)
     /// </summary>
     public class Packet12 : PacketBase {
-        public Packet12(byte id) : base(0xC, new List<byte>()) { 
+        /// <summary>
+        /// Spawn player (12)
+        /// </summary>
+        public Packet12(byte id, short x, short y) : base(0xC, new List<byte>()) { 
             using (Amanuensis = new BinaryWriter(new MemoryStream())) {
                 Amanuensis.Write(id);
-                Amanuensis.Write((short)Main.spawnTileX);
-                Amanuensis.Write((short)Main.spawnTileY);
+                Amanuensis.Write(x);
+                Amanuensis.Write(y);
                 AddData(Amanuensis.BaseStream);
             }
         }

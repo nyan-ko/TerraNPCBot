@@ -9,11 +9,14 @@ namespace rt.Packets {
     /// Player mana (42)
     /// </summary>
     public class Packet42 : PacketBase {
-        public Packet42(Player plr) : base(0x2a, new List<byte>()) {
+        /// <summary>
+        /// Player mana (42)
+        /// </summary>
+        public Packet42(byte plr, short mana, short max) : base(0x2a, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr.PlayerID);
-                Amanuensis.Write(plr.CurMana);
-                Amanuensis.Write(plr.MaxMana);
+                Amanuensis.Write(plr);
+                Amanuensis.Write(mana);
+                Amanuensis.Write(max);
                 AddData(Amanuensis.BaseStream);
             }
         }

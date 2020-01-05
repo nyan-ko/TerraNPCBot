@@ -10,6 +10,9 @@ namespace rt.Packets {
     /// World info (7)
     /// </summary>
     public class Packet7 : ParsedPacketBase {
+        /// <summary>
+        /// World info (7)
+        /// </summary>
         public Packet7 (BinaryReader r, World wrld, Player plr) : base (0x7) {
             using (r) {
                 wrld.Time = r.ReadInt32();

@@ -10,6 +10,9 @@ namespace rt.Packets {
     /// Update player (13)
     /// </summary>
     public class Packet13 : PacketBase {
+        /// <summary>
+        /// Update player (13)
+        /// </summary>
         public Packet13(byte id, byte control, byte pulley, byte selected,
             float posX, float posY, float vecX, float vecY) : base(0xD, new List<byte>()) {
             using (Amanuensis = new BinaryWriter(new MemoryStream())) {

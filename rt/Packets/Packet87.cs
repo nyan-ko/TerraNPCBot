@@ -6,17 +6,17 @@ using System.Threading.Tasks;
 
 namespace rt.Packets {
     /// <summary>
-    /// Player hp (16)
+    /// Place tile entity (87)
     /// </summary>
-    public class Packet16 : PacketBase {
+    public class Packet87 : PacketBase {
         /// <summary>
-        /// Player hp (16)
+        /// Place tile entity (87)
         /// </summary>
-        public Packet16(byte plr, short hp, short max) : base(0x10, new List<byte>()) {
+        public Packet87(short x, short y, byte type) : base(87, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr);
-                Amanuensis.Write(hp);
-                Amanuensis.Write(max);
+                Amanuensis.Write(x);
+                Amanuensis.Write(y);
+                Amanuensis.Write(type);
                 AddData(Amanuensis.BaseStream);
             }
         }

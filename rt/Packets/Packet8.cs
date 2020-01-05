@@ -9,6 +9,9 @@ namespace rt.Packets {
     /// Get section (8)
     /// </summary>
     public class Packet8 : PacketBase {
+        /// <summary>
+        /// Get section (8)
+        /// </summary>
         public Packet8() : base(0x8, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(-1);

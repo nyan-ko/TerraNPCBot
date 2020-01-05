@@ -9,11 +9,14 @@ namespace rt.Packets {
     /// Update player buff (50)
     /// </summary>
     public class Packet50 : PacketBase {
-        public Packet50(Player plr) : base(0x32, new List<byte>()) {
+        /// <summary>
+        /// Update player buff (50)
+        /// </summary>
+        public Packet50(byte plr, byte[] buffs) : base(0x32, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr.PlayerID);
+                Amanuensis.Write(plr);
                 for (int i = 0; i < 22; i++) {
-                    Amanuensis.Write((byte)0);
+                    Amanuensis.Write(buffs[i]);
                 }
                 AddData(Amanuensis.BaseStream);
             }
