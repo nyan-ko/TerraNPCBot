@@ -8,20 +8,18 @@ using TShockAPI;
 
 namespace rt {
     public class RecordedPacket {
-        public StreamInfo reader;
-        public int packetType;
+        public StreamInfo stream;
         public int timeBeforeNextPacket;
 
-        public RecordedPacket(StreamInfo p, int i, int i2) {
-            reader = p;
+        public RecordedPacket(StreamInfo p, int i) {
+            stream = p;
             timeBeforeNextPacket = i;
-            packetType = i2;
         }
 
         public override string ToString() {
             string s ="";
 
-            s += "Packet: " + (PacketTypes)packetType;
+            s += "Packet: " + (PacketTypes)stream.Type;
             s += $", {timeBeforeNextPacket} milliseconds until next packet.";
 
             return s;
@@ -30,13 +28,11 @@ namespace rt {
 
     public class StreamInfo {
         public byte[] Buffer;
-        public int Index;
-        public int Length;
+        public int Type;
 
-        public StreamInfo(byte[] n1, int n2, int n3) {
+        public StreamInfo(byte[] n1, int n4) {
             Buffer = n1;
-            Index = n2;
-            Length = n3;
+            Type = n4;
         }
     }
 }

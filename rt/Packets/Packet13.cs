@@ -36,7 +36,7 @@ namespace rt.Packets {
         public float vecX;
         public float vecY;
 
-        public Packet13Parser(BinaryReader r) : base(0x11) {
+        public Packet13Parser(BinaryReader r) : base(0xD) {
             using (r) {
                 id = r.ReadByte();
                 control = r.ReadByte();

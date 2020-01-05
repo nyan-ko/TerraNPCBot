@@ -6,15 +6,13 @@ using System.Threading.Tasks;
 
 namespace rt.Packets {
     /// <summary>
-    /// Update player buff (50)
+    /// Player team (45)
     /// </summary>
-    public class Packet50 : PacketBase {
-        public Packet50(Player plr) : base(0x32, new List<byte>()) {
+    public class Packet45 : PacketBase {
+        public Packet45(Player plr, byte team) : base(45, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(plr.PlayerID);
-                for (int i = 0; i < 22; i++) {
-                    Amanuensis.Write((byte)0);
-                }
+                Amanuensis.Write(team);
                 AddData(Amanuensis.BaseStream);
             }
         }

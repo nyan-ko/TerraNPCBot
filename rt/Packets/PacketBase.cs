@@ -6,6 +6,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TerrariaApi.Server;
+using Terraria;
 
 namespace rt {
     public class PacketBase {
@@ -75,19 +76,19 @@ namespace rt {
 
                 // Flag102
                 switch (type) {
-                    case 0x2:  // disconnect
+                    case 2:  // disconnect
                         var reason = reader.ReadBytes((int)reader.BaseStream.Length);
                         string r = Encoding.UTF8.GetString(reason);
                         packet = new Packets.Packet2(r);
                         break;
-                    case 0x3:  // continue connection
+                    case 3:  // continue connection
                         var id = reader.ReadByte();
                         packet = new Packets.Packet3(plr, id);
                         break;
-                    case 0x7:  // world info
+                    case 7:  // world info
                         packet = new Packets.Packet7(reader, wrld, plr);
                         break;
-                    case 0xD: // player update
+                    case 13: // player update
                         packet = new Packets.Packet13Parser(reader);
                         break;
                 }
@@ -95,22 +96,15 @@ namespace rt {
 
             return packet;
         }
-    }
 
-    public class ParsedPacketBase {
-        public uint _packetType;
-
-        public ParsedPacketBase(uint packet) {
-            _packetType = packet;
-        }
-
-        public static PacketBase WriteFromRecorded(StreamInfo r, Bot b, int id) {
+        public static PacketBase WriteFromRecorded(StreamInfo r, Bot b) {
             PacketBase packet = null;
 
-            using (var reader = new BinaryReader(new MemoryStream(r.Buffer, r.Index, r.Length))) {
+
+            using (var reader = new BinaryReader(new MemoryStream(r.Buffer))) {
                 try {
-                    switch (id) {
-                        case 0xD:
+                    switch (r.Type) {
+                        case 13:
                             reader.ReadByte();
                             var num1 = reader.ReadByte();
                             var num2 = reader.ReadByte();
@@ -125,15 +119,25 @@ namespace rt {
                             }  // update velocity
 
                             packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);
+
                             break;
                     }  // Flag102
                 }
                 catch (Exception ex) {
                     TShockAPI.TShock.Log.Write($"Exception thrown with writing packet from parsed data: {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
-                    return null;
+                    return packet;
                 }
             }
             return packet;
         }
+    }
+    
+    //replace fields with a stream Flag102
+    public class ParsedPacketBase {
+        public uint _packetType;
+
+        public ParsedPacketBase(uint packet) {
+            _packetType = packet;
+        }        
     }
 }

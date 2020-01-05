@@ -72,8 +72,9 @@ namespace rt {
                         try {
                             _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(new EventInfo(_bot, packedPacket));
                         }
-                        catch { return; }
+                        catch { }
                     }
+                    _buffer = new byte[1024];
                 }
                 catch (Exception ex){
                     Console.WriteLine($"Exception thrown when reading packet: {ex}, {ex.Source}");

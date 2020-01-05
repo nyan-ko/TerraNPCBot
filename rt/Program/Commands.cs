@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Timers;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Threading;
@@ -131,12 +132,10 @@ namespace rt.Program {
         static void Play(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null && bot._recordedPackets.Count > 0) {
-                foreach (var p in bot._recordedPackets) {
-                    var packet = ParsedPacketBase.WriteFromRecorded(p.reader, bot, p.packetType);
-                    if (packet == null) continue;
-                    bot._client.AddPackets(packet);
-                    Thread.Sleep(p.timeBeforeNextPacket);
-                }
+                bot._delayBetweenPackets = new System.Timers.Timer(10);
+                bot._delayBetweenPackets.Elapsed += bot.RecordedPacketDelay;
+                bot._delayBetweenPackets.AutoReset = true;
+                bot._delayBetweenPackets.Start();
             } // Flag101 Flag104
             else {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);

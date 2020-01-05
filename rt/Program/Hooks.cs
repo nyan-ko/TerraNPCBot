@@ -22,22 +22,25 @@ namespace rt.Program {
             if (p != null) {
                 using (MemoryStream m = new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)) {
 
+                    if (args.MsgID != PacketTypes.PlayerUpdate) return;
                     if (args.Msg.whoAmI != p._owner) return;
 
                     if (p._timerBetweenPackets == null) {
                         p._timerBetweenPackets = new System.Diagnostics.Stopwatch();
                         p._timerBetweenPackets.Start();
 
-                        p._previousPacket = new StreamInfo(args.Msg.readBuffer, args.Index, args.Length);
+                        p._previousPacket = new StreamInfo(new byte[args.Length], (int)args.MsgID);
+                        Array.Copy(args.Msg.readBuffer, args.Index, p._previousPacket.Buffer, 0, args.Length);
                     }  // first packet recieved
                     else {
                         p._timerBetweenPackets.Stop();
-                        p._recordedPackets.Add(new RecordedPacket(p._previousPacket, (int)p._timerBetweenPackets.ElapsedMilliseconds, (int)args.MsgID));  // 592 hours at int limit, casting shan't be a problem
+                        p._recordedPackets.Add(new RecordedPacket(p._previousPacket, (int)p._timerBetweenPackets.ElapsedMilliseconds));  // 592 hours at int limit, casting shan't be a problem
 
                         p._timerBetweenPackets = new System.Diagnostics.Stopwatch();
                         p._timerBetweenPackets.Start();
 
-                        p._previousPacket = new StreamInfo(args.Msg.readBuffer, args.Index, args.Length);
+                        p._previousPacket = new StreamInfo(new byte[args.Length], (int)args.MsgID);
+                        Array.Copy(args.Msg.readBuffer, args.Index, p._previousPacket.Buffer, 0, args.Length);
                     }  // all packets onwards
                 }
             }

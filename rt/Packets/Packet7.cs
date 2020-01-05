@@ -6,6 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace rt.Packets {
+    /// <summary>
+    /// World info (7)
+    /// </summary>
     public class Packet7 : ParsedPacketBase {
         public Packet7 (BinaryReader r, World wrld, Player plr) : base (0x7) {
             using (r) {
