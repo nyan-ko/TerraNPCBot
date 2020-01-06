@@ -124,7 +124,7 @@ namespace rt {
             get { return _client._running; }
         }
 
-        public TShockAPI.TSPlayer Player {
+        public TShockAPI.TSPlayer AsTSPlayer {
             get { return TShockAPI.TShock.Players[ID]; }
         }
     }

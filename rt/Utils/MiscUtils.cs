@@ -20,9 +20,5 @@ namespace rt.Utils {
             }
             player.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
         }
-
-        public static void GenericMsg(this TSPlayer pl) {
-
-        }
     }
 }
