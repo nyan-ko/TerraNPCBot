@@ -56,6 +56,10 @@
     <Compile Include="Data\RecordedPacket.cs" />
     <Compile Include="EventManager.cs" />
     <Compile Include="Packets\Packet1.cs" />
+    <Compile Include="Packets\Packet105.cs" />
+    <Compile Include="Packets\Packet109.cs" />
+    <Compile Include="Packets\Packet111.cs" />
+    <Compile Include="Packets\Packet113.cs" />
     <Compile Include="Packets\Packet16.cs" />
     <Compile Include="Packets\Packet17.cs" />
     <Compile Include="Packets\Packet19.cs" />
@@ -69,6 +73,7 @@
     <Compile Include="Packets\Packet45.cs" />
     <Compile Include="Packets\Packet5.cs" />
     <Compile Include="Packets\Packet50.cs" />
+    <Compile Include="Packets\Packet55.cs" />
     <Compile Include="Packets\Packet6.cs" />
     <Compile Include="Packets\Packet61.cs" />
     <Compile Include="Packets\Packet65.cs" />
@@ -80,6 +85,7 @@
     <Compile Include="Packets\Packet42.cs" />
     <Compile Include="Packets\Packet87.cs" />
     <Compile Include="Packets\Packet89.cs" />
+    <Compile Include="Packets\Packet95.cs" />
     <Compile Include="Packets\Packet96.cs" />
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Data\Player.cs" />

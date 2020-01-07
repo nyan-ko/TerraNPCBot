@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace rt.Packets {
     /// <summary>
-    /// Player team (45)
+    /// Crystal invasion start (113)
     /// </summary>
-    public class Packet45 : PacketBase {
+    public class Packet113 : PacketBase {
         /// <summary>
-        /// Player team (45)
+        /// Crystal invasion start (113)
         /// </summary>
-        public Packet45(byte plr, byte team) : base(45, new List<byte>()) {
+        public Packet113(short x, short y) : base(113, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr);
-                Amanuensis.Write(team);
+                Amanuensis.Write(x);
+                Amanuensis.Write(y);
                 AddData(Amanuensis.BaseStream);
             }
         }

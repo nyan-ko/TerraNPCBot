@@ -6,16 +6,15 @@ using System.Threading.Tasks;
 
 namespace rt.Packets {
     /// <summary>
-    /// Player team (45)
+    /// Kill portal (95)
     /// </summary>
-    public class Packet45 : PacketBase {
+    public class Packet95 : PacketBase {
         /// <summary>
-        /// Player team (45)
+        /// Kill portal (95)
         /// </summary>
-        public Packet45(byte plr, byte team) : base(45, new List<byte>()) {
+        public Packet95(ushort index) : base(95, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr);
-                Amanuensis.Write(team);
+                Amanuensis.Write(index);
                 AddData(Amanuensis.BaseStream);
             }
         }
