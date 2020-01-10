@@ -16,7 +16,7 @@ namespace rt.Program {
             if (args.Parameters.Count > 0) {
                 switch (args.Parameters[0]) {
                     case "select":
-                        // Flag102
+                        Select(args);
                         break;
                     case "new":
                         NewBot(args);
@@ -61,8 +61,6 @@ namespace rt.Program {
             }
         }
 
-        // Some undo type of command Flag102
-
         static void Select(CommandArgs args) {
             if (args.Parameters.Count > 1) {
                 int index = -1;
@@ -99,7 +97,7 @@ namespace rt.Program {
                     name = name.Trim('"');
                 }
                 bot = args.Parameters.Count > 1
-                    ? new Bot("127.0.0.1", args.Player.Index, name)
+                    ? new Bot("127.0.0.1", args.Player.Index, 7777, name)
                     : new Bot("127.0.0.1", args.Player.Index);
 
                 // Ports for each server Flag102

@@ -32,7 +32,7 @@ namespace rt {
         public Timer _delayBetweenPackets;
         public int _PacketIndex;
 
-        public Bot(string address, int owner, string name = "Michael_Jackson", int port = 7777) {
+        public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson") {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {

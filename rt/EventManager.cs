@@ -11,10 +11,6 @@ namespace rt {
         public EventManager() {
             _listenReact = new Dictionary<PacketTypes, Action<EventInfo>>();
         }
-
-        public static void Move(Bot b, ParsedPacketBase p) {
-
-        }
     }
 
     public class EventInfo {

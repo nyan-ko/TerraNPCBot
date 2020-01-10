@@ -309,7 +309,28 @@ namespace rt {
                                 packet = new Packets.Packet113(x, y);
                             }
                             break;  // crystal invasion start
-                    }  //Flag102 hurt and death
+                        case 117: {
+                                reader.BaseStream.Position += 1;
+                                var reason = Terraria.DataStructures.PlayerDeathReason.FromReader(reader);
+                                var dmg = reader.ReadInt16();
+                                var dir = reader.ReadByte();
+                                var flags = reader.ReadByte();
+                                var cc = reader.ReadSByte();
+
+                                packet = new Packets.Packet117(b.ID, reason, dmg, dir, flags, cc);
+                            }
+                            break;  // player hurt
+                        case 118: {
+                                reader.BaseStream.Position += 1;
+                                var reason = Terraria.DataStructures.PlayerDeathReason.FromReader(reader);
+                                var dmg = reader.ReadInt16();
+                                var dir = reader.ReadByte();
+                                var flags = reader.ReadByte();
+
+                                packet = new Packets.Packet118(b.ID, reason, dmg, dir, flags);
+                            }
+                            break;  // player death
+                    }
                 }
                 catch (Exception ex) {
                     TShockAPI.TShock.Log.Write($"Exception thrown with writing packet from parsed data: {ex.ToString()}, Bot: {b.Name}", System.Diagnostics.TraceLevel.Error);
@@ -320,7 +341,6 @@ namespace rt {
         }
     }
 
-    //replace fields with a stream Flag102
     public class ParsedPacketBase {
         public MemoryStream _data;
         public uint _packetType;
