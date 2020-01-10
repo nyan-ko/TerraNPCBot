@@ -15,6 +15,9 @@ namespace rt.Program {
         public static void BotMaster(CommandArgs args) {
             if (args.Parameters.Count > 0) {
                 switch (args.Parameters[0]) {
+                    case "select":
+                        // Flag102
+                        break;
                     case "new":
                         NewBot(args);
                         break;
@@ -43,33 +46,92 @@ namespace rt.Program {
                                     args.Player.MultiMsg(Messages.Record, Color.Yellow);
                                     break;
                             }
-                        } // Flag101
+                        }
                         break;
                     case "delete":
-                        // Flag102
+                        DeleteBot(args);
                         break;
+                    default:
+                        args.Player.MultiMsg(Messages.Master, Color.Yellow);
+                        break;
+                }
+            }
+            else {
+                args.Player.MultiMsg(Messages.Master, Color.Yellow);
+            }
+        }
+
+        // Some undo type of command Flag102
+
+        static void Select(CommandArgs args) {
+            if (args.Parameters.Count > 1) {
+                int index = -1;
+                BTSPlayer player = Program.Players[args.Player.Index];
+                if (int.TryParse(args.Parameters[1], out int i)) {
+                    index = i;
+                }
+                else {
+                    string name = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
+                    var bot = player._ownedBots.FirstOrDefault(x => x.Name == name);
+                    if (bot != null) {
+                        index = player._ownedBots.IndexOf(bot);
+                    }
+                }
+                if (index >= 0 && index < player._ownedBots.Count) {
+                    player._selected = index;
+
+                    args.Player.SendSuccessMessage($"Selected bot \"{player.SelectedBot.Name}\".");
+                }
+                else {
+                    args.Player.SendErrorMessage("Could not find specified bot.");
                 }
             }
         }
 
         static void NewBot(CommandArgs args) {
-            Bot bot;
             try {
+                Bot bot;
                 BTSPlayer bp = Program.Players[args.Player.Index];
+
+                string name = "";
+                if (args.Parameters.Count > 1) {
+                    name = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
+                    name = name.Trim('"');
+                }
                 bot = args.Parameters.Count > 1
-                    ? new Bot("127.0.0.1", args.Player.Index, args.Parameters[1])
+                    ? new Bot("127.0.0.1", args.Player.Index, name)
                     : new Bot("127.0.0.1", args.Player.Index);
+
+                // Ports for each server Flag102
+
+                if (bp._ownedBots.Count + 1 > bp._botLimit) {
+                    args.Player.SendErrorMessage($"You have reached the maximum number of bots you can create: {bp._botLimit}");
+                    return;
+                }
                 bp._ownedBots.Add(bot);
                 bp._selected = bp._ownedBots.Count - 1;
+
+                for (int i = 0; i < NetItem.InventorySlots; ++i) {
+                    bot._player.InventorySlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
+                }
+                for (int i = 0; i < NetItem.ArmorSlots; ++i) {
+                    bot._player.ArmorSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
+                }
+                for (int i = 0; i < NetItem.DyeSlots; ++i) {
+                    bot._player.DyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
+                }
+                for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
+                    bot._player.MiscEquipSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
+                }
+                for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
+                    bot._player.MiscDyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
+                }
+                args.Player.SendMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name), Color.Yellow);
             }
             catch (Exception ex) {
                 args.Player.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
                 return;
             }
-
-            // something to prevent players going over their limit Flag102
-
-            args.Player.SendMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name), Color.Yellow);
         }
 
         static void StartBot(CommandArgs args) {
@@ -106,17 +168,41 @@ namespace rt.Program {
             }
         }
 
-        static void Delegation(CommandArgs args) {
+        static void DeleteBot(CommandArgs args) {
+            var bot = Program.Players[args.Player.Index]?.SelectedBot;
+            if (bot != null) {
+                var player = Program.Players[args.Player.Index];
+                try {
+                    player._ownedBots.RemoveAt(player._selected);
+                    player._ownedBots.TrimExcess();
+                    args.Player.SendSuccessMessage("Successfully deleted selected bot.");
+                }
+                catch (Exception ex) {
+                    args.Player.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
+                    return;
+                }
+            }
+            else {
+                args.Player.SendErrorMessage(string.Format(Messages.BotErrorNotFound));
+            }
+        }
 
-        }  // Flag103
+        //static void Delegation(CommandArgs args) {
 
-        // check to prevent multiple bots recording Flag102
+        //}  // Flag103
+
         static void Record(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
+                if (bot._recording) {
+                    args.Player.SendErrorMessage($"Selected bot \"{bot.Name}\" is already recording.");
+                    return;
+                }
                 bot._recording = true;
                 bot._recordedPackets = new List<RecordedPacket>();
-            } // Flag104 Flag101
+
+                args.Player.SendSuccessMessage(string.Format(Messages.BotSuccessRecording, bot.Name));
+            } 
             else {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);
             }
@@ -126,7 +212,8 @@ namespace rt.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 bot._recording = false;
-            } // Flag104 Flag101
+                args.Player.SendSuccessMessage(string.Format(Messages.BotSuccessStopRecording, bot.Name));
+            } 
             else {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);
             }
@@ -134,12 +221,19 @@ namespace rt.Program {
 
         static void Play(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
-            if (bot != null && bot._recordedPackets.Count > 0) {
+            if (bot != null) {
+                if (bot._recordedPackets.Count == 0) {
+                    args.Player.SendErrorMessage("No recorded actions found.");
+                    return;
+                }
+
                 bot._delayBetweenPackets = new System.Timers.Timer(10);
                 bot._delayBetweenPackets.Elapsed += bot.RecordedPacketDelay;
                 bot._delayBetweenPackets.AutoReset = true;
                 bot._delayBetweenPackets.Start();
-            } // Flag101 Flag104
+
+                args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now playing back player actions.");
+            } 
             else {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);
             }
@@ -152,13 +246,13 @@ namespace rt.Program {
                 namewithspaces = namewithspaces.Trim('"');
 
                 var found = TShock.Utils.FindPlayer(namewithspaces);
-                if (found.Count > 1) {
+                if (found.Count == 0 || found == null) {
+                    args.Player.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
+                    return;
+                }                                                                      
+                else if (found.Count > 1) {
                     string multiple = string.Join(", ", found);
                     args.Player.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
-                    return;
-                }
-                else if (found.Count == 0 || found == null) {
-                    args.Player.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
                     return;
                 }
                 else {
@@ -174,58 +268,15 @@ namespace rt.Program {
             if (bot == null) {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);
                 return;
-            }
+            } 
 
-            Terraria.Main.ServerSideCharacter = true;
-            Terraria.NetMessage.SendData(7, bot.ID, -1);
-            for (int i = 0; i < NetItem.ArmorSlots; i++) {
-                var current = target.armor[i];
-                bot._client.AddPackets(new Packets.Packet5(bot.ID,
-                    (byte)(i + 59),
-                    (short)current.stack,
-                    current.prefix,
-                    (short)current.netID));         
-            }
-            for (int i = 0; i < NetItem.DyeSlots; i++) {
-                var current = target.dye[i];
-                bot._client.AddPackets(new Packets.Packet5(bot.ID,
-                    (byte)(i + 79),
-                    (short)current.stack,
-                    current.prefix,
-                    (short)current.netID));
-            }
-            Terraria.Main.ServerSideCharacter = false;
-            Terraria.NetMessage.SendData(7, bot.ID, -1);
-
-            bot._player.HairType = (byte)target.hair;
-            bot._player.HairDye = target.hairDye;
-            bot._player.SkinVariant = (byte)target.skinVariant;
-            bot._player.HMisc = target.hideMisc;
-
-            bot._player.EyeColor = target.eyeColor;
-            bot._player.HairColor = target.hairColor;
-            bot._player.PantsColor = target.pantsColor;
-            bot._player.ShirtColor = target.shirtColor;
-            bot._player.ShoeColor = target.shoeColor;
-            bot._player.SkinColor = target.skinColor;
-            bot._player.UnderShirtColor = target.underShirtColor;     
-
-            Terraria.BitsByte bit1 = 0;
-            for (int i = 0; i < 8; ++i) {
-                bit1[i] = target.hideVisual[i];
-            }
-            bot._player.HVisuals1 = bit1;
-
-            Terraria.BitsByte bit2 = 0;
-            for (int i = 8; i < 10; ++i) {
-                bit2[i] = target.hideVisual[i];
-            }
-            bot._player.HVisuals2 = bit2;
-
-            bot._client.AddPackets(new Packets.Packet4(bot._player));
+            if (bot.Running)
+                bot.ServerInvCopy(target);
+            else
+                bot.ShallowInvCopy(target);
+            bot.PlayerInfoCopy(target);
 
             args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
-            //Flag101 Flag104
         }
     }
 }

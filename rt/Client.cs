@@ -70,7 +70,7 @@ namespace rt {
                         var packedPacket = PacketBase.Parse(reader, _player, _world);
                         if (packedPacket == null) return;
                         try {
-                            _eventManager._listenReact[(Events)packedPacket._packetType].Invoke(new EventInfo(_bot, packedPacket));
+                            _eventManager._listenReact[(PacketTypes)packedPacket._packetType].Invoke(new EventInfo(_bot, packedPacket));
                         }
                         catch { }
                     }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Terraria;
+using TShockAPI;
 
 namespace rt {
     /// <summary>
@@ -37,6 +38,12 @@ namespace rt {
 
         public bool Initialized;
         public bool LoggedIn;
+
+        public Item[] InventorySlots = new Item[NetItem.InventorySlots];
+        public Item[] ArmorSlots = new Item[NetItem.ArmorSlots];
+        public Item[] DyeSlots = new Item[NetItem.DyeSlots];
+        public Item[] MiscEquipSlots = new Item[NetItem.MiscEquipSlots];
+        public Item[] MiscDyeSlots = new Item[NetItem.MiscDyeSlots];
 
         public Player(string name) {
             PlayerID = 0;

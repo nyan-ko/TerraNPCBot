@@ -15,7 +15,7 @@ namespace rt.Packets {
         public Packet50(byte plr, byte[] buffs) : base(0x32, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
                 Amanuensis.Write(plr);
-                for (int i = 0; i < 22; i++) {
+                for (int i = 0; i < 22; ++i) {
                     Amanuensis.Write(buffs[i]);
                 }
                 AddData(Amanuensis.BaseStream);

@@ -22,7 +22,6 @@ namespace rt.Program {
             if (p != null) {
                 using (MemoryStream m = new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)) {
 
-                    if (args.MsgID != PacketTypes.PlayerUpdate) return;
                     if (args.Msg.whoAmI != p._owner) return;
 
                     if (p._timerBetweenPackets == null) {

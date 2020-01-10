@@ -30,30 +30,9 @@ namespace rt.Packets {
     }
 
     public class Packet13Parser : ParsedPacketBase {
-        public byte id;
-        public byte control;
-        public byte pulley;
-        public byte selected;
-        public float posX;
-        public float posY;
-        public float vecX;
-        public float vecY;
-
-        public Packet13Parser(BinaryReader r) : base(0xD) {
-            using (r) {
-                id = r.ReadByte();
-                control = r.ReadByte();
-                pulley = r.ReadByte();
-                selected = r.ReadByte();
-                posX = r.ReadSingle();
-                posY = r.ReadSingle();
-                try {
-                    vecX = r.ReadSingle();
-                    vecY = r.ReadSingle();
-                }
-                catch (EndOfStreamException ex) {
-                    return;
-                }
+        public Packet13Parser(Stream r) : base(0xD) {
+            using (_data = new MemoryStream()) {
+                r.CopyTo(_data);
             }
         }
     }

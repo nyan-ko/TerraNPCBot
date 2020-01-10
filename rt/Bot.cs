@@ -36,9 +36,9 @@ namespace rt {
             _protocol = Main.curRelease;
             _manager = new EventManager();
             {
-                _manager._listenReact.Add(Events.Disconnect, Stop);
-                _manager._listenReact.Add(Events.ReceivedID, ReceivedPlayerID);
-                _manager._listenReact.Add(Events.WorldInfo, Initalize);
+                _manager._listenReact.Add(PacketTypes.Disconnect, Stop);
+                _manager._listenReact.Add(PacketTypes.ContinueConnecting, ReceivedPlayerID);
+                _manager._listenReact.Add(PacketTypes.WorldInfo, Initalize);
             }  // default listeners
             _player = new Player(name);
             _world = new World();
@@ -68,12 +68,13 @@ namespace rt {
         public void ReceivedPlayerID(EventInfo e) {
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
-            //_client.AddPackets(new Packets.Packet30(_player, false));
+            _client.AddPackets(new Packets.Packet30(ID, false));
             _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
-            //_client.AddPackets(new Packets.Packet45(_player, 0));
+            _client.AddPackets(new Packets.Packet45(ID, 0));
             _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
-            for (byte i = 0; i < NetItem.MaxInventory; i++) 
-                _client.AddPackets(new Packets.Packet5(ID, i));           
+
+            UpdateInv();
+
             _client.AddPackets(new Packets.Packet6());
         }
 
@@ -109,6 +110,99 @@ namespace rt {
             var packet = PacketBase.WriteFromRecorded(currentPacket.stream, this);
             if (packet != null)
                 _client.AddPackets(packet);
+        }
+
+        public void UpdateInv() {
+            byte i = 0;
+            foreach (var current in _player.InventorySlots) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    i,
+                    (short)current.stack,
+                    current.prefix,
+                    (short)current.netID));
+                ++i;
+            }
+            foreach (var current in _player.ArmorSlots) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    i,
+                    (short)current.stack,
+                    current.prefix,
+                    (short)current.netID));
+                ++i;
+            }
+            foreach (var current in _player.DyeSlots) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    i,
+                    (short)current.stack,
+                    current.prefix,
+                    (short)current.netID));
+                ++i;
+            }
+            foreach (var current in _player.MiscEquipSlots) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    i,
+                    (short)current.stack,
+                    current.prefix,
+                    (short)current.netID));
+                ++i;
+            }
+            foreach (var current in _player.MiscDyeSlots) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    i,
+                    (short)current.stack,
+                    current.prefix,
+                    (short)current.netID));
+                ++i;
+            }
+        }
+
+        public void ServerInvCopy(Terraria.Player target) {
+            Main.ServerSideCharacter = true;
+            NetMessage.SendData(7, ID, -1);
+
+            ShallowInvCopy(target);
+            UpdateInv();
+
+            Main.ServerSideCharacter = false;
+            NetMessage.SendData(7, ID, -1);
+        }
+
+        public void ShallowInvCopy(Terraria.Player target) {
+            target.inventory.CopyTo(_player.InventorySlots, 0);
+            target.armor.CopyTo(_player.ArmorSlots, 0);
+            target.dye.CopyTo(_player.DyeSlots, 0);
+            target.miscDyes.CopyTo(_player.MiscDyeSlots, 0);
+            target.miscEquips.CopyTo(_player.MiscEquipSlots, 0);
+        }
+
+        public void PlayerInfoCopy(Terraria.Player target) {
+            _player.HairType = (byte)target.hair;
+            _player.HairDye = target.hairDye;
+            _player.SkinVariant = (byte)target.skinVariant;
+            _player.HMisc = target.hideMisc;
+
+            _player.EyeColor = target.eyeColor;
+            _player.HairColor = target.hairColor;
+            _player.PantsColor = target.pantsColor;
+            _player.ShirtColor = target.shirtColor;
+            _player.ShoeColor = target.shoeColor;
+            _player.SkinColor = target.skinColor;
+            _player.UnderShirtColor = target.underShirtColor;
+
+            BitsByte bit1 = 0;
+            for (int i = 0; i < 8; ++i) {
+                bit1[i] = target.hideVisual[i];
+            }
+            _player.HVisuals1 = bit1;
+
+            BitsByte bit2 = 0;
+            for (int i = 8; i < 10; ++i) {
+                bit2[i] = target.hideVisual[i];
+            }
+            _player.HVisuals2 = bit2;
+
+            if (Running)
+                _client.AddPackets(new Packets.Packet4(_player));
         }
 
 

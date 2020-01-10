@@ -15,6 +15,7 @@ namespace rt.Program
     public class Program : TerrariaPlugin {
 
         public static BTSPlayer[] Players = new BTSPlayer[256];
+        public static bool[] IsBot = new bool[256];
 
         public Program(Main game) : base(game) {
 

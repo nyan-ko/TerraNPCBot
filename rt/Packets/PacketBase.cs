@@ -58,21 +58,15 @@ namespace rt {
         /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
         /// </summary>
         /// <param name="reader"></param>
-        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, World wrld, GetDataEventArgs args = null) {
+        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, World wrld) {
             ParsedPacketBase packet = null;
 
             short length;
             byte type;
 
             using (reader) {
-                if (args == null) {
-                    length = reader.ReadInt16();
-                    type = reader.ReadByte();
-                }
-                else {
-                    length = (short)args.Length;
-                    type = (byte)args.MsgID;
-                }
+                length = reader.ReadInt16();
+                type = reader.ReadByte();
 
                 // Flag102
                 switch (type) {
@@ -89,7 +83,7 @@ namespace rt {
                         packet = new Packets.Packet7(reader, wrld, plr);
                         break;
                     case 13: // player update
-                        packet = new Packets.Packet13Parser(reader);
+                        packet = new Packets.Packet13Parser(reader.BaseStream);
                         break;
                 }
             }
@@ -315,7 +309,7 @@ namespace rt {
                                 packet = new Packets.Packet113(x, y);
                             }
                             break;  // crystal invasion start
-                    }
+                    }  //Flag102 hurt and death
                 }
                 catch (Exception ex) {
                     TShockAPI.TShock.Log.Write($"Exception thrown with writing packet from parsed data: {ex.ToString()}, Bot: {b.Name}", System.Diagnostics.TraceLevel.Error);
@@ -328,6 +322,7 @@ namespace rt {
 
     //replace fields with a stream Flag102
     public class ParsedPacketBase {
+        public MemoryStream _data;
         public uint _packetType;
 
         public ParsedPacketBase(uint packet) {
