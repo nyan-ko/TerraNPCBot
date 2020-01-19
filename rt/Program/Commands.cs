@@ -139,7 +139,7 @@ namespace rt.Program {
             }
             else if (bot.Running) {
                 args.Player.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
-                return;
+                
             }
             else if (!bot.Start()) {
                 args.Player.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));

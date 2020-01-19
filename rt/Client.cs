@@ -25,35 +25,32 @@ namespace rt {
         Thread _writeThread;
         Thread _readThread;
         byte[] _buffer;
+        //public Thread _rejoin;
 
         List<PacketBase> _writeQueue;
 
         Socket _client;
-
         Bot _bot;
 
-        public static Client GetClient(string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
-            Client c = new Client();
-            c._address = host;
-            c._port = port;
-            c._player = plr;
-            c._world = wrld;
-            c._eventManager = eventManager;
+        public Client (string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
+            _address = host;
+            _port = port;
+            _player = plr;
+            _world = wrld;
+            _eventManager = eventManager;
 
-            c._bot = bot;
+            _bot = bot;
 
-            c._writeQueue = new List<PacketBase>();
+            _writeThread = new Thread(SendPackets);
+            _writeThread.IsBackground = true;
+            _readThread = new Thread(ReadPackets);
+            _readThread.IsBackground = true;
+            //_rejoin = new Thread(Rejoin);
+            //_rejoin.IsBackground = true;
 
-            c._buffer = new byte[1024];
+            _writeQueue = new List<PacketBase>();
 
-            c._writeThread = new Thread(c.SendPackets);
-            c._writeThread.IsBackground = true;
-
-            c._readThread = new Thread(c.ReadPackets);
-            c._readThread.IsBackground = true;
-
-            // threads are background threads so they stop when program stops
-            return c;
+            _buffer = new byte[1024];
         }
 
         public void AddPackets (PacketBase packet) {
@@ -63,14 +60,14 @@ namespace rt {
         public void ReadPackets() {
             while (_running) {
                 try {
-                    var bytes = _client.Receive(_buffer);  // blocked until data is received
+                    var bytes = _client.Receive(_buffer); 
                     byte[] stream = new byte[bytes];
                     Array.Copy(_buffer, stream, bytes);
                     using (var reader = new BinaryReader(new MemoryStream(stream))) {
-                        var packedPacket = PacketBase.Parse(reader, _player, _world);
+                        var packedPacket = PacketBase.Parse(reader, _player, _world, _bot);
                         if (packedPacket == null) return;
                         try {
-                            _eventManager._listenReact[(PacketTypes)packedPacket._packetType].Invoke(new EventInfo(_bot, packedPacket));
+                            _eventManager._listenReact[(PacketTypes)packedPacket._packetType].Invoke(new EventPacketInfo(_bot, packedPacket));
                         }
                         catch { }
                     }
@@ -89,14 +86,21 @@ namespace rt {
                     try {
                         _writeQueue[0].Send(_client);
                         _writeQueue.RemoveAt(0);
-                        _writeQueue.TrimExcess();  // just in case
                     }
                     catch {
-
+                        continue;
                     }
                 }
             }
         } 
+
+        //public void Rejoin() {
+        //    Stop();
+        //    while (_writeThread.IsAlive || _readThread.IsAlive) {
+        //        continue;
+        //    }
+        //    Start();
+        //}
 
         /// <summary>
         /// Connects to the server. <para/>Using https://docs.microsoft.com/en-us/dotnet/framework/network-programming/synchronous-client-socket-example
@@ -139,8 +143,16 @@ namespace rt {
         /// </summary>
         public void Stop() {
             _running = false;
-            _writeThread.Abort();
-            _readThread.Abort();
+                     
+            _writeThread = new Thread(SendPackets);
+            _writeThread.IsBackground = true;
+            _readThread = new Thread(ReadPackets);
+            _readThread.IsBackground = true;
+        }
+
+        public void Disconnect() {
+            _client.Shutdown(SocketShutdown.Both);
+            _client.Disconnect(true);
         }
     }
 }

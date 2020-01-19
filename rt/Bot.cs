@@ -1,52 +1,57 @@
-﻿using System;
-using System.Timers;
-using Microsoft.Xna.Framework;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
+using System.Timers;
 using Terraria;
 using TShockAPI;
+using System.Threading.Tasks;
+using rt.Utils;
+using rt.Program;
 
 namespace rt {
     /// <summary>
     /// Comprises bot info and functions.
     /// </summary>
     public class Bot {
-        private int _protocol;
+        const int _protocol = 194;
         public int _owner;
         public bool _recording;
-        public bool ActuallyJoined;  //Flag102
+        //public bool _actuallyJoined;
 
         private EventManager _manager;
         public Player _player;
         public Client _client { get; }
         public World _world;
 
+        #region Record Packets
         public List<RecordedPacket> _recordedPackets;
         public Stopwatch _timerBetweenPackets;
-        public StreamInfo _previousPacket;
-
+        public StreamInfo _previousPacket;   
         public Timer _delayBetweenPackets;
         public int _PacketIndex;
+        #endregion
+
+        //public Timer _checkJoin;
 
         public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson") {
-            _protocol = Main.curRelease;
             _manager = new EventManager();
             {
-                _manager._listenReact.Add(PacketTypes.Disconnect, Stop);
-                _manager._listenReact.Add(PacketTypes.ContinueConnecting, ReceivedPlayerID);
-                _manager._listenReact.Add(PacketTypes.WorldInfo, Initalize);
+                _manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Stop));
+                _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
+                _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initalize));
             }  // default listeners
             _player = new Player(name);
             _world = new World();
             _owner = owner;
-            _client = Client.GetClient(address, this, _player, _world, _manager, port);
+            _client = new Client(address, this, _player, _world, _manager, port);
+
+            //_actuallyJoined = false;
+
+            //_checkJoin = new Timer(5000);
+            //_checkJoin.AutoReset = true;
+            //_checkJoin.Elapsed += CheckForJoin;
         }
 
-        public bool Start() {
+        public bool Start() { 
             if (_client.Start()) {
                 _client.AddPackets(new Packets.Packet1(_protocol));
                 return true;
@@ -55,17 +60,17 @@ namespace rt {
                 return false;
         }
 
-        public void Stop(EventInfo i) {
-            _client.Stop();
+        public async Task Stop(EventPacketInfo i) {
             try {
-                NetMessage.SendData(2, ID);
+                _client.Stop();
+                _client.Disconnect();
             }
-            catch (ArgumentNullException) {
-                return;  // if bot has somehow already left the server
-            }  
-        }  // hammer time
+            catch {
 
-        public void ReceivedPlayerID(EventInfo e) {
+            }
+        }  // hammer time  
+
+        public async Task ReceivedPlayerID(EventPacketInfo e) {            
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
             _client.AddPackets(new Packets.Packet30(ID, false));
@@ -78,16 +83,16 @@ namespace rt {
             _client.AddPackets(new Packets.Packet6());
         }
 
-        public void Initalize(EventInfo i) {
-            if (_player.Initialized && !_player.LoggedIn) {
-                _player.LoggedIn = true;
-                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
-            }
-            if (!_player.Initialized) {
-                _player.Initialized = true;
-                _client.AddPackets(new Packets.Packet8());
-                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
-            }
+        public async Task AlertAndInfo(EventPacketInfo e) {
+            Program.Program.Players[_owner].SendInfoMessage($"Recieved player id: {ID}");
+
+            Program.Program.Players[ID]._isBot = true;
+            Program.Program.Players[ID].BotPlayer = this;
+        }
+
+        public async Task Initalize(EventPacketInfo i) {
+            _client.AddPackets(new Packets.Packet8());
+            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
 
 
@@ -154,6 +159,14 @@ namespace rt {
                     (short)current.netID));
                 ++i;
             }
+
+            for (byte x = i; x < NetItem.MaxInventory; ++x) {
+                _client.AddPackets(new Packets.Packet5(ID,
+                    x,
+                    0,
+                    0,
+                    0));
+            }
         }
 
         public void ServerInvCopy(Terraria.Player target) {
@@ -205,9 +218,25 @@ namespace rt {
                 _client.AddPackets(new Packets.Packet4(_player));
         }
 
+        //public void CheckForJoin(object sender, ElapsedEventArgs args) {
+        //    if (!_actuallyJoined) {
+        //        if (_client._rejoin.IsAlive) {
+        //            Program.Program.Players[_owner].SendErrorMessage(string.Format(Utils.Messages.BotErrorGeneric, "Rejoin thread already running."));
+        //            return;
+        //        }                
+        //        _client._rejoin.Start();
+        //        Program.Program.Players[_owner].SendInfoMessage("Retrying connection...");
+        //    }
+        //    else {
+        //        _checkJoin.Stop();
+        //        _checkJoin.Dispose();
+        //    }
+        //}
+        //Flag103
 
         public byte ID {
-            get { return _player.PlayerID; }
+            get { return (byte)_player.PlayerID; }
+            set { _player.PlayerID = _player.PlayerID == -1 ? value : _player.PlayerID; }
         }
 
         public string Name {
@@ -218,8 +247,8 @@ namespace rt {
             get { return _client._running; }
         }
 
-        public TShockAPI.TSPlayer AsTSPlayer {
-            get { return TShockAPI.TShock.Players[ID]; }
+        public TSPlayer AsTSPlayer {
+            get { return TShock.Players[ID]; }
         }
     }
 }

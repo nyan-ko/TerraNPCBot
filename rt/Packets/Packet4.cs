@@ -15,7 +15,7 @@ namespace rt.Packets {
         /// </summary>
         public Packet4 (Player plr) : base(0x4, new List<byte>()) {
             using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
-                Amanuensis.Write(plr.PlayerID);
+                Amanuensis.Write((byte)plr.PlayerID);
                 Amanuensis.Write(plr.SkinVariant);
                 Amanuensis.Write(plr.HairType);
 

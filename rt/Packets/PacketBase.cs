@@ -58,7 +58,7 @@ namespace rt {
         /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
         /// </summary>
         /// <param name="reader"></param>
-        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, World wrld) {
+        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, World wrld, Bot bot) {
             ParsedPacketBase packet = null;
 
             short length;
@@ -77,7 +77,7 @@ namespace rt {
                         break;
                     case 3:  // continue connection
                         var id = reader.ReadByte();
-                        packet = new Packets.Packet3(plr, id);
+                        packet = new Packets.Packet3(bot, id);
                         break;
                     case 7:  // world info
                         packet = new Packets.Packet7(reader, wrld, plr);

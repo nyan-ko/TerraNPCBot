@@ -13,7 +13,7 @@ namespace rt {
     /// </summary>
     public class Player {
 
-        public byte PlayerID;
+        public int PlayerID;
         public byte SkinVariant;
         public byte HairType;
         public string Name;
@@ -46,7 +46,7 @@ namespace rt {
         public Item[] MiscDyeSlots = new Item[NetItem.MiscDyeSlots];
 
         public Player(string name) {
-            PlayerID = 0;
+            PlayerID = -1;
             SkinVariant = 0;
             HairType = 0;
             Name = name;

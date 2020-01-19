@@ -10,7 +10,12 @@ using TerrariaApi.Server;
 namespace rt.Program {
     public class PluginHooks {
         public static void OnJoin(JoinEventArgs args) {
+            TShock.Utils.Broadcast($"{args.Who}", 70,0,0);
             Program.Players[args.Who] = new BTSPlayer(args.Who);
+            //if (Program.Players[args.Who]._isBot) {
+            //    Program.Players[args.Who].BotPlayer._actuallyJoined = true;
+            //}
+            //Flag103
         }
 
         public static void OnLeave(LeaveEventArgs args) {
