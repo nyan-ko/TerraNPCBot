@@ -9,11 +9,19 @@ using TShockAPI;
 namespace rt {
     public class RecordedPacket {
         public StreamInfo stream;
-        public int timeBeforeNextPacket;
+        public uint timeBeforeNextPacket;
 
-        public RecordedPacket(StreamInfo p, int i) {
-            stream = p;
-            timeBeforeNextPacket = i;
+        public RecordedPacket(StreamInfo st, uint time) {
+            stream = st;
+            timeBeforeNextPacket = time;
+        }
+
+        public void WriteToStream(BinaryWriter writer) {
+            writer.Write(stream.Buffer.Length);
+            writer.Write(stream.Buffer);
+            writer.Write(stream.Type);
+            writer.Write(timeBeforeNextPacket);
+
         }
 
         public override string ToString() {
@@ -28,11 +36,11 @@ namespace rt {
 
     public class StreamInfo {
         public byte[] Buffer;
-        public int Type;
+        public byte Type;
 
-        public StreamInfo(byte[] n1, int n4) {
-            Buffer = n1;
-            Type = n4;
+        public StreamInfo(byte[] stream, byte type) {
+            Buffer = stream;
+            Type = type;
         }
     }
 }

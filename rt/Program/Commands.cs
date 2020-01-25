@@ -51,6 +51,16 @@ namespace rt.Program {
                     case "delete":
                         DeleteBot(args);
                         break;
+                    case "save":
+                        if (args.Parameters.Count > 1) {
+                            switch (args.Parameters[1]) {
+                                case "prune":
+                                    
+                                    break;
+                            }
+                        }
+                        Save(args);
+                        break;
                     default:
                         args.Player.MultiMsg(Messages.Master, Color.Yellow);
                         break;
@@ -91,14 +101,19 @@ namespace rt.Program {
                 Bot bot;
                 BTSPlayer bp = Program.Players[args.Player.Index];
 
+                if (!bp.SPlayer.HasPermission("bot.create")) {
+                    args.Player.SendErrorMessage(Messages.NoPermission);
+                    return;
+                }
+
                 string name = "";
                 if (args.Parameters.Count > 1) {
                     name = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
                     name = name.Trim('"');
                 }
                 bot = args.Parameters.Count > 1
-                    ? new Bot("127.0.0.1", args.Player.Index, 7777, name)
-                    : new Bot("127.0.0.1", args.Player.Index);
+                    ? new Bot(Bot.Address, args.Player.Index, 7777, name)
+                    : new Bot(Bot.Address, args.Player.Index);
 
                 // Ports for each server Flag102
 
@@ -153,8 +168,8 @@ namespace rt.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (bot.Running) {
-                    bot.Stop(null);
-
+                    Terraria.NetMessage.SendData((int)PacketTypes.Disconnect, bot.ID);
+                    
                     args.Player.SendMessage(string.Format(Messages.BotSuccessStopped, bot.Name), Color.Green);
                 }
                 else {
@@ -184,10 +199,6 @@ namespace rt.Program {
                 args.Player.SendErrorMessage(string.Format(Messages.BotErrorNotFound));
             }
         }
-
-        //static void Delegation(CommandArgs args) {
-
-        //}  // Flag103
 
         static void Record(CommandArgs args) {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
@@ -275,6 +286,93 @@ namespace rt.Program {
             bot.PlayerInfoCopy(target);
 
             args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
+        }
+
+        static void Save(CommandArgs args) {
+            StreamWriter.ConvertToStream(Program.Players[args.Player.Index]);
+        }
+
+        static void Prune(CommandArgs args) {
+            BTSPlayer bp = Program.Players[args.Player.Index];
+
+            if (!bp.SPlayer.HasPermission("bot.save.prune")) {
+                args.Player.SendErrorMessage(Messages.NoPermission);
+                return;
+            }
+
+            DateTime prune = DateTime.Now;
+
+            if (args.Parameters.Count == 2) {
+                prune = prune.AddDays(-7);
+                args.Player.SendInfoMessage("Defaulting prune to one week.");
+            }
+            else {
+                int year = 0;
+                int month = 0;
+                int day = 0;
+                int hour = 0;
+
+                List<string> time = args.Parameters.GetRange(2, args.Parameters.Count);
+                foreach (string s in time) {
+                    switch (s[s.Length - 1]) {
+                        case 'h':
+                            if (int.TryParse(s.TrimEnd('h'), out int hours)) {
+                                hour += hours;
+                            }
+                            else {
+                                args.Player.SendErrorMessage($"Invalid hour format: \"{s}\"");
+                            }
+                            break;
+                        case 'd':
+                            if (int.TryParse(s.TrimEnd('d'), out int days)) {
+                                day += days;
+                            }
+                            else {
+                                args.Player.SendErrorMessage($"Invalid day format: \"{s}\"");
+                            }
+                            break;
+                        case 'm':
+                            if (int.TryParse(s.TrimEnd('m'), out int months)) {
+                                month += months;
+                            }
+                            else {
+                                args.Player.SendErrorMessage($"Invalid month format: \"{s}\"");
+                            }
+                            break;
+                        case 'y':
+                            if (int.TryParse(s.TrimEnd('y'), out int years)) {
+                                year += years;
+                            }
+                            else {
+                                args.Player.SendErrorMessage($"Invalid year format: \"{s}\"");
+                            }
+                            break;
+                    }
+                }
+
+                prune = prune.AddHours(hour * -1);
+                prune = prune.AddDays(day * -1);
+                prune = prune.AddMonths(month * -1);
+                prune = prune.AddYears(year * -1);
+
+                args.Player.SendInfoMessage($"Prune set to: {prune.Year}, {prune.Month}, {prune.Day}, {prune.Hour}. All prior saves will be moved to the prune folder.");
+            }           
+
+            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(Program.PluginFolderLocation);
+            foreach (var file in dir.GetFiles()) {
+                string date = file.Name.Substring(file.Name.IndexOf('|'), file.Name.Length - file.Name.LastIndexOf('|'));
+                var split = date.Split('_');
+                if (!int.TryParse(split[0], out int years) ||
+                    !int.TryParse(split[1], out int months) ||
+                    !int.TryParse(split[2], out int days) ||
+                    !int.TryParse(split[3], out int hours)) {
+                    continue;
+                }
+                DateTime fileCreation = new DateTime(years, months, days, hours, 0, 0);
+                if (DateTime.Compare(prune, fileCreation) <= 0) {
+                    file.MoveTo(Program.PluginPrunedSaveFolderLocation);
+                }
+            }
         }
     }
 }

@@ -1,33 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
 using TShockAPI;
 
 namespace rt {
     /// <summary>
     /// Bot Terraria Server player, not a seven member South Korean boy band player.
     /// </summary>
-    public class BTSPlayer : TSPlayer {
-        public BTSPlayer(int index) : base(index) {
+    public class BTSPlayer {
+        public BTSPlayer(int index) {
             _ownedBots = new List<Bot>();
             _selected = -1;
             _isBot = false;
+
+            ind = index;
         }
 
-        public int _botLimit = 10;
+        private int ind;
+        public uint _botLimit = 10;
         public List<Bot> _ownedBots;
         public int _selected;
         public bool _isBot;
 
-        private Bot _bot;
+        private Bot _bot;  //Flag103    
 
         public Bot SelectedBot {
             get { return _ownedBots.Count > 0 && _selected != -1 ? _ownedBots[_selected] : null; }
         }
 
-        public Bot BotPlayer {
+        public TSPlayer SPlayer {
+            get { return TShock.Players[ind]; }
+        }
+
+        public Bot AsBot {
             get { return _isBot ? _bot : null; }
             set { _bot = value; }
         }

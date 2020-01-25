@@ -21,6 +21,10 @@ namespace rt {
             b = s;
             p = e;
         }
+
+        public EventPacketInfo Empty {
+            get { return null; }
+        }
     }
 
     public class ParallelTask {
@@ -40,6 +44,23 @@ namespace rt {
                 Task finished = await Task.WhenAny(s);
                 s.Remove(finished);
             }
+        }
+    }
+
+    public enum Functions {
+        Stop = 0,
+        ReceivedPlayerID = 1,
+        AlertAndInfo = 2,
+        Initialize = 3,
+    }
+
+    public struct PacketFuncPair {
+        public PacketTypes packet;
+        public ParallelTask function;
+
+        public PacketFuncPair(PacketTypes p, ParallelTask f) {
+            packet = p;
+            function = f;
         }
     }
 

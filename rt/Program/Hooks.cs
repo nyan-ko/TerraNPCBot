@@ -10,17 +10,18 @@ using TerrariaApi.Server;
 namespace rt.Program {
     public class PluginHooks {
         public static void OnJoin(JoinEventArgs args) {
-            TShock.Utils.Broadcast($"{args.Who}", 70,0,0);
             Program.Players[args.Who] = new BTSPlayer(args.Who);
-            //if (Program.Players[args.Who]._isBot) {
-            //    Program.Players[args.Who].BotPlayer._actuallyJoined = true;
-            //}
-            //Flag103
         }
 
         public static void OnLeave(LeaveEventArgs args) {
+            if (!Program.Players[args.Who]._isBot) {
+                Utils.StreamWriter.ConvertToStream(Program.Players[args.Who]);
+            }
+            else {
+                Program.Players[args.Who].AsBot.Stop();
+            }
             Program.Players[args.Who] = new BTSPlayer(args.Who);
-        }
+        } 
 
         public static void OnGetData(GetDataEventArgs args) {
             Bot p = Program.Players[args.Msg.whoAmI]?._ownedBots?.FirstOrDefault(x => x._recording);
@@ -33,17 +34,17 @@ namespace rt.Program {
                         p._timerBetweenPackets = new System.Diagnostics.Stopwatch();
                         p._timerBetweenPackets.Start();
 
-                        p._previousPacket = new StreamInfo(new byte[args.Length], (int)args.MsgID);
+                        p._previousPacket = new StreamInfo(new byte[args.Length], (byte)args.MsgID);
                         Array.Copy(args.Msg.readBuffer, args.Index, p._previousPacket.Buffer, 0, args.Length);
                     }  // first packet recieved
                     else {
                         p._timerBetweenPackets.Stop();
-                        p._recordedPackets.Add(new RecordedPacket(p._previousPacket, (int)p._timerBetweenPackets.ElapsedMilliseconds));  // 592 hours at int limit, casting shan't be a problem
+                        p._recordedPackets.Add(new RecordedPacket(p._previousPacket, (uint)p._timerBetweenPackets.ElapsedMilliseconds));  // 592 hours at int limit, casting shan't be a problem
 
                         p._timerBetweenPackets = new System.Diagnostics.Stopwatch();
                         p._timerBetweenPackets.Start();
 
-                        p._previousPacket = new StreamInfo(new byte[args.Length], (int)args.MsgID);
+                        p._previousPacket = new StreamInfo(new byte[args.Length], (byte)args.MsgID);
                         Array.Copy(args.Msg.readBuffer, args.Index, p._previousPacket.Buffer, 0, args.Length);
                     }  // all packets onwards
                 }

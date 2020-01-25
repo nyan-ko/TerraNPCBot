@@ -25,6 +25,7 @@ namespace rt.Utils {
             "/bot delete - Deletes the selected bot."
         };
 
+        public static readonly string NoPermission = "You do not have permission to use this command.";
         public static readonly string BotErrorGeneric = "Something went wrong: {0}. Report to staff if you see this.";
 
         public static readonly string BotErrorNotFound = "Could not find selected bot.";

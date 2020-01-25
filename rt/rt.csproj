@@ -99,6 +99,7 @@
     <Compile Include="Data\World.cs" />
     <Compile Include="Utils\Messages.cs" />
     <Compile Include="Utils\MiscUtils.cs" />
+    <Compile Include="Utils\StreamWriter.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

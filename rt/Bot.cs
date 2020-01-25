@@ -1,29 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Timers;
 using Terraria;
 using TShockAPI;
-using System.Threading.Tasks;
-using rt.Utils;
-using rt.Program;
 
 namespace rt {
     /// <summary>
     /// Comprises bot info and functions.
     /// </summary>
     public class Bot {
-        const int _protocol = 194;
+        public const int Protocol = 194;
+        public const string Address = "127.0.0.1";
         public int _owner;
         public bool _recording;
         //public bool _actuallyJoined;
 
-        private EventManager _manager;
+        private Stream data;
+        internal EventManager _manager;
         public Player _player;
         public Client _client { get; }
         public World _world;
 
         #region Record Packets
         public List<RecordedPacket> _recordedPackets;
+
         public Stopwatch _timerBetweenPackets;
         public StreamInfo _previousPacket;   
         public Timer _delayBetweenPackets;
@@ -35,9 +38,8 @@ namespace rt {
         public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson") {
             _manager = new EventManager();
             {
-                _manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Stop));
                 _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
-                _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initalize));
+                _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
             }  // default listeners
             _player = new Player(name);
             _world = new World();
@@ -53,24 +55,25 @@ namespace rt {
 
         public bool Start() { 
             if (_client.Start()) {
-                _client.AddPackets(new Packets.Packet1(_protocol));
+                _client.AddPackets(new Packets.Packet1(Protocol));
                 return true;
             }
             else
                 return false;
         }
 
-        public async Task Stop(EventPacketInfo i) {
+        public async void Stop() {
             try {
                 _client.Stop();
-                _client.Disconnect();
+                await Task.Delay(2);
+                _client.DisconnectAndReuse();
             }
             catch {
 
             }
-        }  // hammer time  
+        }  //Flag103
 
-        public async Task ReceivedPlayerID(EventPacketInfo e) {            
+        public async Task ReceivedPlayerID(EventPacketInfo e) {
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
             _client.AddPackets(new Packets.Packet30(ID, false));
@@ -84,13 +87,13 @@ namespace rt {
         }
 
         public async Task AlertAndInfo(EventPacketInfo e) {
-            Program.Program.Players[_owner].SendInfoMessage($"Recieved player id: {ID}");
+            Program.Program.Players[_owner].SPlayer.SendInfoMessage($"Recieved player id: {ID}");
 
             Program.Program.Players[ID]._isBot = true;
-            Program.Program.Players[ID].BotPlayer = this;
+            Program.Program.Players[ID].AsBot = this;
         }
 
-        public async Task Initalize(EventPacketInfo i) {
+        public async Task Initialize(EventPacketInfo i) {
             _client.AddPackets(new Packets.Packet8());
             _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
@@ -108,7 +111,7 @@ namespace rt {
                 _PacketIndex = 0;
             }
             else {
-                timer.Interval = currentPacket.timeBeforeNextPacket;
+                timer.Interval = currentPacket.timeBeforeNextPacket == 0 ? currentPacket.timeBeforeNextPacket + 1 : currentPacket.timeBeforeNextPacket;
                 ++_PacketIndex;
             }
 
@@ -170,14 +173,8 @@ namespace rt {
         }
 
         public void ServerInvCopy(Terraria.Player target) {
-            Main.ServerSideCharacter = true;
-            NetMessage.SendData(7, ID, -1);
-
             ShallowInvCopy(target);
             UpdateInv();
-
-            Main.ServerSideCharacter = false;
-            NetMessage.SendData(7, ID, -1);
         }
 
         public void ShallowInvCopy(Terraria.Player target) {
@@ -233,6 +230,35 @@ namespace rt {
         //    }
         //}
         //Flag103
+
+
+        public void WriteToStream(System.IO.BinaryWriter writer) {
+            _player.WriteInfoToStream(writer);
+            _player.WriteInvToStream(writer);
+
+            if (_recordedPackets != null) {
+                writer.Write(_recordedPackets.Count);
+                foreach (var r in _recordedPackets) {
+                    r.WriteToStream(writer);
+                }
+            }
+            else {
+                writer.Write(0);
+            }
+            if (_manager._listenReact != null) {
+                writer.Write(_manager._listenReact.Count);
+                foreach (var e in _manager._listenReact) {
+                    writer.Write((byte)e.Key);
+                    writer.Write(e.Value.Tasks.Count);
+                    foreach (var e2 in e.Value.Tasks) {
+                        writer.Write((int)Enum.Parse(typeof(Functions), e2.Method.Name));
+                    }
+                }
+            }
+            else {
+                writer.Write(0);
+            }
+        }
 
         public byte ID {
             get { return (byte)_player.PlayerID; }

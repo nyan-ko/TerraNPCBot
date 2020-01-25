@@ -9,28 +9,28 @@ using System.Net.Sockets;
 using System.Threading;
 
 namespace rt {
+    /// <summary>
+    /// Manages connections for the bot.
+    /// </summary>
     public class Client {
-
-        /// <summary>
-        /// Manages connections for the bot.
-        /// </summary>
-        string _address;
-        int _port;
+        public const int BufferSize = 131072;
+        private string _address;
+        private int _port;
         public bool _running;
 
-        Player _player;
-        World _world;
+        private Player _player;
+        private World _world;
         public EventManager _eventManager;
 
-        Thread _writeThread;
-        Thread _readThread;
-        byte[] _buffer;
+        private Thread _writeThread;
+        private Thread _readThread;
+        private byte[] _buffer;
         //public Thread _rejoin;
 
-        List<PacketBase> _writeQueue;
+        private List<PacketBase> _writeQueue;
 
-        Socket _client;
-        Bot _bot;
+        private Socket _client;
+        private Bot _bot;
 
         public Client (string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
             _address = host;
@@ -50,7 +50,7 @@ namespace rt {
 
             _writeQueue = new List<PacketBase>();
 
-            _buffer = new byte[1024];
+            _buffer = new byte[BufferSize];
         }
 
         public void AddPackets (PacketBase packet) {
@@ -71,7 +71,7 @@ namespace rt {
                         }
                         catch { }
                     }
-                    _buffer = new byte[1024];
+                    _buffer = new byte[BufferSize];
                 }
                 catch (Exception ex){
                     Console.WriteLine($"Exception thrown when reading packet: {ex}, {ex.Source}");
@@ -143,16 +143,16 @@ namespace rt {
         /// </summary>
         public void Stop() {
             _running = false;
-                     
+        }
+
+        public void DisconnectAndReuse() {
+            _client.Shutdown(SocketShutdown.Both);
+            _client.Disconnect(true);
+
             _writeThread = new Thread(SendPackets);
             _writeThread.IsBackground = true;
             _readThread = new Thread(ReadPackets);
             _readThread.IsBackground = true;
-        }
-
-        public void Disconnect() {
-            _client.Shutdown(SocketShutdown.Both);
-            _client.Disconnect(true);
         }
     }
 }
