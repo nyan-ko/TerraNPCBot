@@ -17,7 +17,7 @@ namespace rt.Program {
         }
 
         public static void OnLeave(LeaveEventArgs args) {
-            if (Program.Bots[args.Who] == null) {
+            if (Program.Bots[args.Who] == null && Program.Players[args.Who]._autosave) {
                 Utils.StreamWriter.BTSPlayerToStream(Program.Players[args.Who]);
             }
             else {

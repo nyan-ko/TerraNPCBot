@@ -10,7 +10,6 @@ namespace rt {
         public BTSPlayer(int index) {
             _ownedBots = new List<Bot>();
             _selected = -1;
-            _isBot = false;
 
             ind = index;
         }
@@ -19,7 +18,10 @@ namespace rt {
         public uint _botLimit = 10;
         public List<Bot> _ownedBots;
         public int _selected;
-        public bool _isBot;
+
+        public bool _autosave;
+        public bool _canBeTeleportedTo;
+        public bool _canBeCopied;
 
         public Bot SelectedBot {
             get { return _ownedBots.Count > 0 && _selected != -1 ? _ownedBots[_selected] : null; }

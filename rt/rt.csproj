@@ -113,6 +113,7 @@
     <Compile Include="Program\Commands.cs" />
     <Compile Include="Program\Hooks.cs" />
     <Compile Include="Program\Main.cs" />
+    <Compile Include="Program\Permissions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Packets\Packet13.cs" />
     <Compile Include="Data\World.cs" />

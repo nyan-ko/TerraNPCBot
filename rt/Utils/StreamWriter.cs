@@ -24,6 +24,7 @@ namespace rt.Utils {
                             new GZipStream(
                                     File.Open(PluginUtils.AllocateSavePath(player.SPlayer.User.ID), FileMode.Create), CompressionMode.Compress), Program.Program.BufferSize))) {
                 writer.Write(Program.Program.PluginStreamVersion);
+                writer.Write(player._autosave);
                 writer.Write(player._botLimit);
                 writer.Write(player._ownedBots.Count);
                 foreach (var b in player._ownedBots) {

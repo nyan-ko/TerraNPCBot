@@ -236,7 +236,7 @@ namespace rt {
             bot._client.AddPackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
         }
 
-        public void Talk(string message) {
+        public void Chat(string message) {
             bot._client.AddPackets(new Packets.Packet82(message));
         }
 
