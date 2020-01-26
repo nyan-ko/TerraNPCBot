@@ -9,18 +9,21 @@ using TerrariaApi.Server;
 
 namespace rt.Program {
     public class PluginHooks {
-        public static void OnJoin(JoinEventArgs args) {
+        public static void OnJoin(ConnectEventArgs args) {
             Program.Players[args.Who] = new BTSPlayer(args.Who);
+            if (Program.Bots[args.Who] != null) {
+                Program.Bots[args.Who]._actuallyJoined = true;
+            }
         }
 
         public static void OnLeave(LeaveEventArgs args) {
-            if (!Program.Players[args.Who]._isBot) {
-                Utils.StreamWriter.ConvertToStream(Program.Players[args.Who]);
+            if (Program.Bots[args.Who] == null) {
+                Utils.StreamWriter.BTSPlayerToStream(Program.Players[args.Who]);
             }
             else {
-                Program.Players[args.Who].AsBot.Stop();
+                Program.Bots[args.Who].Stop();
             }
-            Program.Players[args.Who] = new BTSPlayer(args.Who);
+            Program.Players[args.Who] = null;
         } 
 
         public static void OnGetData(GetDataEventArgs args) {

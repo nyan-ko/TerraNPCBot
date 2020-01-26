@@ -14,15 +14,7 @@ namespace rt {
         public RecordedPacket(StreamInfo st, uint time) {
             stream = st;
             timeBeforeNextPacket = time;
-        }
-
-        public void WriteToStream(BinaryWriter writer) {
-            writer.Write(stream.Buffer.Length);
-            writer.Write(stream.Buffer);
-            writer.Write(stream.Type);
-            writer.Write(timeBeforeNextPacket);
-
-        }
+        }        
 
         public override string ToString() {
             string s ="";

@@ -21,19 +21,12 @@ namespace rt {
         public int _selected;
         public bool _isBot;
 
-        private Bot _bot;  //Flag103    
-
         public Bot SelectedBot {
             get { return _ownedBots.Count > 0 && _selected != -1 ? _ownedBots[_selected] : null; }
         }
 
         public TSPlayer SPlayer {
             get { return TShock.Players[ind]; }
-        }
-
-        public Bot AsBot {
-            get { return _isBot ? _bot : null; }
-            set { _bot = value; }
         }
     }
 }

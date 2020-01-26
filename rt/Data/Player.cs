@@ -14,8 +14,6 @@ namespace rt {
     /// Based off of playerinfo packet. Used for bot.
     /// </summary>
     public class Player {
-        private Stream DATA;
-
         public int PlayerID;
         public byte SkinVariant;
         public byte HairType;
@@ -74,58 +72,6 @@ namespace rt {
 
             Initialized = false;
             LoggedIn = false;
-        }
-
-        public void WriteInfoToStream(System.IO.BinaryWriter writer) {
-            writer.Write(SkinVariant);
-            writer.Write(HairType);
-            writer.Write(Name);
-            writer.Write(HairDye);
-            writer.Write(HVisuals1);
-            writer.Write(HVisuals2);
-            writer.Write(HMisc);
-            writer.WriteColor(HairColor);
-            writer.WriteColor(SkinColor);
-            writer.WriteColor(EyeColor);
-            writer.WriteColor(ShirtColor);
-            writer.WriteColor(UnderShirtColor);
-            writer.WriteColor(PantsColor);
-            writer.WriteColor(ShoeColor);
-            writer.Write(Difficulty);
-            //28 bytes + name
-
-            writer.Write(CurHP);
-            writer.Write(MaxHP);
-            //4 bytes
-
-            writer.Write(CurMana);
-            writer.Write(MaxMana);
-            //4 bytes
-            
-        }
-
-        public void WriteInvToStream(System.IO.BinaryWriter writer) {
-            byte i = 0;
-            foreach (var current in InventorySlots) {
-                writer.WriteItem(current, i);
-                ++i;
-            }
-            foreach (var current in ArmorSlots) {
-                writer.WriteItem(current, i);
-                ++i;
-            }
-            foreach (var current in DyeSlots) {
-                writer.WriteItem(current, i);
-                ++i;
-            }
-            foreach (var current in MiscEquipSlots) {
-                writer.WriteItem(current, i);
-                ++i;
-            }
-            foreach (var current in MiscDyeSlots) {
-                writer.WriteItem(current, i);
-                ++i;
-            }           
         }
     }
 }

@@ -92,7 +92,7 @@ namespace rt {
                     }
                 }
             }
-        } 
+        }         
 
         //public void Rejoin() {
         //    Stop();

@@ -23,8 +23,7 @@ namespace rt.Program
         #endregion
 
         public const byte PluginStreamVersion = 1;
-
-        public const int BufferSize = 262144;
+        public const int BufferSize = 262143;
 
         public const string PluginFolderName = "TerraNPCBot";
         public static readonly string PluginFolderLocation = Path.Combine(TShock.SavePath, PluginFolderName);
@@ -32,6 +31,7 @@ namespace rt.Program
         public static readonly string PluginPrunedSaveFolderLocation = Path.Combine(PluginFolderLocation, "prunedsaves");
 
         public static BTSPlayer[] Players = new BTSPlayer[256];
+        public static Bot[] Bots = new Bot[256];
 
         public Program(Main game) : base(game) {
 
@@ -44,7 +44,7 @@ namespace rt.Program
                 Directory.CreateDirectory(PluginPrunedSaveFolderLocation);
             }
 
-            ServerApi.Hooks.ServerJoin.Register(this, PluginHooks.OnJoin);
+            ServerApi.Hooks.ServerConnect.Register(this, PluginHooks.OnJoin);
             ServerApi.Hooks.ServerLeave.Register(this, PluginHooks.OnLeave);
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 

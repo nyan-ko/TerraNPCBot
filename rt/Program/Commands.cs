@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Linq;
 using System.Text;
+using Terraria.Chat;
 using System.Threading.Tasks;
 using rt.Utils;
 using TShockAPI;
@@ -55,11 +56,14 @@ namespace rt.Program {
                         if (args.Parameters.Count > 1) {
                             switch (args.Parameters[1]) {
                                 case "prune":
-                                    
+                                    Prune(args);
                                     break;
                             }
                         }
                         Save(args);
+                        break;
+                    case "talk":
+                        Talk(args);
                         break;
                     default:
                         args.Player.MultiMsg(Messages.Master, Color.Yellow);
@@ -161,6 +165,7 @@ namespace rt.Program {
             }
             else {
                 args.Player.SendMessage(string.Format(Messages.BotSuccessStarted, bot.Name), Color.Green);
+                bot._checkJoin.Start();
             }
         }        
 
@@ -236,10 +241,7 @@ namespace rt.Program {
                     return;
                 }
 
-                bot._delayBetweenPackets = new System.Timers.Timer(10);
-                bot._delayBetweenPackets.Elapsed += bot.RecordedPacketDelay;
-                bot._delayBetweenPackets.AutoReset = true;
-                bot._delayBetweenPackets.Start();
+                bot.StartRecordTimer();
 
                 args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now playing back player actions.");
             } 
@@ -277,19 +279,15 @@ namespace rt.Program {
             if (bot == null) {
                 args.Player.SendErrorMessage(Messages.BotErrorNotFound);
                 return;
-            } 
+            }
 
-            if (bot.Running)
-                bot.ServerInvCopy(target);
-            else
-                bot.ShallowInvCopy(target);
-            bot.PlayerInfoCopy(target);
+            bot.Actions.Copy(target);
 
             args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
         }
 
         static void Save(CommandArgs args) {
-            StreamWriter.ConvertToStream(Program.Players[args.Player.Index]);
+            StreamWriter.BTSPlayerToStream(Program.Players[args.Player.Index]);
         }
 
         static void Prune(CommandArgs args) {
@@ -299,7 +297,6 @@ namespace rt.Program {
                 args.Player.SendErrorMessage(Messages.NoPermission);
                 return;
             }
-
             DateTime prune = DateTime.Now;
 
             if (args.Parameters.Count == 2) {
@@ -356,22 +353,24 @@ namespace rt.Program {
                 prune = prune.AddYears(year * -1);
 
                 args.Player.SendInfoMessage($"Prune set to: {prune.Year}, {prune.Month}, {prune.Day}, {prune.Hour}. All prior saves will be moved to the prune folder.");
-            }           
+            }
 
-            System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(Program.PluginFolderLocation);
-            foreach (var file in dir.GetFiles()) {
-                string date = file.Name.Substring(file.Name.IndexOf('|'), file.Name.Length - file.Name.LastIndexOf('|'));
-                var split = date.Split('_');
-                if (!int.TryParse(split[0], out int years) ||
-                    !int.TryParse(split[1], out int months) ||
-                    !int.TryParse(split[2], out int days) ||
-                    !int.TryParse(split[3], out int hours)) {
-                    continue;
+            PluginUtils.PruneSaves(prune);
+        }
+
+        static void Talk(CommandArgs args) {
+            var bot = Program.Players[args.Player.Index]?.SelectedBot;
+            if (bot != null) {
+                if (args.Parameters.Count == 1) {
+                    args.Player.SendErrorMessage("Expected message or command as input.");
+                    return;
                 }
-                DateTime fileCreation = new DateTime(years, months, days, hours, 0, 0);
-                if (DateTime.Compare(prune, fileCreation) <= 0) {
-                    file.MoveTo(Program.PluginPrunedSaveFolderLocation);
-                }
+                var message = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
+                message = message.Trim('"');
+                bot.Actions.Talk(message);
+            }
+            else {
+                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
     }

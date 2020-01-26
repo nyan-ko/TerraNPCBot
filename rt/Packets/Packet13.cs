@@ -27,6 +27,19 @@ namespace rt.Packets {
                 AddData(Amanuensis.BaseStream);
             }
         }
+
+        public Packet13(byte id, byte control, byte pulley, byte selected,
+            float posX, float posY) : base(0xD, new List<byte>()) {
+            using (Amanuensis = new BinaryWriter(new MemoryStream())) {
+                Amanuensis.Write(id);
+                Amanuensis.Write(control);
+                Amanuensis.Write(pulley);
+                Amanuensis.Write(selected);
+                Amanuensis.Write(posX);
+                Amanuensis.Write(posY);
+                AddData(Amanuensis.BaseStream);
+            }
+        }
     }
 
     public class Packet13Parser : ParsedPacketBase {
