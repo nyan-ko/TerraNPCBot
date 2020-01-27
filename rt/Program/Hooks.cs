@@ -20,7 +20,7 @@ namespace rt.Program {
             if (Program.Bots[args.Who] == null && Program.Players[args.Who]._autosave) {
                 Utils.StreamWriter.BTSPlayerToStream(Program.Players[args.Who]);
             }
-            else {
+            else if (Program.Bots[args.Who] != null) {
                 Program.Bots[args.Who].Stop();
             }
             Program.Players[args.Who] = null;

@@ -38,7 +38,6 @@ namespace rt {
         public int _PacketIndex;
         #endregion
 
-
         public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson") {
             _manager = new EventManager();
             {
