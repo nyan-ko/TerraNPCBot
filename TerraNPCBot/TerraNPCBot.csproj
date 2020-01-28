@@ -1,0 +1,125 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{03685EC7-96FE-4CC5-BA30-F5714165A1A7}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TerraNPCBot</RootNamespace>
+    <AssemblyName>TerraNPCBot</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="OTAPI">
+      <HintPath>..\..\..\..\Downloads\tshock_4.3.26\OTAPI.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TerrariaServer">
+      <HintPath>..\..\..\..\Downloads\tshock_4.3.26\TerrariaServer.exe</HintPath>
+    </Reference>
+    <Reference Include="TShockAPI">
+      <HintPath>..\..\..\..\Downloads\tshock_4.3.26\ServerPlugins\TShockAPI.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Bot.cs" />
+    <Compile Include="Client.cs" />
+    <Compile Include="Data\BTSPlayer.cs" />
+    <Compile Include="Data\RecordedPacket.cs" />
+    <Compile Include="EventManager.cs" />
+    <Compile Include="Packets\Packet1.cs" />
+    <Compile Include="Packets\Packet105.cs" />
+    <Compile Include="Packets\Packet109.cs" />
+    <Compile Include="Packets\Packet111.cs" />
+    <Compile Include="Packets\Packet113.cs" />
+    <Compile Include="Packets\Packet117.cs" />
+    <Compile Include="Packets\Packet118.cs" />
+    <Compile Include="Packets\Packet16.cs" />
+    <Compile Include="Packets\Packet17.cs" />
+    <Compile Include="Packets\Packet19.cs" />
+    <Compile Include="Packets\Packet2.cs" />
+    <Compile Include="Packets\Packet3.cs" />
+    <Compile Include="Packets\Packet30.cs" />
+    <Compile Include="Packets\Packet31.cs" />
+    <Compile Include="Packets\Packet32.cs" />
+    <Compile Include="Packets\Packet4.cs" />
+    <Compile Include="Packets\Packet41.cs" />
+    <Compile Include="Packets\Packet45.cs" />
+    <Compile Include="Packets\Packet5.cs" />
+    <Compile Include="Packets\Packet50.cs" />
+    <Compile Include="Packets\Packet55.cs" />
+    <Compile Include="Packets\Packet6.cs" />
+    <Compile Include="Packets\Packet61.cs" />
+    <Compile Include="Packets\Packet65.cs" />
+    <Compile Include="Packets\Packet67.cs" />
+    <Compile Include="Packets\Packet7.cs" />
+    <Compile Include="Packets\Packet71.cs" />
+    <Compile Include="Packets\Packet8.cs" />
+    <Compile Include="Packets\Packet12.cs" />
+    <Compile Include="Packets\Packet42.cs" />
+    <Compile Include="Packets\Packet82.cs" />
+    <Compile Include="Packets\Packet87.cs" />
+    <Compile Include="Packets\Packet89.cs" />
+    <Compile Include="Packets\Packet95.cs" />
+    <Compile Include="Packets\Packet96.cs" />
+    <Compile Include="Packets\PacketBase.cs" />
+    <Compile Include="Data\Player.cs" />
+    <Compile Include="Program\Commands.cs" />
+    <Compile Include="Program\Hooks.cs" />
+    <Compile Include="Program\Main.cs" />
+    <Compile Include="Program\Permissions.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Packets\Packet13.cs" />
+    <Compile Include="Data\World.cs" />
+    <Compile Include="Utils\Messages.cs" />
+    <Compile Include="Utils\PluginUtils.cs" />
+    <Compile Include="Utils\StreamWriter.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
