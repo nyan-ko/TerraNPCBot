@@ -14,7 +14,7 @@ namespace TerraNPCBot.Packets {
         /// Player info (4)
         /// </summary>
         public Packet4 (Player plr) : base(0x4, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write((byte)plr.PlayerID);
                 Amanuensis.Write(plr.SkinVariant);
                 Amanuensis.Write(plr.HairType);

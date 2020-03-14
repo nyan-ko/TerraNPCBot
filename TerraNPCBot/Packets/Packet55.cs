@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Add player buff (55)
         /// </summary>
         public Packet55(byte id, byte buff, int time) : base(55, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(buff);
                 Amanuensis.Write(time);

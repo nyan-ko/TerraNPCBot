@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Player hp (16)
         /// </summary>
         public Packet16(byte plr, short hp, short max) : base(0x10, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(hp);
                 Amanuensis.Write(max);

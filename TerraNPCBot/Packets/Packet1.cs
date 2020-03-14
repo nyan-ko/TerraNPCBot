@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Connect request (1)
         /// </summary>
         public Packet1 (int protocol) : base(0x1, new List<byte>()){
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write($"Terraria{protocol}");
                 AddData(Amanuensis.BaseStream);
             }

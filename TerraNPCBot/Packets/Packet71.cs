@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Release npc (71)
         /// </summary>
         public Packet71(int x, int y, short type, byte style) : base(71, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
                 Amanuensis.Write(type);

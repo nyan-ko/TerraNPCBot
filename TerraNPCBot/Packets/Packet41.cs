@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Player item animation (41)
         /// </summary>
         public Packet41(byte id, float rot, short ani) : base(41, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(rot);
                 Amanuensis.Write(ani);

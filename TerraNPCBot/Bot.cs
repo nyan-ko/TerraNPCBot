@@ -12,6 +12,7 @@ namespace TerraNPCBot {
     /// Comprises bot info and functions.
     /// </summary>
     public class Bot {
+        public static readonly Item newItem = new Item() { netID = 0, stack = 0, prefix = 0 };
         public const int Protocol = 194;
         public const string Address = "127.0.0.1";
 
@@ -38,6 +39,10 @@ namespace TerraNPCBot {
         public Timer _delayBetweenPackets;
         public int _PacketIndex;
         #endregion
+
+        internal Bot() {
+
+        }
 
         public Bot(int owner) {
             _manager = new EventManager();
@@ -198,10 +203,12 @@ namespace TerraNPCBot {
 
         public async void CheckForJoin(object sender, ElapsedEventArgs args) {
             if (!_actuallyJoined) {
-                Stop();
-                await Task.Delay(100);
-                Start();
-                TShock.Players[_owner].SendInfoMessage("Retrying connection...");
+                if (Running)
+                    Stop();
+                else {
+                    Start();
+                    TShock.Players[_owner].SendInfoMessage("Retrying connection...");
+                }
             }
             else {
                 _checkJoin.Stop();

@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Player death v2 (118)
         /// </summary>
         public Packet118(byte id, Terraria.DataStructures.PlayerDeathReason reason, short dmg, byte dir, byte flags) : base(118, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(id);
                 reason.WriteSelfTo(Amanuensis);
                 Amanuensis.Write(dmg);

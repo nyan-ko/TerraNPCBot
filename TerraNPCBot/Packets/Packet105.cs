@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Gem lock toggle (105)
         /// </summary>
         public Packet105(short x, short y, bool on) : base(105, new List<byte>()){
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
                 Amanuensis.Write(on);

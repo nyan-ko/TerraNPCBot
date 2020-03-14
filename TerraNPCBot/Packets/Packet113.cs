@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Crystal invasion start (113)
         /// </summary>
         public Packet113(short x, short y) : base(113, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
                 AddData(Amanuensis.BaseStream);

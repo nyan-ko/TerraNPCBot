@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Mass wire operation (109)
         /// </summary>
         public Packet109(short sx, short sy, short ex, short ey, byte mode) : base(109, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(sx);
                 Amanuensis.Write(sy);
                 Amanuensis.Write(ex);

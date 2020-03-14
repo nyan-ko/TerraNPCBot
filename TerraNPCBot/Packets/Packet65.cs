@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Player npc teleport (65)
         /// </summary>
         public Packet65(byte flag, short target, float x, float y) : base(65, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(flag);
                 Amanuensis.Write(target);
                 Amanuensis.Write(x);

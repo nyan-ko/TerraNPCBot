@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Kill portal (95)
         /// </summary>
         public Packet95(ushort index) : base(95, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(index);
                 AddData(Amanuensis.BaseStream);
             }

@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Player team (45)
         /// </summary>
         public Packet45(byte plr, byte team) : base(45, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(team);
                 AddData(Amanuensis.BaseStream);

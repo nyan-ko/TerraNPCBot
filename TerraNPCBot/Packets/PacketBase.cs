@@ -16,6 +16,7 @@ namespace TerraNPCBot {
         protected BinaryWriter Amanuensis;
 
         public PacketBase(uint packetType, List<byte> data) {
+            Amanuensis = new BinaryWriter(new MemoryStream());
             _packetType = packetType;
             _data = data;
         }

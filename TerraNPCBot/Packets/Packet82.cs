@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Load net module (82) - only used for text :sad:
         /// </summary>
         public Packet82(string message) : base(82, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write((ushort)1);
                 new Terraria.Chat.ChatMessage(message).Serialize(Amanuensis);
 

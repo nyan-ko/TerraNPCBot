@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Placeholder (67), unused for now
         /// </summary>
         public Packet67() : base(67, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
 
             }
         }

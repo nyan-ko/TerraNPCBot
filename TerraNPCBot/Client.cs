@@ -116,6 +116,7 @@ namespace TerraNPCBot {
 
                     try {
                         _client.Connect(endPoint);
+                        _client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
                         _running = true;
                         _writeThread.Start();
                         _readThread.Start();
@@ -150,6 +151,7 @@ namespace TerraNPCBot {
 
         public void DisconnectAndReuse() {
             _client.Shutdown(SocketShutdown.Both);
+
             _client.Disconnect(true);
 
             _writeThread = new Thread(SendPackets);

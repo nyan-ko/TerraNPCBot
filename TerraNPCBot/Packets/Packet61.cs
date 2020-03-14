@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Spawn boss invasion (61)
         /// </summary>
         public Packet61(short id, short type) : base(61, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(type);
                 AddData(Amanuensis.BaseStream);

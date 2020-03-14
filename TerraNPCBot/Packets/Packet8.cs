@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Get section (8)
         /// </summary>
         public Packet8() : base(0x8, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(-1);
                 Amanuensis.Write(-1);
                 AddData(Amanuensis.BaseStream);

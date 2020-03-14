@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Open chest (31)
         /// </summary>
         public Packet31(short x, short y) : base(31, new List<byte>()){
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
                 AddData(Amanuensis.BaseStream);

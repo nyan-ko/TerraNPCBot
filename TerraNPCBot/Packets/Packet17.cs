@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Modify tile (17)
         /// </summary>
         public Packet17(byte action, short tilex, short tiley, short var1, byte var2) : base(0x11, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(action);
                 Amanuensis.Write(tilex);
                 Amanuensis.Write(tiley);

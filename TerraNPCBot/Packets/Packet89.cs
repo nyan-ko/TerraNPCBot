@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Place item frame (89)
         /// </summary>
         public Packet89(short x, short y, short id, byte pre, short stack) : base(89, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
                 Amanuensis.Write(id);

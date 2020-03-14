@@ -13,7 +13,7 @@ namespace TerraNPCBot.Packets {
         /// Update pvp (30)
         /// </summary>
         public Packet30(byte plr, bool s) : base(30, new List<byte>()) {
-            using (Amanuensis = new System.IO.BinaryWriter(new System.IO.MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(s);
                 AddData(Amanuensis.BaseStream);
