@@ -19,9 +19,9 @@ namespace TerraNPCBot {
         public bool _recording;
         public bool _actuallyJoined;
 
-        internal EventManager _manager;
+        public EventManager _manager;
         public Player _player;
-        public Client _client { get; }
+        public Client _client;
         public World _world;
         public BotActions Actions;
 

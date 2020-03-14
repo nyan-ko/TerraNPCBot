@@ -12,6 +12,7 @@ namespace TerraNPCBot.Utils {
             return version == Program.Program.PluginStreamVersion;
         }
 
+
         #region Writing
 
         #region BTSPlayer
@@ -135,7 +136,7 @@ namespace TerraNPCBot.Utils {
         #endregion
 
         #region Reading
-        public static BTSPlayer BTSPlayerFromStream(string path, int index) {
+        public static async Task<BTSPlayer> BTSPlayerFromStream(string path, int index) {
             BTSPlayer plr = null;
             try {
                 using (BinaryReader reader = new BinaryReader(
@@ -156,7 +157,7 @@ namespace TerraNPCBot.Utils {
             catch (EndOfStreamException) {
                 return null;  //Flag102
             }
-            return null;
+            return plr;
         }
 
         public static Bot BotFromStream(BinaryReader reader, int index) {
