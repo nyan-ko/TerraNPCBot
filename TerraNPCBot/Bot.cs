@@ -16,6 +16,7 @@ namespace TerraNPCBot {
         public const string Address = "127.0.0.1";
 
         public int _owner;
+        public int _port;
         public bool _recording;
         public bool _actuallyJoined;
 
@@ -38,16 +39,17 @@ namespace TerraNPCBot {
         public int _PacketIndex;
         #endregion
 
-        public Bot(string address, int owner, int port = 7777, string name = "Michael_Jackson") {
+        public Bot(string address, int owner) {
             _manager = new EventManager();
             {
                 _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
                 _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
             }  // default listeners
-            _player = new Player(name);
+          
             _world = new World();
             _owner = owner;
-            _client = new Client(address, this, _player, _world, _manager, port);
+            
+            _client = new Client(address, this, _player, _world, _manager, _port);
             Actions = new BotActions(this);
 
             heartBeat = new Timer(15000);
@@ -73,7 +75,7 @@ namespace TerraNPCBot {
 
         public async void Stop() {
             _client.Stop();
-            await Task.Delay(2);
+            await Task.Delay(50);
             _client.DisconnectAndReuse();
         }
 

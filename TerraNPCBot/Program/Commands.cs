@@ -185,16 +185,15 @@ namespace TerraNPCBot.Program {
                 }
 
                 Bot bot;
-                BTSPlayer bp = Program.Players[args.Player.Index];                
-
-                string name = "";
+                BTSPlayer bp = Program.Players[args.Player.Index];
+                string name = "Michael_Jackson";
+                int port = 7777;
                 if (args.Parameters.Count > 1) {
-                    name = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
-                    name = name.Trim('"');
+                    name = args.Parameters[1].Trim('"');
+                    int.TryParse(args.Parameters[2], out port);
                 }
-                bot = args.Parameters.Count > 1
-                    ? new Bot(Bot.Address, args.Player.Index, 7777, name)
-                    : new Bot(Bot.Address, args.Player.Index);
+
+                bot = new Bot(Bot.Address, args.Player.Index) { _port = port, _player = new Player(name) };
 
                 // Ports for each server Flag102
 
