@@ -32,12 +32,12 @@ namespace TerraNPCBot {
         private Socket _client;
         private Bot _bot;
 
-        public Client (string host, Bot bot, Player plr, World wrld, EventManager eventManager, int port = 7777) {
+        public Client (string host, Bot bot, int port = 7777) {
             _address = host;
             _port = port;
-            _player = plr;
-            _world = wrld;
-            _eventManager = eventManager;
+            _player = bot._player ;
+            _world = bot._world;
+            _eventManager = bot._manager;
 
             _bot = bot;
 
@@ -135,6 +135,9 @@ namespace TerraNPCBot {
                 }
                 return _client.Connected;
             }
+            Console.WriteLine($"Exception thrown while getting server info: One or more threads active.");
+            TShockAPI.TShock.Log.Write($"Exception thrown while getting server info: One or more threads active.", System.Diagnostics.TraceLevel.Error);
+
             return false;
         }
 

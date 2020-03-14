@@ -190,10 +190,12 @@ namespace TerraNPCBot.Program {
                 int port = 7777;
                 if (args.Parameters.Count > 1) {
                     name = args.Parameters[1].Trim('"');
-                    int.TryParse(args.Parameters[2], out port);
+                    if (!int.TryParse(args.Parameters[2], out port)) { }
                 }
 
-                bot = new Bot(Bot.Address, args.Player.Index) { _port = port, _player = new Player(name) };
+                bot = new Bot(args.Player.Index) { _player = new Player(name) };
+                bot._client = new Client(Bot.Address, bot, port);
+
 
                 // Ports for each server Flag102
 

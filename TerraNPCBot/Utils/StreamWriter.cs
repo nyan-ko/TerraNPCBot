@@ -161,7 +161,7 @@ namespace TerraNPCBot.Utils {
         }
 
         public static Bot BotFromStream(BinaryReader reader, int index) {
-            Bot b = new Bot("127.0.0.1", index) {
+            Bot b = new Bot(index) {
                 _player = PlayerFromStream(reader)
             };
             var count = reader.ReadInt32();

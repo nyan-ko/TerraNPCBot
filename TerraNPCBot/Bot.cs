@@ -16,7 +16,7 @@ namespace TerraNPCBot {
         public const string Address = "127.0.0.1";
 
         public int _owner;
-        public int _port;
+      
         public bool _recording;
         public bool _actuallyJoined;
 
@@ -39,7 +39,7 @@ namespace TerraNPCBot {
         public int _PacketIndex;
         #endregion
 
-        public Bot(string address, int owner) {
+        public Bot(int owner) {
             _manager = new EventManager();
             {
                 _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
@@ -49,7 +49,7 @@ namespace TerraNPCBot {
             _world = new World();
             _owner = owner;
             
-            _client = new Client(address, this, _player, _world, _manager, _port);
+          
             Actions = new BotActions(this);
 
             heartBeat = new Timer(15000);
@@ -199,7 +199,7 @@ namespace TerraNPCBot {
         public async void CheckForJoin(object sender, ElapsedEventArgs args) {
             if (!_actuallyJoined) {
                 Stop();
-                await Task.Delay(10);
+                await Task.Delay(100);
                 Start();
                 TShock.Players[_owner].SendInfoMessage("Retrying connection...");
             }
