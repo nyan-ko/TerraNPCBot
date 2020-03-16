@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -28,7 +27,7 @@ namespace TerraNPCBot {
         public BotActions Actions;
 
         private Timer heartBeat;
-        public Timer _checkJoin;
+        private Timer checkJoin;
 
         #region Record Packets
         public bool _playingBack;
@@ -47,6 +46,7 @@ namespace TerraNPCBot {
         public Bot(int owner) {
             _manager = new EventManager();
             {
+                _manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Shutdown));
                 _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
                 _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
             }  // default listeners
@@ -60,13 +60,12 @@ namespace TerraNPCBot {
             heartBeat = new Timer(15000);
             heartBeat.Elapsed += SendAlive;
             heartBeat.AutoReset = true;
-            heartBeat.Start();
 
             _actuallyJoined = false;
 
-            _checkJoin = new Timer(9000);
-            _checkJoin.AutoReset = true;
-            _checkJoin.Elapsed += CheckForJoin;
+            checkJoin = new Timer(8000);
+            checkJoin.AutoReset = true;
+            checkJoin.Elapsed += CheckForJoin;
         }
 
         public bool Start() { 
@@ -78,15 +77,23 @@ namespace TerraNPCBot {
                 return false;
         }
 
-        public async void Stop() {
+        public async Task Shutdown(EventPacketInfo unused = null) {
+            _checkJoin.Stop();
+            _heartBeat.Stop();
+
+             CloseSocket();
+        }
+
+        private async void CloseSocket() {
             _client.Stop();
             await Task.Delay(50);
             _client.DisconnectAndReuse();
         }
 
+        #region Default Listeners
         //SHUT UP SHUT UP shut up
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task ReceivedPlayerID(EventPacketInfo e) {
+        public async Task ReceivedPlayerID(EventPacketInfo unused = null) {
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
             _client.AddPackets(new Packets.Packet30(ID, false));
@@ -99,26 +106,25 @@ namespace TerraNPCBot {
             _client.AddPackets(new Packets.Packet6());
         }
 
-        public async Task AlertAndInfo(EventPacketInfo e) {
+        public async Task AlertAndInfo(EventPacketInfo unused = null) {
             Program.Program.Players[_owner].SPlayer.SendInfoMessage($"Recieved player id: {ID}");
             Program.Program.Bots[ID] = this;
         }
 
-        public async Task Initialize(EventPacketInfo i) {
+        public async Task Initialize(EventPacketInfo unused = null) {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             _client.AddPackets(new Packets.Packet8());
             _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
+        #endregion
 
         private void SendAlive(object sender, ElapsedEventArgs args) {
-            if (!ShouldSend())
+            if (!ShouldSendAlive())
                 return;
             _client.AddPackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, AsTSPlayer.LastNetPosition.X, AsTSPlayer.LastNetPosition.Y));
         }
 
-        private bool ShouldSend() {
-            return !(!Running || _playingBack || !_actuallyJoined);
-        }
+        private bool ShouldSendAlive() => Running && _actuallyJoined && !_playingBack;
         
         public void StartRecordTimer() {
             _delayBetweenPackets = new Timer(10);
@@ -204,14 +210,24 @@ namespace TerraNPCBot {
         public async void CheckForJoin(object sender, ElapsedEventArgs args) {
             if (!_actuallyJoined) {
                 if (Running)
-                    Stop();
+                    try {
+                        CloseSocket();
+                        TShock.Players[_owner].SendInfoMessage("Retrying connection: step 1/2");
+                    }
+                    catch (NullReferenceException) {
+                        Start();
+                        TShock.Players[_owner].SendInfoMessage("Retrying connection: step 2/2");
+                    }
                 else {
                     Start();
-                    TShock.Players[_owner].SendInfoMessage("Retrying connection...");
+                    TShock.Players[_owner].SendInfoMessage("Retrying connection: step 2/2");
                 }
+                
             }
             else {
                 _checkJoin.Stop();
+                _heartBeat.Start();
+                TShock.Players[_owner].SendInfoMessage("Confirmed connection of bot.");
             }
         }
   
@@ -220,17 +236,15 @@ namespace TerraNPCBot {
             set { _player.PlayerID = _player.PlayerID == -1 ? value : _player.PlayerID; }
         }
 
-        public string Name {
-            get { return _player.Name; }
-        }
+        public string Name => _player.Name;
 
-        public bool Running {
-            get { return _client._running; }
-        }
+        public bool Running => _client._running;
 
-        public TSPlayer AsTSPlayer {
-            get { return TShock.Players[ID]; }
-        }
+        public TSPlayer AsTSPlayer => TShock.Players[ID];
+
+        public Timer _heartBeat => heartBeat;
+
+        public Timer _checkJoin => checkJoin;
     }
 
     public class BotActions {

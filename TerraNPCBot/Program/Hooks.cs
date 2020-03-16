@@ -9,20 +9,19 @@ using TerrariaApi.Server;
 
 namespace TerraNPCBot.Program {
     public class PluginHooks {
-        public static void OnJoin(ConnectEventArgs args) {
+        public static void OnJoin(GreetPlayerEventArgs args) {
             Program.Players[args.Who] = new BTSPlayer(args.Who);
             if (Program.Bots[args.Who] != null) {
                 Program.Bots[args.Who]._actuallyJoined = true;
+                Console.WriteLine("TESTTEST");
             }
+            Console.WriteLine("TEST");
         }
 
         public static void OnLeave(LeaveEventArgs args) {
             if (Program.Bots[args.Who] == null && Program.Players[args.Who]._autosave) {
                 Utils.StreamWriter.BTSPlayerToStream(Program.Players[args.Who]);
-            }
-            else if (Program.Bots[args.Who] != null) {
-                Program.Bots[args.Who].Stop();
-            }
+            }            
             Program.Players[args.Who] = null;
         } 
 

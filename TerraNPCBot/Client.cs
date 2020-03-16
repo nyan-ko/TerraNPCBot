@@ -60,7 +60,7 @@ namespace TerraNPCBot {
         public void ReadPackets() {
             while (_running) {
                 try {
-                    var bytes = _client.Receive(_buffer); 
+                    var bytes = _client.Receive(_buffer);
                     byte[] stream = new byte[bytes];
                     Array.Copy(_buffer, stream, bytes);
                     using (var reader = new BinaryReader(new MemoryStream(stream))) {
@@ -71,7 +71,6 @@ namespace TerraNPCBot {
                         }
                         catch { }
                     }
-                    _buffer = new byte[BufferSize];
                 }
                 catch (Exception ex){
                     Console.WriteLine($"Exception thrown when reading packet: {ex}, {ex.Source}");
@@ -151,7 +150,6 @@ namespace TerraNPCBot {
 
         public void DisconnectAndReuse() {
             _client.Shutdown(SocketShutdown.Both);
-
             _client.Disconnect(true);
 
             _writeThread = new Thread(SendPackets);

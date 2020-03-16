@@ -248,7 +248,7 @@ namespace TerraNPCBot.Program {
             }
             else {
                 args.Player.SendMessage(string.Format(Messages.BotSuccessStarted, bot.Name), Color.Green);
-                bot._checkJoin.Start();
+                bot._checkJoin.Start(); 
             }
         }        
 
@@ -256,8 +256,7 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (bot.Running) {
-                    Terraria.NetMessage.SendData((int)PacketTypes.Disconnect, bot.ID);
-                    
+                    Terraria.NetMessage.SendData((int)PacketTypes.Disconnect, bot.ID);        
                     args.Player.SendMessage(string.Format(Messages.BotSuccessStopped, bot.Name), Color.Green);
                 }
                 else {

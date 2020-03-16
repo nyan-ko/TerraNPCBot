@@ -44,12 +44,16 @@ namespace TerraNPCBot.Program
                 Directory.CreateDirectory(PluginPrunedSaveFolderLocation);
             }
 
-            ServerApi.Hooks.ServerConnect.Register(this, PluginHooks.OnJoin);
+            ServerApi.Hooks.NetGreetPlayer.Register(this, PluginHooks.OnJoin);
             ServerApi.Hooks.ServerLeave.Register(this, PluginHooks.OnLeave);
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
             Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.BotMaster, "bot"));
         }
-
+        protected override void Dispose(bool disposing) {
+            if (disposing) {
+                
+            }
+        }
     }
 }
