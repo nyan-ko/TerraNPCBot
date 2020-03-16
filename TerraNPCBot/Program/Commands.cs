@@ -186,7 +186,7 @@ namespace TerraNPCBot.Program {
 
                 Bot bot;
                 BTSPlayer bp = Program.Players[args.Player.Index];
-                string name = "Michael_Jackson";
+                string name = "Michael Jackson";
                 int port = 7777;
                 if (args.Parameters.Count > 1) {
                     name = args.Parameters[1].Trim('"');
