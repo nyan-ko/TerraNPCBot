@@ -256,7 +256,7 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (bot.Running) {
-                    Terraria.NetMessage.SendData((int)PacketTypes.Disconnect, bot.ID);        
+                    bot.Shutdown();
                     args.Player.SendMessage(string.Format(Messages.BotSuccessStopped, bot.Name), Color.Green);
                 }
                 else {
