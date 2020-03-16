@@ -144,7 +144,7 @@ namespace TerraNPCBot.Program {
             if (args.Parameters.Count > 1) {
                 BTSPlayer player = Program.Players[args.Player.Index];
                 if (player._ownedBots == null || player._ownedBots.Count == 0) {
-                    args.Player.SendErrorMessage("You do not have any owned bots.");
+                    args.Player?.SendErrorMessage("You do not have any owned bots.");
                     return;
                 }
 
@@ -163,10 +163,10 @@ namespace TerraNPCBot.Program {
                 if (index >= 0 && index < player._ownedBots.Count) {
                     player._selected = index;
 
-                    args.Player.SendSuccessMessage($"Selected bot \"{player.SelectedBot.Name}\".");
+                    args.Player?.SendSuccessMessage($"Selected bot \"{player.SelectedBot.Name}\".");
                 }
                 else {
-                    args.Player.SendErrorMessage("Could not find specified bot.");
+                    args.Player?.SendErrorMessage("Could not find specified bot.");
                 }
             }
             else {
@@ -180,7 +180,7 @@ namespace TerraNPCBot.Program {
                     return;
 
                 if (!args.Player.HasPermission(Permissions.BotUse)) {
-                    args.Player.SendErrorMessage(Messages.NoPermission);
+                    args.Player?.SendErrorMessage(Messages.NoPermission);
                     return;
                 }
 
@@ -200,7 +200,7 @@ namespace TerraNPCBot.Program {
                 // Ports for each server Flag102
 
                 if (bp._ownedBots.Count + 1 > bp._botLimit) {
-                    args.Player.SendErrorMessage($"You have reached the maximum number of bots you can create: {bp._botLimit}");
+                    args.Player?.SendErrorMessage($"You have reached the maximum number of bots you can create: {bp._botLimit}");
                     return;
                 }
                 bp._ownedBots.Add(bot);
@@ -221,33 +221,33 @@ namespace TerraNPCBot.Program {
                 for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
                     bot._player.MiscDyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
                 }
-                args.Player.SendMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name), Color.Yellow);
+                args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name));
             }
             catch (Exception ex) {
-                args.Player.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
+                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
                 return;
             }
         }
 
         private static void StartBot(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotUse)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot == null) {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
             else if (bot.Running) {
-                args.Player.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
+                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
                 
             }
             else if (!bot.Start()) {
-                args.Player.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));
+                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));
             }
             else {
-                args.Player.SendMessage(string.Format(Messages.BotSuccessStarted, bot.Name), Color.Green);
+                args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStarted, bot.Name));
                 bot._checkJoin.Start(); 
             }
         }        
@@ -257,14 +257,14 @@ namespace TerraNPCBot.Program {
             if (bot != null) {
                 if (bot.Running) {
                     bot.Shutdown();
-                    args.Player.SendMessage(string.Format(Messages.BotSuccessStopped, bot.Name), Color.Green);
+                    args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStopped, bot.Name));
                 }
                 else {
-                    args.Player.SendMessage(string.Format(Messages.BotErrorNotRunning, bot.Name), Color.Red);
+                    args.Player?.SendErrorMessage(string.Format(Messages.BotErrorNotRunning, bot.Name));
                 }
             } 
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
@@ -274,20 +274,20 @@ namespace TerraNPCBot.Program {
                 if (args.Parameters.Count == 1) {
                     var player = Program.Players[args.Player.Index];
                     player._ownedBots.RemoveAt(player._selected);
-                    args.Player.SendSuccessMessage("Successfully deleted selected bot.");
+                    args.Player?.SendSuccessMessage("Successfully deleted selected bot.");
                 }
                 else {
 
                 }
             }
             else {
-                args.Player.SendErrorMessage(string.Format(Messages.BotErrorNotFound));
+                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorNotFound));
             }
         }
 
         private static void Record(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotRecord)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -298,22 +298,22 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (bot._recording) {
-                    args.Player.SendErrorMessage($"Selected bot \"{bot.Name}\" is already recording.");
+                    args.Player?.SendErrorMessage($"Selected bot \"{bot.Name}\" is already recording.");
                     return;
                 }
                 bot._recording = true;
                 bot._recordedPackets = new List<RecordedPacket>();
 
-                args.Player.SendSuccessMessage(string.Format(Messages.BotSuccessRecording, bot.Name));
+                args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessRecording, bot.Name));
             } 
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
         private static void StopRecording(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotRecord)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -324,16 +324,16 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 bot._recording = false;
-                args.Player.SendSuccessMessage(string.Format(Messages.BotSuccessStopRecording, bot.Name));
+                args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStopRecording, bot.Name));
             } 
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
         private static void Play(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotRecord)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -344,22 +344,22 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (bot._recordedPackets.Count == 0) {
-                    args.Player.SendErrorMessage("No recorded actions found.");
+                    args.Player?.SendErrorMessage("No recorded actions found.");
                     return;
                 }
 
                 bot.StartRecordTimer();
 
-                args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now playing back player actions.");
+                args.Player?.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now playing back player actions.");
             } 
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
         private static void Copy(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotCopy)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -370,7 +370,7 @@ namespace TerraNPCBot.Program {
             TSPlayer tstarget;
             if (args.Parameters.Count > 1) {
                 if (!args.Player.HasPermission(Permissions.BotCopyOther)) {
-                    args.Player.SendErrorMessage("You do not have permission to copy other players.");
+                    args.Player?.SendErrorMessage("You do not have permission to copy other players.");
                     return;
                 }
 
@@ -379,12 +379,12 @@ namespace TerraNPCBot.Program {
 
                 var found = TShock.Utils.FindPlayer(namewithspaces);
                 if (found.Count == 0 || found == null) {
-                    args.Player.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
+                    args.Player?.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
                     return;
                 }                                                                      
                 else if (found.Count > 1) {
                     string multiple = string.Join(", ", found);
-                    args.Player.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
+                    args.Player?.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
                     return;
                 }
                 else {
@@ -395,34 +395,34 @@ namespace TerraNPCBot.Program {
                 tstarget = args.Player;
             }
             if (!Program.Players[tstarget.Index]._canBeCopied && !args.Player.HasPermission(Permissions.BotBypassCopy)) {
-                args.Player.SendErrorMessage("This player has disabled inventory copying.");
+                args.Player?.SendErrorMessage("This player has disabled inventory copying.");
                 return;
             }
 
             var target = tstarget.TPlayer;
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot == null) {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
                 return;
             }
 
             bot.Actions.Copy(target);
 
-            args.Player.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
+            args.Player?.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
         }
 
         private static void Save(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotSave)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
             StreamWriter.BTSPlayerToStream(Program.Players[args.Player.Index]);
-            args.Player.SendSuccessMessage("Successfully saved player data.");
+            args.Player?.SendSuccessMessage("Successfully saved player data.");
         }
 
         private static void Prune(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotSavePruning)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -431,7 +431,7 @@ namespace TerraNPCBot.Program {
 
             if (args.Parameters.Count == 2) {
                 prune = prune.AddDays(-7);
-                args.Player.SendInfoMessage("Defaulting prune to one week.");
+                args.Player?.SendInfoMessage("Defaulting prune to one week.");
             }
             else {
                 int year = 0;
@@ -447,7 +447,7 @@ namespace TerraNPCBot.Program {
                                 hour += hours;
                             }
                             else {
-                                args.Player.SendErrorMessage($"Invalid hour format: \"{s}\"");
+                                args.Player?.SendErrorMessage($"Invalid hour format: \"{s}\"");
                             }
                             break;
                         case 'd':
@@ -455,7 +455,7 @@ namespace TerraNPCBot.Program {
                                 day += days;
                             }
                             else {
-                                args.Player.SendErrorMessage($"Invalid day format: \"{s}\"");
+                                args.Player?.SendErrorMessage($"Invalid day format: \"{s}\"");
                             }
                             break;
                         case 'm':
@@ -463,7 +463,7 @@ namespace TerraNPCBot.Program {
                                 month += months;
                             }
                             else {
-                                args.Player.SendErrorMessage($"Invalid month format: \"{s}\"");
+                                args.Player?.SendErrorMessage($"Invalid month format: \"{s}\"");
                             }
                             break;
                         case 'y':
@@ -471,11 +471,11 @@ namespace TerraNPCBot.Program {
                                 year += years;
                             }
                             else {
-                                args.Player.SendErrorMessage($"Invalid year format: \"{s}\"");
+                                args.Player?.SendErrorMessage($"Invalid year format: \"{s}\"");
                             }
                             break;
                         default:
-                            args.Player.SendErrorMessage($"Invalid year format: \"{s}\"");
+                            args.Player?.SendErrorMessage($"Invalid year format: \"{s}\"");
                             break;
                     }
                 }
@@ -485,7 +485,7 @@ namespace TerraNPCBot.Program {
                 prune = prune.AddMonths(month * -1);
                 prune = prune.AddYears(year * -1);
 
-                args.Player.SendInfoMessage($"Prune set to: {prune.Year}, {prune.Month}, {prune.Day}, {prune.Hour}. All prior saves will be moved to the prune folder.");
+                args.Player?.SendInfoMessage($"Prune set to: {prune.Year}, {prune.Month}, {prune.Day}, {prune.Hour}. All prior saves will be moved to the prune folder.");
             }
 
             PluginUtils.PruneSaves(prune); 
@@ -493,7 +493,7 @@ namespace TerraNPCBot.Program {
 
         private static void Chat(CommandArgs args) {
             if (!args.Player.HasPermission(Permissions.BotChat)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -504,7 +504,7 @@ namespace TerraNPCBot.Program {
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
                 if (args.Parameters.Count == 1) {
-                    args.Player.SendErrorMessage("Expected message or command as input.");
+                    args.Player?.SendErrorMessage("Expected message or command as input.");
                     return;
                 }
                 var message = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1));
@@ -512,7 +512,7 @@ namespace TerraNPCBot.Program {
                 bot.Actions.Chat(message);
             }
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
 
@@ -521,7 +521,7 @@ namespace TerraNPCBot.Program {
                 return;
 
             if (!args.Player.HasPermission(Permissions.BotTeleport)) {
-                args.Player.SendErrorMessage(Messages.NoPermission);
+                args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -535,12 +535,12 @@ namespace TerraNPCBot.Program {
 
                     var found = TShock.Utils.FindPlayer(namewithspaces);
                     if (found.Count == 0 || found == null) {
-                        args.Player.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
+                        args.Player?.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
                         return;
                     }
                     else if (found.Count > 1) {
                         string multiple = string.Join(", ", found);
-                        args.Player.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
+                        args.Player?.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
                         return;
                     }
                     else {
@@ -551,14 +551,14 @@ namespace TerraNPCBot.Program {
                     tstarget = args.Player;
                 }
                 if (!Program.Players[tstarget.Index]._canBeTeleportedTo && !args.Player.HasPermission(Permissions.BotBypassTele)) {
-                    args.Player.SendErrorMessage("This player has disabled bot teleportation.");
+                    args.Player?.SendErrorMessage("This player has disabled bot teleportation.");
                     return;
                 }
 
                 bot.Actions.Teleport(tstarget.LastNetPosition);
             }
             else {
-                args.Player.SendErrorMessage(Messages.BotErrorNotFound);
+                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
         }
     }

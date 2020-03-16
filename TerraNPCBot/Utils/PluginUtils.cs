@@ -19,9 +19,9 @@ namespace TerraNPCBot.Utils {
 
         public static void MultiMsg(this TSPlayer player, List<string> msgs, Microsoft.Xna.Framework.Color color) {
             foreach (var x in msgs) {
-                player.SendMessage(x, color);
+                player?.SendMessage(x, color);
             }
-            player.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
+            player?.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
         }
 
         public static string AllocateSavePath(int id) {

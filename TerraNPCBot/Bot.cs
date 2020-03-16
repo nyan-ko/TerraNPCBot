@@ -107,7 +107,7 @@ namespace TerraNPCBot {
         }
 
         public async Task AlertAndInfo(EventPacketInfo unused = null) {
-            Program.Program.Players[_owner].SPlayer.SendInfoMessage($"Recieved player id: {ID}");
+            TShock.Players[_owner]?.SendInfoMessage($"Received player id: {ID}");
             Program.Program.Bots[ID] = this;
         }
 
@@ -212,22 +212,22 @@ namespace TerraNPCBot {
                 if (Running)
                     try {
                         CloseSocket();
-                        TShock.Players[_owner].SendInfoMessage("Retrying connection: step 1/2");
+                        TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 1/2");
                     }
                     catch (NullReferenceException) {
                         Start();
-                        TShock.Players[_owner].SendInfoMessage("Retrying connection: step 2/2");
+                        TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 2/2");
                     }
                 else {
                     Start();
-                    TShock.Players[_owner].SendInfoMessage("Retrying connection: step 2/2");
+                    TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 2/2");
                 }
                 
             }
             else {
                 _checkJoin.Stop();
                 _heartBeat.Start();
-                TShock.Players[_owner].SendInfoMessage("Confirmed connection of bot.");
+                TShock.Players[_owner]?.SendInfoMessage("Confirmed connection of bot.");
             }
         }
   
