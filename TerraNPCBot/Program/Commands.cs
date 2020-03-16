@@ -14,7 +14,7 @@ namespace TerraNPCBot.Program {
     public class PluginCommands {
 
         public static void BotMaster(CommandArgs args) {
-            if (args.Parameters.Count > 0) {
+            if (args.Parameters.Count > 0 && args.Player != null) {
                 switch (args.Parameters[0]) {
                     case "help":
                         Help(args);
@@ -189,12 +189,18 @@ namespace TerraNPCBot.Program {
                 string name = "Michael Jackson";
                 int port = 7777;
                 if (args.Parameters.Count > 1) {
-                    name = args.Parameters[1].Trim('"');
-                    if (!int.TryParse(args.Parameters[2], out port)) { }
+                    string tempName = args.Parameters[1].Trim('"');
+                    if (tempName.Length > 30)
+                        bp.SPlayer?.SendErrorMessage("Specified name exceeds 30 character limit. Defaulting to Michael Jackson.");
+                    else
+                        name = tempName;
+                    if (args.Parameters.Count > 2)
+                        if (!int.TryParse(args.Parameters[2], out port))
+                            bp.SPlayer?.SendErrorMessage("Invalid port specified. Defaulting to 7777.");
                 }
 
                 bot = new Bot(args.Player.Index) { _player = new Player(name) };
-                bot._client = new Client(Bot.Address, bot, port);
+                bot._client = new Client(bot, port);
 
 
                 // Ports for each server Flag102
@@ -221,7 +227,7 @@ namespace TerraNPCBot.Program {
                 for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
                     bot._player.MiscDyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
                 }
-                args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name));
+                args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name, port));
             }
             catch (Exception ex) {
                 args.Player?.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
@@ -560,6 +566,10 @@ namespace TerraNPCBot.Program {
             else {
                 args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
             }
+        }
+
+        public static void Debug(CommandArgs args) {
+            args.Player.SendMessage(args.Player.Index.ToString(), Color.Orange);
         }
     }
 }

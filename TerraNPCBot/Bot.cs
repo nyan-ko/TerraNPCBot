@@ -71,6 +71,8 @@ namespace TerraNPCBot {
         public bool Start() { 
             if (_client.Start()) {
                 _client.AddPackets(new Packets.Packet1(Protocol));
+
+                Program.Program.GlobalRunningBots.Add(this);
                 return true;
             }
             else
@@ -82,6 +84,8 @@ namespace TerraNPCBot {
             _heartBeat.Stop();
 
              CloseSocket();
+
+            Program.Program.GlobalRunningBots.Remove(this);
         }
 
         private async void CloseSocket() {

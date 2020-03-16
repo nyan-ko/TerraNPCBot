@@ -13,9 +13,7 @@ namespace TerraNPCBot.Program {
             Program.Players[args.Who] = new BTSPlayer(args.Who);
             if (Program.Bots[args.Who] != null) {
                 Program.Bots[args.Who]._actuallyJoined = true;
-                Console.WriteLine("TESTTEST");
-            }
-            Console.WriteLine("TEST");
+            }            
         }
 
         public static void OnLeave(LeaveEventArgs args) {

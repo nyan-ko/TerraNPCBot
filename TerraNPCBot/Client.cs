@@ -13,8 +13,7 @@ namespace TerraNPCBot {
     /// Manages connections for the bot.
     /// </summary>
     public class Client {
-        public const int BufferSize = 131072;
-        private string _address;
+        public const int BufferSize = 131072;       
         private int _port;
         public bool _running;
 
@@ -32,8 +31,7 @@ namespace TerraNPCBot {
         private Socket _client;
         private Bot _bot;
 
-        public Client (string host, Bot bot, int port = 7777) {
-            _address = host;
+        public Client (Bot bot, int port = 7777) {  
             _port = port;
             _player = bot._player ;
             _world = bot._world;
@@ -108,7 +106,7 @@ namespace TerraNPCBot {
             if (!_writeThread.IsAlive && !_readThread.IsAlive) {
                 try {
                     IPHostEntry hostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress address = IPAddress.Parse(_address);
+                    IPAddress address = IPAddress.Parse(Bot.Address);
                     IPEndPoint endPoint = new IPEndPoint(address, _port);
 
                     _client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);

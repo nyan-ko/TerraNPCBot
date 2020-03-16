@@ -32,6 +32,7 @@ namespace TerraNPCBot.Program
 
         public static BTSPlayer[] Players = new BTSPlayer[256];
         public static Bot[] Bots = new Bot[256];
+        public static List<Bot> GlobalRunningBots = new List<Bot>();
 
         public Program(Main game) : base(game) {
 
@@ -49,6 +50,7 @@ namespace TerraNPCBot.Program
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
             Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.BotMaster, "bot"));
+            Commands.ChatCommands.Add(new Command("", PluginCommands.Debug, "debug"));
         }
         protected override void Dispose(bool disposing) {
             if (disposing) {
