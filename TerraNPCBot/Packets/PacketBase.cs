@@ -39,9 +39,7 @@ namespace TerraNPCBot {
                 using (var writer = new BinaryWriter(new MemoryStream(packet))) {
                     writer.Write((short)(_data.Count + 3));
                     writer.Write((byte)_packetType);
-                    foreach (var x in _data) {
-                        writer.Write(x);
-                    }
+                    Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
                 }
                 socket.Send(packet);
             }
