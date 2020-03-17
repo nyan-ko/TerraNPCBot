@@ -1,3 +1,3 @@
 # TerraNPCBot
 
-Personal Assistants without pay brought to you by free labor gang
+Personal Assistants without pay, brought to you by the free labor gang.
