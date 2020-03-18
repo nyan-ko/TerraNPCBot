@@ -17,7 +17,7 @@ namespace TerraNPCBot {
         }        
 
         public override string ToString() {
-            string s ="";
+            string s = "";
 
             s += "Packet: " + (PacketTypes)stream.Type;
             s += $", {timeBeforeNextPacket} milliseconds until next packet.";

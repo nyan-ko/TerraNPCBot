@@ -33,7 +33,6 @@ namespace TerraNPCBot.Program
         public static BTSPlayer[] Players = new BTSPlayer[256];
         public static Bot[] Bots = new Bot[256];
         public static List<Bot> GlobalRunningBots = new List<Bot>();
-        public static List<int> BotsInLimbo = new List<int>();
 
         public Program(Main game) : base(game) {
 

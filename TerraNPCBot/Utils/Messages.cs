@@ -109,7 +109,7 @@ namespace TerraNPCBot.Utils {
         public static readonly string BotErrorAlreadyRunning = "Selected bot \"{0}\" is already running.";
         public static readonly string BotErrorCouldNotStart = "Selected bot \"{0}\" could not establish a connection. Retry?";
 
-        public static readonly string BotSuccessCreateNew = "Created a new bot with name \"{0}\" targeting port {1}.";
+        public static readonly string BotSuccessCreateNew = "Created a new bot with name \"{0}\".";
 
         public static readonly string BotSuccessStopped = "Stopped selected bot \"{0}\".";
         public static readonly string BotSuccessStarted = "Started selected bot \"{0}\".";

@@ -11,7 +11,7 @@ using TShockAPI;
 
 namespace TerraNPCBot {
     /// <summary>
-    /// Based off of playerinfo packet. Used for bot.
+    /// Based off of PlayerInfo(4), InventorySlot(5), PlayerHP(16), and PlayerMana(42) packets.
     /// </summary>
     public class Player {
         public int PlayerID;
@@ -37,15 +37,16 @@ namespace TerraNPCBot {
         public ushort MaxMana;
         public ushort CurMana;
 
-        public bool Initialized;
-        public bool LoggedIn;
+        public ItemData[] InventorySlots = new ItemData[NetItem.InventorySlots];
+        public ItemData[] ArmorSlots = new ItemData[NetItem.ArmorSlots];
+        public ItemData[] DyeSlots = new ItemData[NetItem.DyeSlots];
+        public ItemData[] MiscEquipSlots = new ItemData[NetItem.MiscEquipSlots];
+        public ItemData[] MiscDyeSlots = new ItemData[NetItem.MiscDyeSlots];
 
-        public Item[] InventorySlots = new Item[NetItem.InventorySlots];
-        public Item[] ArmorSlots = new Item[NetItem.ArmorSlots];
-        public Item[] DyeSlots = new Item[NetItem.DyeSlots];
-        public Item[] MiscEquipSlots = new Item[NetItem.MiscEquipSlots];
-        public Item[] MiscDyeSlots = new Item[NetItem.MiscDyeSlots];
-
+        /// <summary>
+        /// Initializes the default bot player with a given name.
+        /// </summary>
+        /// <param name="name"></param>
         public Player(string name) {
             PlayerID = -1;
             SkinVariant = 0;
@@ -70,8 +71,34 @@ namespace TerraNPCBot {
             MaxMana = 200;
             CurMana = 200;
 
-            Initialized = false;
-            LoggedIn = false;
+            for (int i = 0; i < NetItem.InventorySlots; ++i) {
+                InventorySlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 }; // Do I need to do this
+            }
+            for (int i = 0; i < NetItem.ArmorSlots; ++i) {
+                ArmorSlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 };
+            }
+            for (int i = 0; i < NetItem.DyeSlots; ++i) {
+                DyeSlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 };
+            }
+            for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
+                MiscEquipSlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 };
+            }
+            for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
+                MiscDyeSlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 };
+            }
+        }
+    }
+
+    /// <summary>
+    /// Stripped-down form of Terraria.Item to store item data.
+    /// </summary>
+    public class ItemData {
+        public short netID;
+        public short stack;
+        public byte prefix;
+
+        static internal ItemData FromTerrariaItem(Item i) {
+            return new ItemData() { netID = (short)i.netID, stack = (short)i.stack, prefix = i.prefix };
         }
     }
 }

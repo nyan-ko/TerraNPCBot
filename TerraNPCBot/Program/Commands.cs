@@ -187,20 +187,16 @@ namespace TerraNPCBot.Program {
                 Bot bot;
                 BTSPlayer bp = Program.Players[args.Player.Index];
                 string name = "Michael Jackson";
-                int port = 7777;
                 if (args.Parameters.Count > 1) {
                     string tempName = args.Parameters[1].Trim('"');
                     if (tempName.Length > 30)
                         bp.SPlayer?.SendErrorMessage("Specified name exceeds 30 character limit. Defaulting to Michael Jackson.");
                     else
                         name = tempName;
-                    if (args.Parameters.Count > 2)
-                        if (!int.TryParse(args.Parameters[2], out port))
-                            bp.SPlayer?.SendErrorMessage("Invalid port specified. Defaulting to 7777.");
                 }
 
                 bot = new Bot(args.Player.Index) { _player = new Player(name) };
-                bot._client = new Client(bot, port);
+                bot._client = new Client(bot);
 
 
                 // Ports for each server Flag102
@@ -212,22 +208,7 @@ namespace TerraNPCBot.Program {
                 bp._ownedBots.Add(bot);
                 bp._selected = bp._ownedBots.Count - 1;
 
-                for (int i = 0; i < NetItem.InventorySlots; ++i) {
-                    bot._player.InventorySlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
-                }
-                for (int i = 0; i < NetItem.ArmorSlots; ++i) {
-                    bot._player.ArmorSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
-                }
-                for (int i = 0; i < NetItem.DyeSlots; ++i) {
-                    bot._player.DyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
-                }
-                for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
-                    bot._player.MiscEquipSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
-                }
-                for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
-                    bot._player.MiscDyeSlots[i] = new Terraria.Item() { netID = 0, stack = 0, prefix = 0 };
-                }
-                args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name, port));
+                args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name));
             }
             catch (Exception ex) {
                 args.Player?.SendErrorMessage(string.Format(Messages.BotErrorGeneric, ex.ToString()));
@@ -412,7 +393,7 @@ namespace TerraNPCBot.Program {
                 return;
             }
 
-            bot.Actions.Copy(target);
+            bot.Actions.FullCopy(target);
 
             args.Player?.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
         }

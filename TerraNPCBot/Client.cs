@@ -17,24 +17,13 @@ namespace TerraNPCBot {
     /// </summary>
     public class Client {
         public const int BufferSize = 131072;       
-        private int _port;
         public bool _running;
-
-        private Player _player;
-        private World _world;
-        public EventManager _eventManager;
 
         private Thread _writeThread;
         private List<PacketBase> _writeQueue;
-
         private Bot _bot;
 
-        public Client (Bot bot, int port = 7777) {  
-            _port = port;
-            _player = bot._player ;
-            _world = bot._world;
-            _eventManager = bot._manager;
-
+        public Client (Bot bot) {  
             _bot = bot;
 
             _writeThread = new Thread(SendPackets);
@@ -47,7 +36,7 @@ namespace TerraNPCBot {
             _writeQueue.Add(packet);
         }
 
-        public void SendPackets() { 
+        private void SendPackets() { 
             while (_running) {
                 if (_writeQueue.Count > 0) {
                     try {
@@ -59,7 +48,6 @@ namespace TerraNPCBot {
                     }
                 }
             }
-            TShockAPI.TShock.Log.Write($"Bot thread ended: Name {_bot.Name}.", System.Diagnostics.TraceLevel.Warning);
         }         
 
         private int FindOpenSlot() {
@@ -76,12 +64,15 @@ namespace TerraNPCBot {
                     int slot = FindOpenSlot();
                     if (slot == -1)
                         return false;
+
                     _running = true;
                     _bot.ID = (byte)slot;
                     Main.player[slot] = new Terraria.Player();
-                    Netplay.Clients[slot] = new RemoteClient {
-                        Socket = new BotSocket(_bot)
-                    };
+                    Program.Program.Bots[slot] = _bot;
+                    //Netplay.Clients[slot] = new RemoteClient {
+                    //    Socket = new BotSocket(_bot)
+                    //};
+
                     _writeThread.Start();
                 }
                 catch (Exception ex) {
@@ -105,6 +96,8 @@ namespace TerraNPCBot {
             _running = false;
         }
     }
+
+    [Obsolete]
     public class BotSocket : ISocket {
         private Bot bot;
 
@@ -150,11 +143,11 @@ namespace TerraNPCBot {
         #endregion
 
         public bool IsConnected() {
-            return bot.Running;
+            return false;
         }
 
         void ISocket.Close() {
-            bot.AsTSPlayer?.Disconnect("Bot disconnected.");
+            //bot.AsTSPlayer?.Disconnect("Bot disconnected.");
         }
     }
 }

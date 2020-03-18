@@ -32,13 +32,6 @@ namespace TerraNPCBot.Program {
         } 
 
         public static void OnGetData(GetDataEventArgs args) {
-            if (ClientSentPackets.TryGetValue(args.MsgID, out PacketTypes returnPacket) && Program.BotsInLimbo.Contains(args.Msg.whoAmI)) {
-                try {
-                    Program.Bots[args.Msg.whoAmI]._manager._listenReact[returnPacket].Invoke(null);
-                }
-                catch { }
-            }
-
             Bot p = Program.Players[args.Msg.whoAmI]?._ownedBots?.FirstOrDefault(x => x._recording);
             if (p != null) {
                 using (MemoryStream m = new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)) {

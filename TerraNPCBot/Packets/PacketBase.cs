@@ -66,7 +66,7 @@ namespace TerraNPCBot {
         /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
         /// </summary>
         /// <param name="reader"></param>
-        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, World wrld, Bot bot) {
+        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, Bot bot) {
             ParsedPacketBase packet = null;
 
             short length;
@@ -78,18 +78,6 @@ namespace TerraNPCBot {
 
                 // Flag102
                 switch (type) {
-                    case 2:  // disconnect
-                        var reason = reader.ReadBytes((int)reader.BaseStream.Length);
-                        string r = Encoding.UTF8.GetString(reason);
-                        packet = new Packets.Packet2(r);
-                        break;
-                    case 3:  // continue connection
-                        var id = reader.ReadByte();
-                        packet = new Packets.Packet3(bot, id);
-                        break;
-                    case 7:  // world info
-                        packet = new Packets.Packet7(reader, wrld, plr);
-                        break;
                     case 13: // player update
                         packet = new Packets.Packet13Parser(reader.BaseStream);
                         break;

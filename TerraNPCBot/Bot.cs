@@ -11,7 +11,6 @@ namespace TerraNPCBot {
     /// Comprises bot info and functions.
     /// </summary>
     public class Bot {
-        public static readonly Item newItem = new Item() { netID = 0, stack = 0, prefix = 0 };
         public const int Protocol = 194;
         public const string Address = "127.0.0.1";
 
@@ -20,14 +19,12 @@ namespace TerraNPCBot {
         public bool _recording;
         public bool _actuallyJoined;
 
-        public EventManager _manager;
+        //public EventManager _manager;
         public Player _player;
         public Client _client;
-        public World _world;
         public BotActions Actions;
 
         private Timer heartBeat;
-        private Timer checkJoin;
 
         #region Record Packets
         public bool _playingBack;
@@ -44,14 +41,13 @@ namespace TerraNPCBot {
         }
 
         public Bot(int owner) {
-            _manager = new EventManager();
-            {
-                _manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Shutdown));
-                _manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
-                _manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
-            }  // default listeners
+            //_manager = new EventManager();
+            //{
+                //_manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Shutdown));
+                //_manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
+                //_manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
+            //}  // default listeners
           
-            _world = new World();
             _owner = owner;
           
             Actions = new BotActions(this);
@@ -61,15 +57,10 @@ namespace TerraNPCBot {
             heartBeat.AutoReset = true;
 
             _actuallyJoined = false;
-
-            checkJoin = new Timer(8000);
-            checkJoin.AutoReset = true;
-            checkJoin.Elapsed += CheckForJoin;
         }
 
         public bool Start() { 
             if (_client.Start()) {
-                Program.Program.BotsInLimbo.Add(ID);
                 Program.Program.GlobalRunningBots.Add(this);
 
                 _client.AddPackets(new Packets.Packet4(_player));
@@ -78,10 +69,8 @@ namespace TerraNPCBot {
                 _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
                 _client.AddPackets(new Packets.Packet45(ID, 0));
                 _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
+                UpdateInventory();
 
-                UpdateInv();
-
-                _client.AddPackets(new Packets.Packet8() { target = TSPlayer.Server.Index });
                 _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { target = TSPlayer.Server.Index });
                 return true;
             }
@@ -89,22 +78,16 @@ namespace TerraNPCBot {
                 return false;
         }
 
-        public async Task Shutdown(EventPacketInfo unused = null) {
-            _checkJoin.Stop();
-            _heartBeat.Stop();
-
-             CloseSocket();
-
-            Program.Program.GlobalRunningBots.Remove(this);
-        }
-
-        private async void CloseSocket() {
+        public void Shutdown() {
             _client.Stop();
+            AsTSPlayer.Disconnect("Bot disconnected.");
+            Program.Program.GlobalRunningBots.Remove(this);
         }
 
         #region Default Listeners
         //SHUT UP SHUT UP shut up
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        [Obsolete]
         public async Task ReceivedPlayerID(EventPacketInfo unused = null) {
             _client.AddPackets(new Packets.Packet4(_player));
             _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
@@ -113,16 +96,18 @@ namespace TerraNPCBot {
             _client.AddPackets(new Packets.Packet45(ID, 0));
             _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
 
-            UpdateInv();
+            UpdateInventory();
 
             _client.AddPackets(new Packets.Packet6() { target = TSPlayer.Server.Index });
         }
 
+        [Obsolete]
         public async Task AlertAndInfo(EventPacketInfo unused = null) {
             TShock.Players[_owner]?.SendInfoMessage($"Received player id: {ID}");
             Program.Program.Bots[ID] = this;
         }
 
+        [Obsolete]
         public async Task Initialize(EventPacketInfo unused = null) {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             _client.AddPackets(new Packets.Packet8() { target = TSPlayer.Server.Index });
@@ -167,7 +152,7 @@ namespace TerraNPCBot {
                 _client.AddPackets(packet);
         }
 
-        public void UpdateInv() {
+        public void UpdateInventory() {
             byte i = 0;
             foreach (var current in _player.InventorySlots) {
                 _client.AddPackets(new Packets.Packet5(ID,
@@ -209,38 +194,6 @@ namespace TerraNPCBot {
                     (short)current.netID));
                 ++i;
             }
-
-            for (byte x = i; x < NetItem.MaxInventory; ++x) {
-                _client.AddPackets(new Packets.Packet5(ID,
-                    x,
-                    0,
-                    0,
-                    0));
-            }
-        }
-
-        public async void CheckForJoin(object sender, ElapsedEventArgs args) {
-            if (!_actuallyJoined) {
-                if (Running)
-                    try {
-                        CloseSocket();
-                        TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 1/2");
-                    }
-                    catch (NullReferenceException) {
-                        Start();
-                        TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 2/2");
-                    }
-                else {
-                    Start();
-                    TShock.Players[_owner]?.SendInfoMessage("Retrying connection: step 2/2");
-                }
-                
-            }
-            else {
-                _checkJoin.Stop();
-                _heartBeat.Start();
-                TShock.Players[_owner]?.SendInfoMessage("Confirmed connection of bot.");
-            }
         }
   
         public byte ID {
@@ -248,15 +201,25 @@ namespace TerraNPCBot {
             set => _player.PlayerID = value;
         }
 
+        /// <summary>
+        /// Gets the bot's player name.
+        /// </summary>
         public string Name => _player.Name;
 
+        /// <summary>
+        /// Gets bot's running status.
+        /// </summary>
         public bool Running => _client._running;
 
+        /// <summary>
+        /// Gets the TSPlayer associated with the bot's index.
+        /// </summary>
         public TSPlayer AsTSPlayer => TShock.Players[ID];
 
+        /// <summary>
+        /// Gets the bot's timer to send PlayerUpdate (13) periodically to prevent time-out; potentially obsolete for new optimized bots.
+        /// </summary>
         public Timer _heartBeat => heartBeat;
-
-        public Timer _checkJoin => checkJoin;
     }
 
     public class BotActions {
@@ -274,29 +237,45 @@ namespace TerraNPCBot {
             bot._client.AddPackets(new Packets.Packet82(message));
         }
 
-        public void Copy(Terraria.Player target) {
-            if (bot.Running)
-                ServerInvCopy(target);
-            else
-                ShallowInvCopy(target);
-            PlayerInfoCopy(target);
+        /// <summary>
+        /// Copies target's inventory and player info.
+        /// </summary>
+        /// <param name="target">The target as a Terraria.Player.</param>
+        public void FullCopy(Terraria.Player target) {
+            InventoryCopy(target);
+            InfoCopy(target);
         }
 
-        public void ServerInvCopy(Terraria.Player target) {
-            ShallowInvCopy(target);
-            bot.UpdateInv();
-        }
-
-        public void ShallowInvCopy(Terraria.Player target) {
+        /// <summary>
+        /// Copies target's inventory and updates bot's inventory to match if it is running.
+        /// </summary>
+        /// <param name="target"></param>
+        public void InventoryCopy(Terraria.Player target) {
             var _player = bot._player;
-            target.inventory.CopyTo(_player.InventorySlots, 0);
-            target.armor.CopyTo(_player.ArmorSlots, 0);
-            target.dye.CopyTo(_player.DyeSlots, 0);
-            target.miscDyes.CopyTo(_player.MiscDyeSlots, 0);
-            target.miscEquips.CopyTo(_player.MiscEquipSlots, 0);
+            for (int i = 0; i < NetItem.InventorySlots; ++i) {
+                _player.InventorySlots[i] = ItemData.FromTerrariaItem(target.inventory[i]);
+            }
+            for (int i = 0; i < NetItem.ArmorSlots; ++i) {
+                _player.ArmorSlots[i] = ItemData.FromTerrariaItem(target.armor[i]);
+            }
+            for (int i = 0; i < NetItem.DyeSlots; ++i) {
+                _player.DyeSlots[i] = ItemData.FromTerrariaItem(target.dye[i]);
+            }
+            for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
+                _player.MiscDyeSlots[i] = ItemData.FromTerrariaItem(target.miscDyes[i]);
+            }
+            for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
+                _player.MiscEquipSlots[i] = ItemData.FromTerrariaItem(target.miscEquips[i]);
+            }
+            if (bot.Running)
+                bot.UpdateInventory();
         }
 
-        public void PlayerInfoCopy(Terraria.Player target) {
+        /// <summary>
+        /// Copies target's player info and updates bot's info to match if it is running.
+        /// </summary>
+        /// <param name="target"></param>
+        public void InfoCopy(Terraria.Player target) {
             var _player = bot._player;
             _player.HairType = (byte)target.hair;
             _player.HairDye = target.hairDye;
@@ -311,12 +290,12 @@ namespace TerraNPCBot {
             _player.SkinColor = target.skinColor;
             _player.UnderShirtColor = target.underShirtColor;
 
+            // Terraria uses this struct so I'm doing it too
             BitsByte bit1 = 0;
             for (int i = 0; i < 8; ++i) {
                 bit1[i] = target.hideVisual[i];
             }
             _player.HVisuals1 = bit1;
-
             BitsByte bit2 = 0;
             for (int i = 8; i < 10; ++i) {
                 bit2[i] = target.hideVisual[i];

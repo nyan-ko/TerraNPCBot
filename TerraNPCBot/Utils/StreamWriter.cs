@@ -12,7 +12,6 @@ namespace TerraNPCBot.Utils {
             return version == Program.Program.PluginStreamVersion;
         }
 
-
         #region Writing
 
         #region BTSPlayer
@@ -49,15 +48,14 @@ namespace TerraNPCBot.Utils {
             else {
                 writer.Write(0);
             }
-            if (bot._manager._listenReact != null) {
-                writer.Write(bot._manager._listenReact.Count);
-                foreach (var e in bot._manager._listenReact) {
-                    FuncToStream(writer, e);
-                }
-            }
-            else {
-                writer.Write(0);
-            }
+            //if (bot._manager._listenReact != null) {
+            //    writer.Write(bot._manager._listenReact.Count);
+            //    foreach (var e in bot._manager._listenReact) {
+            //        FuncToStream(writer, e);
+            //    }
+            //}
+            writer.Write(0);
+            
         }
         #endregion
 
@@ -107,7 +105,7 @@ namespace TerraNPCBot.Utils {
             }
         }
 
-        public static void ItemToStream(this BinaryWriter writer, Terraria.Item item) {
+        public static void ItemToStream(this BinaryWriter writer, ItemData item) {
             writer.Write((short)item.stack);
             writer.Write(item.prefix);
             writer.Write((short)item.netID);
@@ -136,7 +134,9 @@ namespace TerraNPCBot.Utils {
         #endregion
 
         #region Reading
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public static async Task<BTSPlayer> BTSPlayerFromStream(string path, int index) {
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
             BTSPlayer plr = null;
             try {
                 using (BinaryReader reader = new BinaryReader(
@@ -169,10 +169,10 @@ namespace TerraNPCBot.Utils {
                 b._recordedPackets.Add(RPFromStream(reader));
             }
             count = reader.ReadInt32();
-            for (int i = 0; i < count; ++i) {
-                var packetfuncpair = FuncFromStream(reader);
-                b._manager._listenReact.Add(packetfuncpair.packet, packetfuncpair.function);
-            }
+            //for (int i = 0; i < count; ++i) {
+            //    var packetfuncpair = FuncFromStream(reader);
+            //    b._manager._listenReact.Add(packetfuncpair.packet, packetfuncpair.function);
+            //}
             return b;
         }
 
@@ -217,8 +217,8 @@ namespace TerraNPCBot.Utils {
             return plr;
         }
 
-        public static Terraria.Item ItemFromStream(BinaryReader reader) {
-            return new Terraria.Item() { stack = reader.ReadInt16(), prefix = reader.ReadByte(), netID = reader.ReadInt16() };
+        public static ItemData ItemFromStream(BinaryReader reader) {
+            return new ItemData() { stack = reader.ReadInt16(), prefix = reader.ReadByte(), netID = reader.ReadInt16() };
         }
 
         public static RecordedPacket RPFromStream(BinaryReader reader) {

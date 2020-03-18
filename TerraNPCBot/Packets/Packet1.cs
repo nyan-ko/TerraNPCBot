@@ -8,10 +8,12 @@ namespace TerraNPCBot.Packets {
     /// <summary>
     /// Connect request (1)
     /// </summary>
+    [Obsolete]
     public class Packet1 : PacketBase {
         /// <summary>
         /// Connect request (1)
         /// </summary>
+        [Obsolete]
         public Packet1 (int protocol) : base(0x1, new List<byte>()){
             using (Amanuensis) {
                 Amanuensis.Write($"Terraria{protocol}");
