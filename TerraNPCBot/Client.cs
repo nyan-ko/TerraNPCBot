@@ -114,38 +114,38 @@ namespace TerraNPCBot {
 
         #region Nobody really cares.
         public void Connect(RemoteAddress address) {
-            Console.WriteLine("Connect");
+            //Console.WriteLine("Connect");
         }
 
         public RemoteAddress GetRemoteAddress() {
-            Console.WriteLine("GetRemoteAddress");
+            //Console.WriteLine("GetRemoteAddress");
             return null;
         }
 
         public bool IsDataAvailable() {
-            Console.WriteLine("IsDataAvailable");
+            //Console.WriteLine("IsDataAvailable");
             return false;
         }
 
         public void SendQueuedPackets() {
-            Console.WriteLine("SendQueuedPackets");
+            //Console.WriteLine("SendQueuedPackets");
         }
 
         public bool StartListening(SocketConnectionAccepted callback) {
-            Console.WriteLine("StartListening");
+            //Console.WriteLine("StartListening");
             return false;
         }
 
         public void StopListening() {
-            Console.WriteLine("StopListening");
+            //Console.WriteLine("StopListening");
         }
 
         void ISocket.AsyncReceive(byte[] data, int offset, int size, SocketReceiveCallback callback, object state) {
-            Console.WriteLine("AsyncReceive");
+            //Console.WriteLine("AsyncReceive");
         }
 
         void ISocket.AsyncSend(byte[] data, int offset, int size, SocketSendCallback callback, object state) {
-            Console.WriteLine("AsyncSend");
+            //Console.WriteLine("AsyncSend");
         }
         #endregion
 

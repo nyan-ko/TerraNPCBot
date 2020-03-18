@@ -72,7 +72,17 @@ namespace TerraNPCBot {
                 Program.Program.BotsInLimbo.Add(ID);
                 Program.Program.GlobalRunningBots.Add(this);
 
-                _client.AddPackets(new Packets.Packet1(Protocol) { target = TSPlayer.Server.Index });
+                _client.AddPackets(new Packets.Packet4(_player));
+                _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
+                _client.AddPackets(new Packets.Packet30(ID, false));
+                _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
+                _client.AddPackets(new Packets.Packet45(ID, 0));
+                _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
+
+                UpdateInv();
+
+                _client.AddPackets(new Packets.Packet8() { target = TSPlayer.Server.Index });
+                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { target = TSPlayer.Server.Index });
                 return true;
             }
             else

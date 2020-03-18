@@ -46,14 +46,16 @@ namespace TerraNPCBot {
                 }
                 Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
 
-                bool flag = target == -1;
-                ISocket targetSocket = flag ? Netplay.Connection.Socket : Netplay.Clients[target].Socket;
-                SocketSendCallback callback = flag ? (SocketSendCallback)Netplay.Connection.ClientWriteCallBack : Netplay.Clients[target].ServerWriteCallBack;
-                try {
-                    targetSocket.AsyncSend(packet, 0, packet.Length, callback);
+                bool flag = target == -1; 
+                for (int i = 0; i < 256; ++i) {
+                    if (Netplay.Clients[i].IsConnected()) {
+                        try {
+                            Netplay.Clients[i].Socket.AsyncSend(packet, 0, packet.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        }
+                        catch { }
+                    }
                     // A specific target (i.e. besides all players) is likely unnecessary; will consider removing
                 }
-                catch { }
             }
             catch (Exception ex) {
                 TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);
