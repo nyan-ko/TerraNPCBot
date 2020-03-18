@@ -2,6 +2,8 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using Terraria.Net.Sockets;
+using TShockAPI;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
@@ -12,10 +14,12 @@ namespace TerraNPCBot {
     public class PacketBase {
 
         public uint _packetType;
+        public int target = TSPlayer.All.Index;
+
         private List<byte> _data;
         protected BinaryWriter Amanuensis;
 
-        public PacketBase(uint packetType, List<byte> data) {
+        protected PacketBase(uint packetType, List<byte> data) {
             Amanuensis = new BinaryWriter(new MemoryStream());
             _packetType = packetType;
             _data = data;
@@ -33,25 +37,28 @@ namespace TerraNPCBot {
             }
         }
 
-        public void Send(Socket socket) {
+        public void Send() {
             try {
                 byte[] packet = new byte[_data.Count + 3];
                 using (var writer = new BinaryWriter(new MemoryStream(packet))) {
                     writer.Write((short)(_data.Count + 3));
                     writer.Write((byte)_packetType);
-                    Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
                 }
-                socket.Send(packet);
+                Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
+
+                bool flag = target == -1;
+                ISocket targetSocket = flag ? Netplay.Connection.Socket : Netplay.Clients[target].Socket;
+                SocketSendCallback callback = flag ? (SocketSendCallback)Netplay.Connection.ClientWriteCallBack : Netplay.Clients[target].ServerWriteCallBack;
+                try {
+                    targetSocket.AsyncSend(packet, 0, packet.Length, callback);
+                    // A specific target (i.e. besides all players) is likely unnecessary; will consider removing
+                }
+                catch { }
             }
             catch (Exception ex) {
-                TShockAPI.TShock.Log.Write($"Exception thrown with Send(Socket): {ex}", System.Diagnostics.TraceLevel.Error);
+                TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);
             }
         }
-
-        // soon ?
-        //public static void LittleEndianifier(byte[] bites) {
-            
-        //}
 
         /// <summary>
         /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure

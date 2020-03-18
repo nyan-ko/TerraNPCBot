@@ -4,9 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria.Net.Sockets;
 using System.Net;
+using Terraria;
 using System.Net.Sockets;
 using System.Threading;
+using Terraria.Net;
 
 namespace TerraNPCBot {
     /// <summary>
@@ -22,13 +25,8 @@ namespace TerraNPCBot {
         public EventManager _eventManager;
 
         private Thread _writeThread;
-        private Thread _readThread;
-        private byte[] _buffer;
-        //public Thread _rejoin;
-
         private List<PacketBase> _writeQueue;
 
-        private Socket _client;
         private Bot _bot;
 
         public Client (Bot bot, int port = 7777) {  
@@ -41,97 +39,58 @@ namespace TerraNPCBot {
 
             _writeThread = new Thread(SendPackets);
             _writeThread.IsBackground = true;
-            _readThread = new Thread(ReadPackets);
-            _readThread.IsBackground = true;
-            //_rejoin = new Thread(Rejoin);
-            //_rejoin.IsBackground = true;
 
             _writeQueue = new List<PacketBase>();
-
-            _buffer = new byte[BufferSize];
         }
 
         public void AddPackets (PacketBase packet) {
             _writeQueue.Add(packet);
         }
 
-        public void ReadPackets() {
-            while (_running) {
-                try {
-                    var bytes = _client.Receive(_buffer);
-                    byte[] stream = new byte[bytes];
-                    Array.Copy(_buffer, stream, bytes);
-                    using (var reader = new BinaryReader(new MemoryStream(stream))) {
-                        var packedPacket = PacketBase.Parse(reader, _player, _world, _bot);
-                        if (packedPacket == null) return;
-                        try {
-                            _eventManager._listenReact[(PacketTypes)packedPacket._packetType].Invoke(new EventPacketInfo(_bot, packedPacket));
-                        }
-                        catch { }
-                    }
-                }
-                catch (Exception ex){
-                    Console.WriteLine($"Exception thrown when reading packet: {ex}, {ex.Source}");
-                    TShockAPI.TShock.Log.Write($"Exception thrown when reading packet: {ex}, {ex.Source}", System.Diagnostics.TraceLevel.Error);
-                }
-            }
-        }
-
         public void SendPackets() { 
             while (_running) {
                 if (_writeQueue.Count > 0) {
                     try {
-                        _writeQueue[0].Send(_client);
+                        _writeQueue[0].Send();
                         _writeQueue.RemoveAt(0);
                     }
                     catch {
-                        continue;
+                        
                     }
                 }
             }
+            TShockAPI.TShock.Log.Write($"Bot thread ended: Name {_bot.Name}.", System.Diagnostics.TraceLevel.Warning);
         }         
 
-        //public void Rejoin() {
-        //    Stop();
-        //    while (_writeThread.IsAlive || _readThread.IsAlive) {
-        //        continue;
-        //    }
-        //    Start();
-        //}
+        private int FindOpenSlot() {
+            for (int i = 254; i > -1; --i) {
+                if (!Netplay.Clients[i].IsConnected())
+                    return i;
+            }
+            return -1;
+        }
 
-        /// <summary>
-        /// Connects to the server. <para/>Using https://docs.microsoft.com/en-us/dotnet/framework/network-programming/synchronous-client-socket-example
-        /// </summary>
         public bool Start() {
-            if (!_writeThread.IsAlive && !_readThread.IsAlive) {
+            if (!_writeThread.IsAlive) {
                 try {
-                    IPHostEntry hostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                    IPAddress address = IPAddress.Parse(Bot.Address);
-                    IPEndPoint endPoint = new IPEndPoint(address, _port);
-
-                    _client = new Socket(address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-                    try {
-                        _client.Connect(endPoint);
-                        _client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.DontLinger, true);
-                        _running = true;
-                        _writeThread.Start();
-                        _readThread.Start();
-                    }
-                    catch (Exception ex) {
-                        Console.WriteLine($"Exception thrown while connecting to the server: {ex.ToString()}");
-                        TShockAPI.TShock.Log.Write($"Exception thrown while connecting to the server: {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
-
+                    int slot = FindOpenSlot();
+                    if (slot == -1)
                         return false;
-                    }
+                    _running = true;
+                    _bot.ID = (byte)slot;
+                    Main.player[slot] = new Terraria.Player();
+                    Netplay.Clients[slot] = new RemoteClient {
+                        Socket = new BotSocket(_bot)
+                    };
+                    _writeThread.Start();
                 }
                 catch (Exception ex) {
-                    Console.WriteLine($"Exception thrown while getting server info: {ex.ToString()}");
-                    TShockAPI.TShock.Log.Write($"Exception thrown while getting server info (Start()): {ex.ToString()}", System.Diagnostics.TraceLevel.Error);
+                    Console.WriteLine($"Exception thrown while getting server info: {ex.ToString()} {ex.Source}");
+                    TShockAPI.TShock.Log.Write($"Exception thrown while getting server info (Start()): {ex.ToString()} {ex.Source}", System.Diagnostics.TraceLevel.Error);
 
                     return false;
                 }
-                return _client.Connected;
+                return _running;
             }
             Console.WriteLine($"Exception thrown while getting server info: One or more threads active.");
             TShockAPI.TShock.Log.Write($"Exception thrown while getting server info: One or more threads active.", System.Diagnostics.TraceLevel.Error);
@@ -145,15 +104,57 @@ namespace TerraNPCBot {
         public void Stop() {
             _running = false;
         }
+    }
+    public class BotSocket : ISocket {
+        private Bot bot;
 
-        public void DisconnectAndReuse() {
-            _client.Shutdown(SocketShutdown.Both);
-            _client.Disconnect(true);
+        public BotSocket(Bot b) : base() {
+            bot = b;
+        }
 
-            _writeThread = new Thread(SendPackets);
-            _writeThread.IsBackground = true;
-            _readThread = new Thread(ReadPackets);
-            _readThread.IsBackground = true;
+        #region Nobody really cares.
+        public void Connect(RemoteAddress address) {
+            Console.WriteLine("Connect");
+        }
+
+        public RemoteAddress GetRemoteAddress() {
+            Console.WriteLine("GetRemoteAddress");
+            return null;
+        }
+
+        public bool IsDataAvailable() {
+            Console.WriteLine("IsDataAvailable");
+            return false;
+        }
+
+        public void SendQueuedPackets() {
+            Console.WriteLine("SendQueuedPackets");
+        }
+
+        public bool StartListening(SocketConnectionAccepted callback) {
+            Console.WriteLine("StartListening");
+            return false;
+        }
+
+        public void StopListening() {
+            Console.WriteLine("StopListening");
+        }
+
+        void ISocket.AsyncReceive(byte[] data, int offset, int size, SocketReceiveCallback callback, object state) {
+            Console.WriteLine("AsyncReceive");
+        }
+
+        void ISocket.AsyncSend(byte[] data, int offset, int size, SocketSendCallback callback, object state) {
+            Console.WriteLine("AsyncSend");
+        }
+        #endregion
+
+        public bool IsConnected() {
+            return bot.Running;
+        }
+
+        void ISocket.Close() {
+            bot.AsTSPlayer?.Disconnect("Bot disconnected.");
         }
     }
 }

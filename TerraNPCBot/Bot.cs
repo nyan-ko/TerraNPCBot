@@ -53,7 +53,6 @@ namespace TerraNPCBot {
           
             _world = new World();
             _owner = owner;
-            
           
             Actions = new BotActions(this);
 
@@ -70,9 +69,10 @@ namespace TerraNPCBot {
 
         public bool Start() { 
             if (_client.Start()) {
-                _client.AddPackets(new Packets.Packet1(Protocol));
-
+                Program.Program.BotsInLimbo.Add(ID);
                 Program.Program.GlobalRunningBots.Add(this);
+
+                _client.AddPackets(new Packets.Packet1(Protocol) { target = TSPlayer.Server.Index });
                 return true;
             }
             else
@@ -90,8 +90,6 @@ namespace TerraNPCBot {
 
         private async void CloseSocket() {
             _client.Stop();
-            await Task.Delay(50);
-            _client.DisconnectAndReuse();
         }
 
         #region Default Listeners
@@ -107,7 +105,7 @@ namespace TerraNPCBot {
 
             UpdateInv();
 
-            _client.AddPackets(new Packets.Packet6());
+            _client.AddPackets(new Packets.Packet6() { target = TSPlayer.Server.Index });
         }
 
         public async Task AlertAndInfo(EventPacketInfo unused = null) {
@@ -117,8 +115,8 @@ namespace TerraNPCBot {
 
         public async Task Initialize(EventPacketInfo unused = null) {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _client.AddPackets(new Packets.Packet8());
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
+            _client.AddPackets(new Packets.Packet8() { target = TSPlayer.Server.Index });
+            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { target = TSPlayer.Server.Index });
         }
         #endregion
 
@@ -237,7 +235,7 @@ namespace TerraNPCBot {
   
         public byte ID {
             get { return (byte)_player.PlayerID; }
-            set { _player.PlayerID = _player.PlayerID == -1 ? value : _player.PlayerID; }
+            set => _player.PlayerID = value;
         }
 
         public string Name => _player.Name;

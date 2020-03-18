@@ -254,7 +254,7 @@ namespace TerraNPCBot.Program {
             }
             else {
                 args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStarted, bot.Name));
-                bot._checkJoin.Start(); 
+                //bot._checkJoin.Start(); 
             }
         }        
 
