@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Placeholder (67), unused for now
         /// </summary>
-        public Packet67() : base(67, new List<byte>()) {
+        public Packet67() : base(67) {
             using (Amanuensis) {
 
             }

@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Place tile entity (87)
         /// </summary>
-        public Packet87(short x, short y, byte type) : base(87, new List<byte>()) {
+        public Packet87(short x, short y, byte type) : base(87) {
             using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);

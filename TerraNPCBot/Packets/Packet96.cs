@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Player teleport portal (96)
         /// </summary>
-        public Packet96(byte id, short portal, float x, float y, float vecx, float vecy) : base(87, new List<byte>()) {
+        public Packet96(byte id, short portal, float x, float y, float vecx, float vecy) : base(87) {
             using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(portal);

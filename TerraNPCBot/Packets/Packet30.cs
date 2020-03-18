@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Update pvp (30)
         /// </summary>
-        public Packet30(byte plr, bool s) : base(30, new List<byte>()) {
+        public Packet30(byte plr, bool s) : base(30) {
             using (Amanuensis) {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(s);

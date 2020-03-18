@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Door toggle (19)
         /// </summary>
-        public Packet19(byte action, short x, short y, byte direction) : base(19, new List<byte>()) {
+        public Packet19(byte action, short x, short y, byte direction) : base(19) {
             using (Amanuensis) {
                 Amanuensis.Write(action);
                 Amanuensis.Write(x);

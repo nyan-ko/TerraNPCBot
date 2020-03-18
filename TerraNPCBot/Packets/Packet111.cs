@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Toggle birthday (111)
         /// </summary>
-        public Packet111() : base(111, new List<byte>()) {
+        public Packet111() : base(111) {
 
         }
     }

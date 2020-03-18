@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Update chest item (32)
         /// </summary>
-        public Packet32(short id, byte slot, short stack, byte prefix, short netid) : base(32, new List<byte>()) {
+        public Packet32(short id, byte slot, short stack, byte prefix, short netid) : base(32) {
             using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(slot);

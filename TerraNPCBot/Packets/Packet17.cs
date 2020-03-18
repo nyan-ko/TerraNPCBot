@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Modify tile (17)
         /// </summary>
-        public Packet17(byte action, short tilex, short tiley, short var1, byte var2) : base(0x11, new List<byte>()) {
+        public Packet17(byte action, short tilex, short tiley, short var1, byte var2) : base(0x11) {
             using (Amanuensis) {
                 Amanuensis.Write(action);
                 Amanuensis.Write(tilex);

@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Open chest (31)
         /// </summary>
-        public Packet31(short x, short y) : base(31, new List<byte>()){
+        public Packet31(short x, short y) : base(31){
             using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);

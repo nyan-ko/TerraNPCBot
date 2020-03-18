@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Player team (45)
         /// </summary>
-        public Packet45(byte plr, byte team) : base(45, new List<byte>()) {
+        public Packet45(byte plr, byte team) : base(45) {
             using (Amanuensis) {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(team);

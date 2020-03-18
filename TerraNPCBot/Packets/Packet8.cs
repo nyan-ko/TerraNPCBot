@@ -14,7 +14,7 @@ namespace TerraNPCBot.Packets {
         /// Get section (8)
         /// </summary>
         [Obsolete]
-        public Packet8() : base(0x8, new List<byte>()) {
+        public Packet8() : base(0x8) {
             using (Amanuensis) {
                 Amanuensis.Write(-1);
                 Amanuensis.Write(-1);

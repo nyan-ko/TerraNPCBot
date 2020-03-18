@@ -14,7 +14,7 @@ namespace TerraNPCBot.Packets {
         /// Request world data (6)
         /// </summary>
         [Obsolete]
-        public Packet6() : base(0x6, new List<byte>()) {
+        public Packet6() : base(0x6) {
 
         }
     }

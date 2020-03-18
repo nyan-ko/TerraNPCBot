@@ -14,7 +14,7 @@ namespace TerraNPCBot.Packets {
         /// Update player (13)
         /// </summary>
         public Packet13(byte id, byte control, byte pulley, byte selected,
-            float posX, float posY, float vecX, float vecY) : base(0xD, new List<byte>()) {
+            float posX, float posY, float vecX, float vecY) : base(0xD) {
             using (Amanuensis = new BinaryWriter(new MemoryStream())) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(control);
@@ -29,7 +29,7 @@ namespace TerraNPCBot.Packets {
         }
 
         public Packet13(byte id, byte control, byte pulley, byte selected,
-            float posX, float posY) : base(0xD, new List<byte>()) {
+            float posX, float posY) : base(0xD) {
             using (Amanuensis = new BinaryWriter(new MemoryStream())) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(control);

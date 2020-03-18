@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Crystal invasion start (113)
         /// </summary>
-        public Packet113(short x, short y) : base(113, new List<byte>()) {
+        public Packet113(short x, short y) : base(113) {
             using (Amanuensis) {
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
