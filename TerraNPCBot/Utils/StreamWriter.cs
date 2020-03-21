@@ -122,6 +122,7 @@ namespace TerraNPCBot.Utils {
         #endregion
 
         #region Event Listeners
+        [Obsolete]
         public static void FuncToStream(BinaryWriter writer, KeyValuePair<PacketTypes, ParallelTask> funk) {
             writer.Write((byte)funk.Key);
             writer.Write(funk.Value.Tasks.Count);
@@ -227,6 +228,7 @@ namespace TerraNPCBot.Utils {
                 reader.ReadUInt32());
         }
 
+        [Obsolete]
         public static PacketFuncPair FuncFromStream(BinaryReader reader) {
             List<Func<EventPacketInfo, Task>> funcs = new List<Func<EventPacketInfo, Task>>();
 

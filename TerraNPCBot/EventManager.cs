@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot {
+    [Obsolete]
     public class EventManager {
         public Dictionary<PacketTypes, ParallelTask> _listenReact;
 
@@ -13,6 +14,7 @@ namespace TerraNPCBot {
         }
     }
 
+    [Obsolete]
     public class EventPacketInfo {
         public Bot b;
         public ParsedPacketBase p;
@@ -27,6 +29,7 @@ namespace TerraNPCBot {
         }
     }
 
+    [Obsolete]
     public class ParallelTask {
         public List<Func<EventPacketInfo, Task>> Tasks;
 
@@ -54,6 +57,7 @@ namespace TerraNPCBot {
         Initialize = 3,
     }
 
+    [Obsolete]
     public struct PacketFuncPair {
         public PacketTypes packet;
         public ParallelTask function;

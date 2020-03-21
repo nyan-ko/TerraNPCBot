@@ -9,12 +9,10 @@ namespace TerraNPCBot.Packets {
     /// <summary>
     /// World info (7)
     /// </summary>
-    [Obsolete]
     public class Packet7 : ParsedPacketBase {
         /// <summary>
         /// World info (7)
         /// </summary>
-        [Obsolete]
         public Packet7 (BinaryReader r, Player plr) : base (0x7) {
             
         }

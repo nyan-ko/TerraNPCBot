@@ -8,12 +8,10 @@ namespace TerraNPCBot.Packets {
     /// <summary>
     /// Request world data (6)
     /// </summary>
-    [Obsolete]
     public class Packet6 : PacketBase {
         /// <summary>
         /// Request world data (6)
         /// </summary>
-        [Obsolete]
         public Packet6() : base(0x6) {
 
         }

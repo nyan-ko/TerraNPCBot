@@ -52,9 +52,9 @@ namespace TerraNPCBot {
           
             Actions = new BotActions(this);
 
-            heartBeat = new Timer(15000);
-            heartBeat.Elapsed += SendAlive;
-            heartBeat.AutoReset = true;
+            //heartBeat = new Timer(15000);
+            //heartBeat.Elapsed += SendAlive;
+            //heartBeat.AutoReset = true;
 
             _actuallyJoined = false;
         }
@@ -62,16 +62,7 @@ namespace TerraNPCBot {
         public bool Start() { 
             if (_client.Start()) {
                 Program.Program.GlobalRunningBots.Add(this);
-
-                _client.AddPackets(new Packets.Packet4(_player));
-                _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
-                _client.AddPackets(new Packets.Packet30(ID, false));
-                _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
-                _client.AddPackets(new Packets.Packet45(ID, 0));
-                _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
-                UpdateInventory();
-
-                _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { target = TSPlayer.Server.Index });
+                SendJoinPackets();
                 return true;
             }
             else
@@ -80,7 +71,8 @@ namespace TerraNPCBot {
 
         public void Shutdown() {
             _client.Stop();
-            AsTSPlayer.Disconnect("Bot disconnected.");
+            
+            NetMessage.SendData(2, ID);
             Program.Program.GlobalRunningBots.Remove(this);
         }
 
@@ -98,7 +90,7 @@ namespace TerraNPCBot {
 
             UpdateInventory();
 
-            _client.AddPackets(new Packets.Packet6() { target = TSPlayer.Server.Index });
+            _client.AddPackets(new Packets.Packet6());
         }
 
         [Obsolete]
@@ -110,11 +102,12 @@ namespace TerraNPCBot {
         [Obsolete]
         public async Task Initialize(EventPacketInfo unused = null) {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _client.AddPackets(new Packets.Packet8() { target = TSPlayer.Server.Index });
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { target = TSPlayer.Server.Index });
+            _client.AddPackets(new Packets.Packet8());
+            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
         #endregion
 
+        [Obsolete]
         private void SendAlive(object sender, ElapsedEventArgs args) {
             if (!ShouldSendAlive())
                 return;
@@ -152,6 +145,22 @@ namespace TerraNPCBot {
                 _client.AddPackets(packet);
         }
 
+        public async void SendJoinPackets() {
+            _client.AddPackets(new Packets.Packet1(194) { from = ID });
+            await Task.Delay(25);
+            _client.AddPackets(new Packets.Packet4(_player) { from = ID });
+            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP) { from = ID });
+            _client.AddPackets(new Packets.Packet30(ID, false) { from = ID });
+            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana) { from = ID });
+            _client.AddPackets(new Packets.Packet45(ID, 0) { from = ID });
+            _client.AddPackets(new Packets.Packet50(ID, new byte[22]) { from = ID });
+            UpdateInventory();
+            _client.AddPackets(new Packets.Packet6() { from = ID });
+            await Task.Delay(25);
+            _client.AddPackets(new Packets.Packet8() { from = ID });
+            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { from = ID });
+        }
+
         public void UpdateInventory() {
             byte i = 0;
             foreach (var current in _player.InventorySlots) {
@@ -159,7 +168,7 @@ namespace TerraNPCBot {
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID));
+                    (short)current.netID) { from = ID });
                 ++i;
             }
             foreach (var current in _player.ArmorSlots) {
@@ -167,7 +176,7 @@ namespace TerraNPCBot {
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID));
+                    (short)current.netID) { from = ID });
                 ++i;
             }
             foreach (var current in _player.DyeSlots) {
@@ -175,7 +184,7 @@ namespace TerraNPCBot {
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID));
+                    (short)current.netID) { from = ID });
                 ++i;
             }
             foreach (var current in _player.MiscEquipSlots) {
@@ -183,7 +192,7 @@ namespace TerraNPCBot {
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID));
+                    (short)current.netID) { from = ID });
                 ++i;
             }
             foreach (var current in _player.MiscDyeSlots) {
@@ -191,7 +200,7 @@ namespace TerraNPCBot {
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID));
+                    (short)current.netID) { from = ID });
                 ++i;
             }
         }

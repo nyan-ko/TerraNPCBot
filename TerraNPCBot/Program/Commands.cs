@@ -175,6 +175,14 @@ namespace TerraNPCBot.Program {
         }
 
         private static void NewBot(CommandArgs args) {
+            if (!args.Player.RealPlayer) {
+                Bot bot = new Bot();
+                bot._client = new Client(7777, bot);
+                bot._player = new Player("server");
+                BTSPlayer.BTSServerPlayer._ownedBots.Add(bot);
+                BTSPlayer.BTSServerPlayer._selected = BTSPlayer.BTSServerPlayer._ownedBots.Count - 1;
+                return;
+            }
             try {
                 if (NeedsHelpOrExample(args.Parameters, args.Player, Messages.New, Messages.NewExample))
                     return;
@@ -184,19 +192,24 @@ namespace TerraNPCBot.Program {
                     return;
                 }
 
-                Bot bot;
                 BTSPlayer bp = Program.Players[args.Player.Index];
                 string name = "Michael Jackson";
+                int port = 7777;
+
                 if (args.Parameters.Count > 1) {
                     string tempName = args.Parameters[1].Trim('"');
                     if (tempName.Length > 30)
                         bp.SPlayer?.SendErrorMessage("Specified name exceeds 30 character limit. Defaulting to Michael Jackson.");
                     else
                         name = tempName;
+                    if (args.Parameters.Count > 2 && !int.TryParse(args.Parameters[2], out port)) {
+                        bp.SPlayer?.SendErrorMessage("Specified port is not recognized. Defaulting to 7777.");
+                    }
                 }
 
-                bot = new Bot(args.Player.Index) { _player = new Player(name) };
-                bot._client = new Client(bot);
+                Bot bot = new Bot(args.Player.Index);
+                bot._client = new Client(port, bot);
+                bot._player = new Player(name);
 
 
                 // Ports for each server Flag102
@@ -217,6 +230,12 @@ namespace TerraNPCBot.Program {
         }
 
         private static void StartBot(CommandArgs args) {
+            if (!args.Player.RealPlayer) {
+                Bot bot2 = BTSPlayer.BTSServerPlayer.SelectedBot;
+                bot2.Start();
+                return;
+            }
+
             if (!args.Player.HasPermission(Permissions.BotUse)) {
                 args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;

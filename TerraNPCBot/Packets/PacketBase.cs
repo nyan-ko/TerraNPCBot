@@ -14,7 +14,7 @@ namespace TerraNPCBot {
     public class PacketBase {
 
         public uint _packetType;
-        public int target = TSPlayer.All.Index;
+        public int from = -1;
 
         private List<byte> _data;
         protected BinaryWriter Amanuensis;
@@ -38,7 +38,8 @@ namespace TerraNPCBot {
         }
 
         public void Send() {
-            try {
+            //try 
+            {
                 byte[] packet = new byte[_data.Count + 3];
                 using (var writer = new BinaryWriter(new MemoryStream(packet))) {
                     writer.Write((short)(_data.Count + 3));
@@ -46,20 +47,25 @@ namespace TerraNPCBot {
                 }
                 Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
 
-                bool flag = target == -1; 
-                for (int i = 0; i < 256; ++i) {
-                    if (Netplay.Clients[i].IsConnected()) {
-                        try {
-                            Netplay.Clients[i].Socket.AsyncSend(packet, 0, packet.Length, Netplay.Clients[i].ServerWriteCallBack);
+                // from server -> all other clients
+                if (from == -1) {
+                    foreach (RemoteClient sock in Netplay.Clients) {
+                        if (sock.IsConnected()) {
+                            try {
+                                sock.Socket.AsyncSend(packet, 0, packet.Length, sock.ServerWriteCallBack);
+                            }
+                            catch { }
                         }
-                        catch { }
                     }
-                    // A specific target (i.e. besides all players) is likely unnecessary; will consider removing
+                }
+                // from client -> server
+                else {
+                    Client.ClientSockets[from].AsyncSend(packet, 0, packet.Length, Client.UnusedClientWriteCallback);
                 }
             }
-            catch (Exception ex) {
-                TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);
-            }
+            //catch (Exception ex) {
+                //TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);
+            //}
         }
 
         /// <summary>

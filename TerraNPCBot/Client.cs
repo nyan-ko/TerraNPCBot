@@ -18,13 +18,15 @@ namespace TerraNPCBot {
     public class Client {
         public const int BufferSize = 131072;       
         public bool _running;
+        public int _port;
 
+        private Bot _bot;
         private Thread _writeThread;
         private List<PacketBase> _writeQueue;
-        private Bot _bot;
 
-        public Client (Bot bot) {  
+        public Client (int port, Bot bot) {
             _bot = bot;
+            _port = port;
 
             _writeThread = new Thread(SendPackets);
             _writeThread.IsBackground = true;
@@ -51,9 +53,9 @@ namespace TerraNPCBot {
         }         
 
         private int FindOpenSlot() {
-            for (int i = 254; i > -1; --i) {
-                if (!Netplay.Clients[i].IsConnected())
-                    return i;
+            for (byte index = 0; index < Main.maxNetPlayers; ++index) {
+                if (!Netplay.Clients[index].IsConnected())
+                    return index;
             }
             return -1;
         }
@@ -64,15 +66,12 @@ namespace TerraNPCBot {
                     int slot = FindOpenSlot();
                     if (slot == -1)
                         return false;
-
                     _running = true;
                     _bot.ID = (byte)slot;
-                    Main.player[slot] = new Terraria.Player();
-                    Program.Program.Bots[slot] = _bot;
-                    //Netplay.Clients[slot] = new RemoteClient {
-                    //    Socket = new BotSocket(_bot)
-                    //};
-
+                    ClientSockets[slot] = new TcpSocket();
+                    ClientSockets[slot].Connect(new TcpAddress(
+                        new IPAddress(
+                            new byte[4] { 127, 0, 0, 1 }), _port));
                     _writeThread.Start();
                 }
                 catch (Exception ex) {
@@ -94,6 +93,12 @@ namespace TerraNPCBot {
         /// </summary>
         public void Stop() {
             _running = false;
+        }
+
+        public static ISocket[] ClientSockets = new TcpSocket[256];
+
+        public static void UnusedClientWriteCallback(object unused) {
+            //Lol!
         }
     }
 

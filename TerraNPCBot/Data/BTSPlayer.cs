@@ -7,6 +7,13 @@ namespace TerraNPCBot {
     /// Bot Terraria Server player, not a seven member South Korean boy band player.
     /// </summary>
     public class BTSPlayer {
+        public static BTSPlayer BTSServerPlayer = new BTSPlayer();
+
+        internal BTSPlayer() {
+            _ownedBots = new List<Bot>();
+            _selected = -1;
+        }
+
         public BTSPlayer(int index) {
             _ownedBots = new List<Bot>();
             _selected = -1;
