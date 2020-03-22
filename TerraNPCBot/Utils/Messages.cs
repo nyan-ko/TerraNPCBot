@@ -36,12 +36,26 @@ namespace TerraNPCBot.Utils {
             "Page (3/3)"
         };
 
+        public static List<string> Delete = new List<string>() {
+            "Sub-command for selecting bots given position or name to delete.",
+            "Usage: /bot delete <number>/<name> - Number or name are optional.",
+            "/bot delete - Currently selected bot will be deleted.",
+            "/bot delete <number> - Selects a bot from your owned bots according to its position in the list.",
+            "/bot delete <name> - Selects a bot with a match or close match to the given name.",
+            "Bots will only be deleted upon receiving confirmation through /confirm."
+        };
+
+        public static List<string> DeleteExample = new List<string>() {
+            "Example: /bot delete - Selects currently selected bot for deletion.",
+            "Example: /bot delete 2 - Selects the 2nd bot you own for deletion.",
+            "Example: /bot delete \"Michael Jackson\" - Selects a bot named Michael Jackson for deletion."
+        };
+
         public static List<string> Select = new List<string> {
-            "Sub-command for selecting bot given position or name.",
+            "Sub-command for selecting bots given position or name.",
             "Usage: /bot select <number>/<name>",
             "/bot select <number> - Selects a bot from your owned bots according to its position in the list.",
-            "/bot select <name> - Selects a bot with a match or close match to the given name*.",
-            "*Using bot names will only select the first bot found if multiple names match.",
+            "/bot select <name> - Selects a bot with a match or close match to the given name."
         };
         public static List<string> SelectExample = new List<string> {
             "Example: /bot select 7 - Will select 7th bot in owned bots.",
@@ -56,7 +70,7 @@ namespace TerraNPCBot.Utils {
             "/bot new <name> <world> - Creates a bot with the given name, sets it to target the given world, and selects it."
         };
         public static List<string> NewExample = new List<string> {
-            "Example: /bot new - Will default bot name to \"Michael_Jackson\" and world to Nexus.",
+            "Example: /bot new - Will default bot name to \"Michael Jackson\" and world to Nexus.",
             "Example: /bot new NewBot - Will create bot with name \"NewBot\".",
             "Example: /bot new NewBot fb - Will create bot with name \"NewBot\" that will join Freebuild when started."
         };
@@ -76,7 +90,7 @@ namespace TerraNPCBot.Utils {
             "Usage: /bot teleport <target name>/<position> - Default target is bot owner.",
             "/bot teleport <target name> - Teleports bot to online player with a match or close match to the given name*.",
             "/bot teleport <position> - Teleports bot to specified position in x-y coordinates.",
-            "*Specificity is recommended for players with similar names (e.g. john, johnny)."
+            "*Specificity is recommended for players with similar names (e.g. Cy, CyborgEmperor)."
         };
         public static List<string> TeleportExample = new List<string> {
             "Example: /bot teleport - Will teleport bot to its owner (i.e. whoever executed the command).",

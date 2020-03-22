@@ -85,14 +85,14 @@ namespace TerraNPCBot.Program {
         }
 
         #region Help
-        public static bool NeedsHelp(List<string> args) {
+        private static bool NeedsHelp(List<string> args) {
             List<string> s = new List<string>();
             foreach (var x in args) {
                 s.Add(x.ToLower());
             }
             return s.Contains("help");
         }
-        public static bool NeedsExample(List<string> args) {
+        private static bool NeedsExample(List<string> args) {
             List<string> s = new List<string>();
             foreach (var x in args) {
                 s.Add(x.ToLower());
@@ -258,23 +258,51 @@ namespace TerraNPCBot.Program {
             }
         }
 
-        private static void ConfirmedDelete(CommandArgs args) {
-
+        private static void ConfirmedDelete(object obj) {
+            CommandArgs args = (CommandArgs)obj;
+            var player = Program.Players[args.Player.Index];
+            player._ownedBots.RemoveAt(player._selectedDelete);
+            player.SPlayer?.SendSuccessMessage("Successfully deleted bot.");  
         }
 
         private static void DeleteBot(CommandArgs args) {
-            var player = Program.Players[args.Player.Index];
-            var bot = player?.SelectedBot;
-            if (bot != null) {
-                if (args.Parameters.Count == 1) {
-                    player._selectedDelete = player._selected;
-                }
-                else if (args.Parameters.Count == 2) {
+            if (NeedsHelpOrExample(args.Parameters, args.Player, Messages.Delete, Messages.DeleteExample))
+                return;
 
+            var player = Program.Players[args.Player.Index];
+            if (args.Parameters.Count == 1 && player._selected != -1) {
+                player._selectedDelete = player._selected;
+                args.Player?.SendSuccessMessage("Currently selected bot will be deleted upon confirmation.");
+                args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
+            }
+            else if (args.Parameters.Count > 1) {
+                string nameOrIndex = string.Join(" ", args.Parameters.Skip(1)).Trim('"');
+                if (player._ownedBots == null || player._ownedBots.Count == 0) {
+                    args.Player?.SendErrorMessage("You do not have any owned bots.");
+                    return;
+                }
+                List<Bot> foundbots = player.GetBotFromIndexOrName(nameOrIndex);
+
+                if (foundbots.Count == 0) {
+                    args.Player?.SendErrorMessage("Could not find specified bot.");
+                }
+                else if (foundbots.Count > 1) {
+                    args.Player?.SendErrorMessage("Multiple bots matched your search criteria:");
+                    List<string> names = new List<string>();
+                    foreach (Bot bot in foundbots) {
+                        names.Add("\"" + bot.Name + "\"");
+                    }
+                    string stringnames = string.Join(", ", names);
+                    args.Player?.SendErrorMessage(stringnames);
+                }
+                else if (foundbots.Count == 1) {
+                    player._selectedDelete = foundbots[0].IndexInOwnerBots;
+                    args.Player?.SendSuccessMessage($"Selecting bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots} to delete.");
+                    args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
                 }
             }
             else {
-                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorNotFound));
+                args.Player?.MultiMsg(Messages.Delete, Color.Yellow);
             }
         }
 
