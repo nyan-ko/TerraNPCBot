@@ -50,6 +50,7 @@ namespace TerraNPCBot {
         }
     }
 
+    [Obsolete]
     public enum Functions {
         Stop = 0,
         ReceivedPlayerID = 1,

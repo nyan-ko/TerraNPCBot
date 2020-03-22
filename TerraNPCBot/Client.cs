@@ -16,7 +16,8 @@ namespace TerraNPCBot {
     /// Manages connections for the bot.
     /// </summary>
     public class Client {
-        public const int BufferSize = 131072;       
+        public const int BufferSize = 131072;
+        public const string UUID = "bigchungusisfunnybigchungusisfunnybigchungusisfunnybigchungusisfunnybigchungusisfunnybigchungusisfunnybigchungusisfunnybigchungu";
         public bool _running;
         public int _port;
 
@@ -34,7 +35,7 @@ namespace TerraNPCBot {
             _writeQueue = new List<PacketBase>();
         }
 
-        public void AddPackets (PacketBase packet) {
+        public void QueuePackets (PacketBase packet) {
             _writeQueue.Add(packet);
         }
 
@@ -68,10 +69,6 @@ namespace TerraNPCBot {
                         return false;
                     _running = true;
                     _bot.ID = (byte)slot;
-                    ClientSockets[slot] = new TcpSocket();
-                    ClientSockets[slot].Connect(new TcpAddress(
-                        new IPAddress(
-                            new byte[4] { 127, 0, 0, 1 }), _port));
                     _writeThread.Start();
                 }
                 catch (Exception ex) {
@@ -95,11 +92,11 @@ namespace TerraNPCBot {
             _running = false;
         }
 
-        public static ISocket[] ClientSockets = new TcpSocket[256];
+        //public static ISocket[] ClientSockets = new TcpSocket[256];
 
-        public static void UnusedClientWriteCallback(object unused) {
-            //Lol!
-        }
+        //public static void UnusedClientWriteCallback(object unused) {
+        //    //Lol!
+        //}
     }
 
     [Obsolete]

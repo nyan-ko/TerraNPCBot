@@ -41,7 +41,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.WriteColor(plr.ShoeColor);
 
                 Amanuensis.Write(plr.Difficulty);
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }

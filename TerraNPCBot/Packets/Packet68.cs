@@ -6,16 +6,12 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Update pvp (30)
+    /// Send UUID (68)
     /// </summary>
-    public class Packet30 : PacketBase {
-        /// <summary>
-        /// Update pvp (30)
-        /// </summary>
-        public Packet30(byte plr, bool s) : base(30) {
+    public class Packet68 : PacketBase {
+        public Packet68() : base(68) {
             using (Amanuensis) {
-                Amanuensis.Write(plr);
-                Amanuensis.Write(s);
+                Amanuensis.Write(Client.UUID);
                 Packetize();
             }
         }

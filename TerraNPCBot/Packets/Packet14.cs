@@ -6,16 +6,18 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Update pvp (30)
+    /// Player active (14)
     /// </summary>
-    public class Packet30 : PacketBase {
+    public class Packet14 : PacketBase {
         /// <summary>
-        /// Update pvp (30)
+        /// Player active (14)
         /// </summary>
-        public Packet30(byte plr, bool s) : base(30) {
+        /// <param name="id"></param>
+        /// <param name="active"></param>
+        public Packet14(byte id, bool active) : base(14) {
             using (Amanuensis) {
-                Amanuensis.Write(plr);
-                Amanuensis.Write(s);
+                Amanuensis.Write(id);
+                Amanuensis.Write(active);
                 Packetize();
             }
         }

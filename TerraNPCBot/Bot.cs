@@ -19,7 +19,6 @@ namespace TerraNPCBot {
         public bool _recording;
         public bool _actuallyJoined;
 
-        //public EventManager _manager;
         public Player _player;
         public Client _client;
         public BotActions Actions;
@@ -41,21 +40,8 @@ namespace TerraNPCBot {
         }
 
         public Bot(int owner) {
-            //_manager = new EventManager();
-            //{
-                //_manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Shutdown));
-                //_manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
-                //_manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
-            //}  // default listeners
-          
             _owner = owner;
-          
             Actions = new BotActions(this);
-
-            //heartBeat = new Timer(15000);
-            //heartBeat.Elapsed += SendAlive;
-            //heartBeat.AutoReset = true;
-
             _actuallyJoined = false;
         }
 
@@ -70,9 +56,8 @@ namespace TerraNPCBot {
         }
 
         public void Shutdown() {
+
             _client.Stop();
-            
-            NetMessage.SendData(2, ID);
             Program.Program.GlobalRunningBots.Remove(this);
         }
 
@@ -81,16 +66,16 @@ namespace TerraNPCBot {
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         [Obsolete]
         public async Task ReceivedPlayerID(EventPacketInfo unused = null) {
-            _client.AddPackets(new Packets.Packet4(_player));
-            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
-            _client.AddPackets(new Packets.Packet30(ID, false));
-            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
-            _client.AddPackets(new Packets.Packet45(ID, 0));
-            _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
+            _client.QueuePackets(new Packets.Packet4(_player));
+            _client.QueuePackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
+            _client.QueuePackets(new Packets.Packet30(ID, false));
+            _client.QueuePackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
+            _client.QueuePackets(new Packets.Packet45(ID, 0));
+            _client.QueuePackets(new Packets.Packet50(ID, new byte[22]));
 
             UpdateInventory();
 
-            _client.AddPackets(new Packets.Packet6());
+            _client.QueuePackets(new Packets.Packet6());
         }
 
         [Obsolete]
@@ -102,8 +87,8 @@ namespace TerraNPCBot {
         [Obsolete]
         public async Task Initialize(EventPacketInfo unused = null) {
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _client.AddPackets(new Packets.Packet8());
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
+            _client.QueuePackets(new Packets.Packet8());
+            _client.QueuePackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
         #endregion
 
@@ -111,7 +96,7 @@ namespace TerraNPCBot {
         private void SendAlive(object sender, ElapsedEventArgs args) {
             if (!ShouldSendAlive())
                 return;
-            _client.AddPackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, AsTSPlayer.LastNetPosition.X, AsTSPlayer.LastNetPosition.Y));
+            _client.QueuePackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, AsTSPlayer.LastNetPosition.X, AsTSPlayer.LastNetPosition.Y));
         }
 
         private bool ShouldSendAlive() => Running && _actuallyJoined && !_playingBack;
@@ -142,65 +127,66 @@ namespace TerraNPCBot {
 
             var packet = PacketBase.WriteFromRecorded(currentPacket.stream, this);
             if (packet != null)
-                _client.AddPackets(packet);
+                _client.QueuePackets(packet);
         }
 
-        public async void SendJoinPackets() {
-            _client.AddPackets(new Packets.Packet1(194) { from = ID });
-            await Task.Delay(25);
-            _client.AddPackets(new Packets.Packet4(_player) { from = ID });
-            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP) { from = ID });
-            _client.AddPackets(new Packets.Packet30(ID, false) { from = ID });
-            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana) { from = ID });
-            _client.AddPackets(new Packets.Packet45(ID, 0) { from = ID });
-            _client.AddPackets(new Packets.Packet50(ID, new byte[22]) { from = ID });
+        public void SendJoinPackets() {
+            //_client.AddPackets(new Packets.Packet1(194));
+            //await Task.Delay(25);
+            _client.QueuePackets(new Packets.Packet4(_player));
+            //_client.AddPackets(new Packets.Packet68());
+            _client.QueuePackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
+            _client.QueuePackets(new Packets.Packet30(ID, false));
+            _client.QueuePackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
+            _client.QueuePackets(new Packets.Packet45(ID, 0));
+            _client.QueuePackets(new Packets.Packet50(ID, new byte[22]));
             UpdateInventory();
-            _client.AddPackets(new Packets.Packet6() { from = ID });
-            await Task.Delay(25);
-            _client.AddPackets(new Packets.Packet8() { from = ID });
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { from = ID });
+            //_client.AddPackets(new Packets.Packet6());
+            //await Task.Delay(25);
+            //_client.AddPackets(new Packets.Packet8());
+            _client.QueuePackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
 
         public void UpdateInventory() {
             byte i = 0;
             foreach (var current in _player.InventorySlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.ArmorSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.DyeSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.MiscEquipSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.MiscDyeSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
         }
@@ -239,11 +225,11 @@ namespace TerraNPCBot {
         }
 
         public void Teleport(Microsoft.Xna.Framework.Vector2 pos) {
-            bot._client.AddPackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
+            bot._client.QueuePackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
         }
 
         public void Chat(string message) {
-            bot._client.AddPackets(new Packets.Packet82(message));
+            bot._client.QueuePackets(new Packets.Packet82(message));
         }
 
         /// <summary>
@@ -312,7 +298,7 @@ namespace TerraNPCBot {
             _player.HVisuals2 = bit2;
 
             if (bot.Running)
-                bot._client.AddPackets(new Packets.Packet4(_player));
+                bot._client.QueuePackets(new Packets.Packet4(_player));
         }
     }
 

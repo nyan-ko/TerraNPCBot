@@ -15,7 +15,7 @@ namespace TerraNPCBot.Packets {
         public Packet1 (int protocol) : base(0x1){
             using (Amanuensis) {
                 Amanuensis.Write($"Terraria{protocol}");
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }

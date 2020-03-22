@@ -175,14 +175,6 @@ namespace TerraNPCBot.Program {
         }
 
         private static void NewBot(CommandArgs args) {
-            if (!args.Player.RealPlayer) {
-                Bot bot = new Bot();
-                bot._client = new Client(7777, bot);
-                bot._player = new Player("server");
-                BTSPlayer.BTSServerPlayer._ownedBots.Add(bot);
-                BTSPlayer.BTSServerPlayer._selected = BTSPlayer.BTSServerPlayer._ownedBots.Count - 1;
-                return;
-            }
             try {
                 if (NeedsHelpOrExample(args.Parameters, args.Player, Messages.New, Messages.NewExample))
                     return;
@@ -230,12 +222,6 @@ namespace TerraNPCBot.Program {
         }
 
         private static void StartBot(CommandArgs args) {
-            if (!args.Player.RealPlayer) {
-                Bot bot2 = BTSPlayer.BTSServerPlayer.SelectedBot;
-                bot2.Start();
-                return;
-            }
-
             if (!args.Player.HasPermission(Permissions.BotUse)) {
                 args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;

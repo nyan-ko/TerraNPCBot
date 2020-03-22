@@ -15,7 +15,7 @@ namespace TerraNPCBot.Packets {
         public Packet95(ushort index) : base(95) {
             using (Amanuensis) {
                 Amanuensis.Write(index);
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }
