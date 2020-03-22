@@ -121,17 +121,6 @@ namespace TerraNPCBot.Utils {
         }
         #endregion
 
-        #region Event Listeners
-        [Obsolete]
-        public static void FuncToStream(BinaryWriter writer, KeyValuePair<PacketTypes, ParallelTask> funk) {
-            writer.Write((byte)funk.Key);
-            writer.Write(funk.Value.Tasks.Count);
-            foreach (var f in funk.Value.Tasks) {
-                writer.Write((int)Enum.Parse(typeof(Functions), f.Method.Name));
-            }
-        }
-        #endregion
-
         #endregion
 
         #region Reading
@@ -162,7 +151,7 @@ namespace TerraNPCBot.Utils {
         }
 
         public static Bot BotFromStream(BinaryReader reader, int index) {
-            Bot b = new Bot(index) {
+            Bot b = new Bot(index, Program.Program.Players[index]._ownedBots.Count - 1) {
                 _player = PlayerFromStream(reader)
             };
             var count = reader.ReadInt32();
@@ -226,21 +215,6 @@ namespace TerraNPCBot.Utils {
             var count = reader.ReadInt32();
             return new RecordedPacket(new StreamInfo(reader.ReadBytes(count), reader.ReadByte()),
                 reader.ReadUInt32());
-        }
-
-        [Obsolete]
-        public static PacketFuncPair FuncFromStream(BinaryReader reader) {
-            List<Func<EventPacketInfo, Task>> funcs = new List<Func<EventPacketInfo, Task>>();
-
-            var packet = (PacketTypes)reader.ReadByte();
-            var count = reader.ReadInt32();
-            for (int i = 0; i < count; ++i) {
-                var funcname = (string)Enum.Parse(typeof(PacketTypes), reader.ReadInt32().ToString());
-                MethodInfo func = typeof(Bot).GetMethod(funcname);
-                var f = (Func<EventPacketInfo, Task>)func.CreateDelegate(typeof(Func<EventPacketInfo, Task>), func);
-                funcs.Add(f);
-            }
-            return new PacketFuncPair(packet, new ParallelTask(funcs.ToArray()));
         }
 
         #endregion

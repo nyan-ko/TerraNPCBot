@@ -24,8 +24,6 @@ namespace TerraNPCBot {
         public Client _client;
         public BotActions Actions;
 
-        private Timer heartBeat;
-
         #region Record Packets
         public bool _playingBack;
         public List<RecordedPacket> _recordedPackets;
@@ -40,22 +38,9 @@ namespace TerraNPCBot {
 
         }
 
-        public Bot(int owner) {
-            //_manager = new EventManager();
-            //{
-                //_manager._listenReact.Add(PacketTypes.Disconnect, new ParallelTask(Shutdown));
-                //_manager._listenReact.Add(PacketTypes.ContinueConnecting, new ParallelTask(ReceivedPlayerID, AlertAndInfo));
-                //_manager._listenReact.Add(PacketTypes.WorldInfo, new ParallelTask(Initialize));
-            //}  // default listeners
-          
+        public Bot(int owner, int ownedbotsindex) {
             _owner = owner;
-          
             Actions = new BotActions(this);
-
-            //heartBeat = new Timer(15000);
-            //heartBeat.Elapsed += SendAlive;
-            //heartBeat.AutoReset = true;
-
             _actuallyJoined = false;
         }
 
@@ -69,53 +54,14 @@ namespace TerraNPCBot {
                 return false;
         }
 
-        public void Shutdown() {
+        public async void Shutdown() {
+            _client.QueuePackets(new Packets.Packet14(ID, false));
+            await Task.Delay(500);
             _client.Stop();
-            
-            NetMessage.SendData(2, ID);
             Program.Program.GlobalRunningBots.Remove(this);
         }
 
-        #region Default Listeners
-        //SHUT UP SHUT UP shut up
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        [Obsolete]
-        public async Task ReceivedPlayerID(EventPacketInfo unused = null) {
-            _client.AddPackets(new Packets.Packet4(_player));
-            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
-            _client.AddPackets(new Packets.Packet30(ID, false));
-            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
-            _client.AddPackets(new Packets.Packet45(ID, 0));
-            _client.AddPackets(new Packets.Packet50(ID, new byte[22]));
-
-            UpdateInventory();
-
-            _client.AddPackets(new Packets.Packet6());
-        }
-
-        [Obsolete]
-        public async Task AlertAndInfo(EventPacketInfo unused = null) {
-            TShock.Players[_owner]?.SendInfoMessage($"Received player id: {ID}");
-            Program.Program.Bots[ID] = this;
-        }
-
-        [Obsolete]
-        public async Task Initialize(EventPacketInfo unused = null) {
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
-            _client.AddPackets(new Packets.Packet8());
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
-        }
-        #endregion
-
-        [Obsolete]
-        private void SendAlive(object sender, ElapsedEventArgs args) {
-            if (!ShouldSendAlive())
-                return;
-            _client.AddPackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, AsTSPlayer.LastNetPosition.X, AsTSPlayer.LastNetPosition.Y));
-        }
-
-        private bool ShouldSendAlive() => Running && _actuallyJoined && !_playingBack;
-        
+        #region Record
         public void StartRecordTimer() {
             _delayBetweenPackets = new Timer(10);
             _delayBetweenPackets.Elapsed += RecordedPacketDelay;
@@ -142,65 +88,61 @@ namespace TerraNPCBot {
 
             var packet = PacketBase.WriteFromRecorded(currentPacket.stream, this);
             if (packet != null)
-                _client.AddPackets(packet);
+                _client.QueuePackets(packet);
         }
+        #endregion
 
-        public async void SendJoinPackets() {
-            _client.AddPackets(new Packets.Packet1(194) { from = ID });
-            await Task.Delay(25);
-            _client.AddPackets(new Packets.Packet4(_player) { from = ID });
-            _client.AddPackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP) { from = ID });
-            _client.AddPackets(new Packets.Packet30(ID, false) { from = ID });
-            _client.AddPackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana) { from = ID });
-            _client.AddPackets(new Packets.Packet45(ID, 0) { from = ID });
-            _client.AddPackets(new Packets.Packet50(ID, new byte[22]) { from = ID });
+        public void SendJoinPackets() {
+            _client.QueuePackets(new Packets.Packet4(_player));
+            _client.QueuePackets(new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP));
+            _client.QueuePackets(new Packets.Packet30(ID, false));
+            _client.QueuePackets(new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana));
+            _client.QueuePackets(new Packets.Packet45(ID, 0));
+            _client.QueuePackets(new Packets.Packet50(ID, new byte[22]));
             UpdateInventory();
-            _client.AddPackets(new Packets.Packet6() { from = ID });
-            await Task.Delay(25);
-            _client.AddPackets(new Packets.Packet8() { from = ID });
-            _client.AddPackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY) { from = ID });
+            _client.QueuePackets(new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
         }
 
         public void UpdateInventory() {
             byte i = 0;
             foreach (var current in _player.InventorySlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.ArmorSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.DyeSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.MiscEquipSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
             foreach (var current in _player.MiscDyeSlots) {
-                _client.AddPackets(new Packets.Packet5(ID,
+                _client.QueuePackets(new Packets.Packet5(ID,
                     i,
                     (short)current.stack,
                     current.prefix,
-                    (short)current.netID) { from = ID });
+                    (short)current.netID));
                 ++i;
             }
         }
@@ -216,7 +158,12 @@ namespace TerraNPCBot {
         public string Name => _player.Name;
 
         /// <summary>
-        /// Gets bot's running status.
+        /// Gets the bot's position in the owner's owned bots.
+        /// </summary>
+        public int IndexInOwnerBots { get; set; }
+
+        /// <summary>
+        /// Gets the bot's running status.
         /// </summary>
         public bool Running => _client._running;
 
@@ -224,11 +171,6 @@ namespace TerraNPCBot {
         /// Gets the TSPlayer associated with the bot's index.
         /// </summary>
         public TSPlayer AsTSPlayer => TShock.Players[ID];
-
-        /// <summary>
-        /// Gets the bot's timer to send PlayerUpdate (13) periodically to prevent time-out; potentially obsolete for new optimized bots.
-        /// </summary>
-        public Timer _heartBeat => heartBeat;
     }
 
     public class BotActions {
@@ -239,11 +181,11 @@ namespace TerraNPCBot {
         }
 
         public void Teleport(Microsoft.Xna.Framework.Vector2 pos) {
-            bot._client.AddPackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
+            bot._client.QueuePackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
         }
 
         public void Chat(string message) {
-            bot._client.AddPackets(new Packets.Packet82(message));
+            bot._client.QueuePackets(new Packets.Packet82(message));
         }
 
         /// <summary>
@@ -312,7 +254,7 @@ namespace TerraNPCBot {
             _player.HVisuals2 = bit2;
 
             if (bot.Running)
-                bot._client.AddPackets(new Packets.Packet4(_player));
+                bot._client.QueuePackets(new Packets.Packet4(_player));
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,7 +22,8 @@ namespace TerraNPCBot {
 
         private Bot _bot;
         private Thread _writeThread;
-        private List<PacketBase> _writeQueue;
+        private static CancellationTokenSource _cancelToken = new CancellationTokenSource();
+        private BlockingCollection<PacketBase> _writeQueue;
 
         public Client (int port, Bot bot) {
             _bot = bot;
@@ -31,23 +32,23 @@ namespace TerraNPCBot {
             _writeThread = new Thread(SendPackets);
             _writeThread.IsBackground = true;
 
-            _writeQueue = new List<PacketBase>();
+            _writeQueue = new BlockingCollection<PacketBase>();
         }
 
-        public void AddPackets (PacketBase packet) {
+        public void QueuePackets (PacketBase packet) {
             _writeQueue.Add(packet);
         }
 
         private void SendPackets() { 
             while (_running) {
-                if (_writeQueue.Count > 0) {
-                    try {
-                        _writeQueue[0].Send();
-                        _writeQueue.RemoveAt(0);
+                try {
+                    if (!_writeQueue.TryTake(out PacketBase packet, -1, _cancelToken.Token)) {
+                        break; 
                     }
-                    catch {
-                        
-                    }
+                    packet.Send();
+                }
+                catch (OperationCanceledException) {
+                    break;
                 }
             }
         }         
@@ -60,6 +61,10 @@ namespace TerraNPCBot {
             return -1;
         }
 
+        /// <summary>
+        /// Allocates an index and starts the packet writing thread.
+        /// </summary>
+        /// <returns></returns>
         public bool Start() {
             if (!_writeThread.IsAlive) {
                 try {
@@ -68,10 +73,6 @@ namespace TerraNPCBot {
                         return false;
                     _running = true;
                     _bot.ID = (byte)slot;
-                    ClientSockets[slot] = new TcpSocket();
-                    ClientSockets[slot].Connect(new TcpAddress(
-                        new IPAddress(
-                            new byte[4] { 127, 0, 0, 1 }), _port));
                     _writeThread.Start();
                 }
                 catch (Exception ex) {
@@ -89,70 +90,14 @@ namespace TerraNPCBot {
         }
 
         /// <summary>
-        /// Stops the bot.
+        /// Stops the bot's write thread.
         /// </summary>
         public void Stop() {
             _running = false;
         }
 
-        public static ISocket[] ClientSockets = new TcpSocket[256];
-
-        public static void UnusedClientWriteCallback(object unused) {
-            //Lol!
-        }
-    }
-
-    [Obsolete]
-    public class BotSocket : ISocket {
-        private Bot bot;
-
-        public BotSocket(Bot b) : base() {
-            bot = b;
-        }
-
-        #region Nobody really cares.
-        public void Connect(RemoteAddress address) {
-            //Console.WriteLine("Connect");
-        }
-
-        public RemoteAddress GetRemoteAddress() {
-            //Console.WriteLine("GetRemoteAddress");
-            return null;
-        }
-
-        public bool IsDataAvailable() {
-            //Console.WriteLine("IsDataAvailable");
-            return false;
-        }
-
-        public void SendQueuedPackets() {
-            //Console.WriteLine("SendQueuedPackets");
-        }
-
-        public bool StartListening(SocketConnectionAccepted callback) {
-            //Console.WriteLine("StartListening");
-            return false;
-        }
-
-        public void StopListening() {
-            //Console.WriteLine("StopListening");
-        }
-
-        void ISocket.AsyncReceive(byte[] data, int offset, int size, SocketReceiveCallback callback, object state) {
-            //Console.WriteLine("AsyncReceive");
-        }
-
-        void ISocket.AsyncSend(byte[] data, int offset, int size, SocketSendCallback callback, object state) {
-            //Console.WriteLine("AsyncSend");
-        }
-        #endregion
-
-        public bool IsConnected() {
-            return false;
-        }
-
-        void ISocket.Close() {
-            //bot.AsTSPlayer?.Disconnect("Bot disconnected.");
+        public static void CancelAllConnections() {
+            _cancelToken.Cancel();
         }
     }
 }

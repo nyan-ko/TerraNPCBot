@@ -17,7 +17,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write((ushort)1);
                 new Terraria.Chat.ChatMessage(message).Serialize(Amanuensis);
 
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }

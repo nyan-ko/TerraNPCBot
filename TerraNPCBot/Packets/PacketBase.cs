@@ -14,7 +14,7 @@ namespace TerraNPCBot {
     public class PacketBase {
 
         public uint _packetType;
-        public int from = -1;
+        public int target = -1;
 
         private List<byte> _data;
         protected BinaryWriter Amanuensis;
@@ -29,10 +29,10 @@ namespace TerraNPCBot {
         /// Adds data to a packet from a stream.
         /// </summary>
         /// <param name="stream"></param>
-        protected void AddData(Stream stream) {
+        protected void Packetize() {
             using (MemoryStream s = new MemoryStream()) {
-                stream.Position = 0;
-                stream.CopyTo(s);
+                Amanuensis.BaseStream.Position = 0;
+                Amanuensis.BaseStream.CopyTo(s);
                 _data.AddRange(s.ToArray());
             }
         }
@@ -47,8 +47,11 @@ namespace TerraNPCBot {
                 }
                 Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
 
-                // from server -> all other clients
-                if (from == -1) {
+                if (target != -1) {
+
+                    return;
+                }
+                
                     foreach (RemoteClient sock in Netplay.Clients) {
                         if (sock.IsConnected()) {
                             try {
@@ -57,11 +60,7 @@ namespace TerraNPCBot {
                             catch { }
                         }
                     }
-                }
-                // from client -> server
-                else {
-                    Client.ClientSockets[from].AsyncSend(packet, 0, packet.Length, Client.UnusedClientWriteCallback);
-                }
+                
             }
             //catch (Exception ex) {
                 //TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);

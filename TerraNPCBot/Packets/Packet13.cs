@@ -24,7 +24,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(posY);
                 Amanuensis.Write(vecX);
                 Amanuensis.Write(vecY);
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
 
@@ -37,7 +37,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(selected);
                 Amanuensis.Write(posX);
                 Amanuensis.Write(posY);
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }

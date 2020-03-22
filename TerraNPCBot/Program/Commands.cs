@@ -143,46 +143,36 @@ namespace TerraNPCBot.Program {
 
             if (args.Parameters.Count > 1) {
                 BTSPlayer player = Program.Players[args.Player.Index];
+                string nameOrIndex = string.Join(" ", args.Parameters.Skip(1));
                 if (player._ownedBots == null || player._ownedBots.Count == 0) {
                     args.Player?.SendErrorMessage("You do not have any owned bots.");
                     return;
                 }
+                List<Bot> foundbots = player.GetBotFromIndexOrName(nameOrIndex);
 
-                int index = -1;
-                if (int.TryParse(args.Parameters[1], out int i)) {
-                    index = i - 1;
-                }
-                else {
-                    string name = string.Join(" ", args.Parameters.GetRange(1, args.Parameters.Count - 1)).ToLower();
-                    var bot = player._ownedBots.FirstOrDefault(x => x.Name.ToLower().StartsWith(name) || x.Name.ToLower() == name);
-                    if (bot != null) {
-                        index = player._ownedBots.IndexOf(bot);
-                    }
-                }
-
-                if (index >= 0 && index < player._ownedBots.Count) {
-                    player._selected = index;
-
-                    args.Player?.SendSuccessMessage($"Selected bot \"{player.SelectedBot.Name}\".");
-                }
-                else {
+                if (foundbots.Count == 0) {
                     args.Player?.SendErrorMessage("Could not find specified bot.");
+                }
+                else if (foundbots.Count > 1) {
+                    args.Player?.SendErrorMessage("Multiple bots matched your search criteria:");
+                    List<string> names = new List<string>();
+                    foreach (Bot bot in foundbots) {
+                        names.Add("\"" + bot.Name + "\"");
+                    }
+                    string stringnames = string.Join(", ", names);
+                    args.Player?.SendErrorMessage(stringnames);
+                }
+                else if (foundbots.Count == 1) {
+                    player._selected = foundbots[0].IndexInOwnerBots;
+                    args.Player?.SendSuccessMessage($"Selected bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots}.");
                 }
             }
             else {
                 args.Player.MultiMsg(Messages.Select, Color.Yellow);
-            }
+            } 
         }
 
         private static void NewBot(CommandArgs args) {
-            if (!args.Player.RealPlayer) {
-                Bot bot = new Bot();
-                bot._client = new Client(7777, bot);
-                bot._player = new Player("server");
-                BTSPlayer.BTSServerPlayer._ownedBots.Add(bot);
-                BTSPlayer.BTSServerPlayer._selected = BTSPlayer.BTSServerPlayer._ownedBots.Count - 1;
-                return;
-            }
             try {
                 if (NeedsHelpOrExample(args.Parameters, args.Player, Messages.New, Messages.NewExample))
                     return;
@@ -207,7 +197,7 @@ namespace TerraNPCBot.Program {
                     }
                 }
 
-                Bot bot = new Bot(args.Player.Index);
+                Bot bot = new Bot(args.Player.Index, bp._ownedBots.Count - 1);
                 bot._client = new Client(port, bot);
                 bot._player = new Player(name);
 
@@ -230,12 +220,6 @@ namespace TerraNPCBot.Program {
         }
 
         private static void StartBot(CommandArgs args) {
-            if (!args.Player.RealPlayer) {
-                Bot bot2 = BTSPlayer.BTSServerPlayer.SelectedBot;
-                bot2.Start();
-                return;
-            }
-
             if (!args.Player.HasPermission(Permissions.BotUse)) {
                 args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
@@ -274,15 +258,18 @@ namespace TerraNPCBot.Program {
             }
         }
 
+        private static void ConfirmedDelete(CommandArgs args) {
+
+        }
+
         private static void DeleteBot(CommandArgs args) {
-            var bot = Program.Players[args.Player.Index]?.SelectedBot;
+            var player = Program.Players[args.Player.Index];
+            var bot = player?.SelectedBot;
             if (bot != null) {
                 if (args.Parameters.Count == 1) {
-                    var player = Program.Players[args.Player.Index];
-                    player._ownedBots.RemoveAt(player._selected);
-                    args.Player?.SendSuccessMessage("Successfully deleted selected bot.");
+                    player._selectedDelete = player._selected;
                 }
-                else {
+                else if (args.Parameters.Count == 2) {
 
                 }
             }

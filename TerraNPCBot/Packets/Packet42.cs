@@ -17,7 +17,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(plr);
                 Amanuensis.Write(mana);
                 Amanuensis.Write(max);
-                AddData(Amanuensis.BaseStream);
+                Packetize();
             }
         }
     }
