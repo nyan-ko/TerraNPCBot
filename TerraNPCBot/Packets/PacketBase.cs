@@ -14,7 +14,7 @@ namespace TerraNPCBot {
     public class PacketBase {
 
         public uint _packetType;
-        public int target = -1;
+        public List<int> targets = new List<int>();
 
         private List<byte> _data;
         protected BinaryWriter Amanuensis;
@@ -32,39 +32,35 @@ namespace TerraNPCBot {
         protected void Packetize() {
             using (MemoryStream s = new MemoryStream()) {
                 Amanuensis.BaseStream.Position = 0;
+                Amanuensis.Write((short)(_data.Count + 3));
+                Amanuensis.Write((byte)_packetType);
                 Amanuensis.BaseStream.CopyTo(s);
                 _data.AddRange(s.ToArray());
             }
         }
 
         public void Send() {
-            //try 
-            {
-                byte[] packet = new byte[_data.Count + 3];
-                using (var writer = new BinaryWriter(new MemoryStream(packet))) {
-                    writer.Write((short)(_data.Count + 3));
-                    writer.Write((byte)_packetType);
-                }
-                Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
-
-                if (target != -1) {
-
-                    return;
-                }
-                
-                    foreach (RemoteClient sock in Netplay.Clients) {
-                        if (sock.IsConnected()) {
-                            try {
-                                sock.Socket.AsyncSend(packet, 0, packet.Length, sock.ServerWriteCallBack);
-                            }
-                            catch { }
-                        }
+            byte[] packet = _data.ToArray();
+            // Specific targets
+            if (targets.Count != 0) {
+                foreach (int i in targets) {
+                    try {
+                        Netplay.Clients[i].Socket.AsyncSend(packet, 0, packet.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
-                
+                    catch { }
+                }
+                return;
             }
-            //catch (Exception ex) {
-                //TShock.Log.Write($"Exception thrown with Send(): {ex}", System.Diagnostics.TraceLevel.Error);
-            //}
+                
+            // Entire server
+            foreach (RemoteClient sock in Netplay.Clients) {
+                if (sock.IsConnected()) {
+                    try {
+                        sock.Socket.AsyncSend(packet, 0, packet.Length, sock.ServerWriteCallBack);
+                    }
+                    catch { }
+                }
+            }
         }
 
         /// <summary>

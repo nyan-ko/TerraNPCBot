@@ -38,10 +38,11 @@ namespace TerraNPCBot {
 
         }
 
-        public Bot(int owner, int ownedbotsindex) {
+        public Bot(int owner, int ownedBotsIndex) {
             _owner = owner;
             Actions = new BotActions(this);
             _actuallyJoined = false;
+            IndexInOwnerBots = ownedBotsIndex;
         }
 
         public bool Start() { 
