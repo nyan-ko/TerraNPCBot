@@ -23,11 +23,15 @@ namespace TerraNPCBot {
         private Bot _bot;
         private Thread _writeThread;
         public bool _sendPackets;
+        //private static CancellationTokenSource _cancelToken = new CancellationTokenSource();
         private BlockingCollection<PacketBase> _writeQueue;
 
         public Client (int port, Bot bot) {
             _bot = bot;
             _port = port;
+            _sendPackets = true;
+            _writeThread = new Thread(SendPackets);
+            _writeThread.IsBackground = true;
 
             _writeQueue = new BlockingCollection<PacketBase>();
         }
@@ -39,20 +43,20 @@ namespace TerraNPCBot {
         private void SendPackets() { 
             while (_running) {
                 try {
-                    if (!_writeQueue.TryTake(out PacketBase packet) || !_sendPackets) {
-                        break; 
+                    if (!_writeQueue.TryTake(out PacketBase packet, -1)) {
+                        continue; 
                     }
                     packet.Send();
                 }
                 catch (OperationCanceledException) {
-                    break;
+                    continue;
                 }
             }
         }         
 
         private int FindOpenSlot() {
-            for (byte index = 0; index < Main.maxNetPlayers; ++index) {
-                if (!Netplay.Clients[index].IsConnected())
+            for (byte index = 254; index > 0; --index) {
+                if (!Netplay.Clients[index].IsConnected() && Program.Program.Bots[index] == null)
                     return index;
             }
             return -1;
@@ -70,10 +74,13 @@ namespace TerraNPCBot {
                         return false;
                     _running = true;
                     _bot.ID = (byte)slot;
-                    Netplay.Clients[slot].Reset();
-                    Netplay.Clients[slot].Socket = new ConnectedFillerSocket();
-                    _writeThread = new Thread(SendPackets);
-                    _writeThread.IsBackground = true;
+
+                    Main.player[slot] = new Terraria.Player();
+                    Netplay.Clients[slot] = new RemoteClient() {
+                        Socket = new ConnectedFillerSocket()
+                    };
+                    Program.Program.Bots[slot] = _bot;
+
                     _writeThread.Start();
                 }
                 catch (Exception ex) {
@@ -90,8 +97,16 @@ namespace TerraNPCBot {
         /// <summary>
         /// Stops the bot's write thread.
         /// </summary>
-        public void Stop() {
+        public async void Stop() {
             _running = false;
+            await Task.Delay(500);
+            _writeThread = new Thread(SendPackets);
+            _writeThread.IsBackground = true;
+        }
+
+        public bool ToggleSendPackets() {
+            _sendPackets = !_sendPackets;
+            return _sendPackets;
         }
     }
 
@@ -119,8 +134,6 @@ namespace TerraNPCBot {
         public RemoteAddress GetRemoteAddress() {
             return null;
         }
-
-
 
         public bool IsDataAvailable() {
             return false;

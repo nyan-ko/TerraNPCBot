@@ -46,7 +46,7 @@ namespace TerraNPCBot.Utils {
             foreach (var file in dir.GetFiles()) {
                 DateTime fileCreation = file.CreationTime;
                 if (DateTime.Compare(prune, fileCreation) <= 0) {
-                    file.MoveTo(Program.Program.PluginPrunedSaveFolderLocation);
+                    file.MoveTo(Path.Combine(Program.Program.PluginPrunedSaveFolderLocation, file.Name));
                 }
             }
         }
