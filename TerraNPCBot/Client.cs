@@ -36,8 +36,10 @@ namespace TerraNPCBot {
             _writeQueue = new BlockingCollection<PacketBase>();
         }
 
-        public void QueuePackets (PacketBase packet) {
-            _writeQueue.Add(packet);
+        public void QueuePackets (params PacketBase[] packets) {
+            foreach (var packet in packets) {
+                _writeQueue.Add(packet);
+            }
         }
 
         private void SendPackets() { 
@@ -75,11 +77,14 @@ namespace TerraNPCBot {
                     _running = true;
                     _bot.ID = (byte)slot;
 
+                    #region Slots
                     Main.player[slot] = new Terraria.Player();
+                    TShockAPI.TShock.Players[slot] = new TShockAPI.TSPlayer(slot);
                     Netplay.Clients[slot] = new RemoteClient() {
                         Socket = new ConnectedFillerSocket()
                     };
                     Program.Program.Bots[slot] = _bot;
+                    #endregion
 
                     _writeThread.Start();
                 }

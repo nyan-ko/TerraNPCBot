@@ -16,7 +16,7 @@ namespace TerraNPCBot {
         public byte _packetType;
         public List<int> targets = new List<int>();
 
-        private List<byte> _data = new List<byte>();
+        private byte[] _data;
         protected BinaryWriter Amanuensis;
 
         protected PacketBase(byte packetType) {
@@ -30,25 +30,26 @@ namespace TerraNPCBot {
         /// <param name="stream"></param>
         protected void Packetize() {
             using (MemoryStream stream = new MemoryStream()) {
+                short packetLength = (short)(Amanuensis.BaseStream.Position + 3);
+                Amanuensis.Write(packetLength);
+                Amanuensis.Write(_packetType);
                 Amanuensis.BaseStream.Position = 0;
                 Amanuensis.BaseStream.CopyTo(stream);
-                _data.AddRange(stream.ToArray());
+                _data = new byte[packetLength];
+                byte[] temp = stream.ToArray();
+
+                Buffer.BlockCopy(temp, 0, _data, 3, temp.Length - 3);
+                Buffer.BlockCopy(temp, packetLength - 3, _data, 0, 3);
+                
             }
         }
 
         public void Send() {
-            byte[] packet = new byte[_data.Count + 3];
-            using (BinaryWriter temp = new BinaryWriter(new MemoryStream(packet))) {
-                temp.Write((short)(_data.Count + 3));
-                temp.Write(_packetType);
-            }
-            Buffer.BlockCopy(_data.ToArray(), 0, packet, 3, _data.Count);
-
             // Specific targets
             if (targets.Count != 0) {
                 foreach (int i in targets) {
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(packet, 0, packet.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(_data, 0, _data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
@@ -59,7 +60,7 @@ namespace TerraNPCBot {
             for (int i = 0; i < 256; ++i) {
                 if (Netplay.Clients[i].IsConnected()) {
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(packet, 0, packet.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(_data, 0, _data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }

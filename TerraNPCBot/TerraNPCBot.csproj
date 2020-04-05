@@ -94,6 +94,7 @@
     <Compile Include="Packets\Packet5.cs" />
     <Compile Include="Packets\Packet50.cs" />
     <Compile Include="Packets\Packet55.cs" />
+    <Compile Include="Packets\Packet58.cs" />
     <Compile Include="Packets\Packet6.cs" />
     <Compile Include="Packets\Packet61.cs" />
     <Compile Include="Packets\Packet65.cs" />

@@ -584,7 +584,7 @@ namespace TerraNPCBot.Program {
         }
 
         public static void Debug(CommandArgs args) {
-            args.Player.SendMessage(args.Player.Index.ToString(), Color.Orange);
+            Program.Players[args.Player.Index].SelectedBot.Actions.PlayNote(float.Parse(args.Parameters[0]));
         }
     }
 }

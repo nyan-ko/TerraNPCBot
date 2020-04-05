@@ -9,17 +9,8 @@ using TerrariaApi.Server;
 
 namespace TerraNPCBot.Program {
     public class PluginHooks {
-        public static Dictionary<PacketTypes, PacketTypes> ClientSentPackets = new Dictionary<PacketTypes, PacketTypes> {
-            { PacketTypes.ConnectRequest, PacketTypes.ContinueConnecting },
-            { PacketTypes.ContinueConnecting2, PacketTypes.WorldInfo }
-        };
-
-
         public static void OnJoin(GreetPlayerEventArgs args) {
-            Program.Players[args.Who] = new BTSPlayer(args.Who);
-            if (Program.Bots[args.Who] != null) {
-                Program.Bots[args.Who]._actuallyJoined = true;
-            }            
+            Program.Players[args.Who] = new BTSPlayer(args.Who);          
         }
 
         public static void OnLeave(LeaveEventArgs args) {
