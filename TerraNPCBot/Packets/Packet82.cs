@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Terraria.Localization;
+using TerraNPCBot.Utils;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
@@ -12,11 +14,12 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Load net module (82) - only used for text :sad:
         /// </summary>
-        public Packet82(string message) : base(82) {
+        public Packet82(string message, byte id, Microsoft.Xna.Framework.Color color) : base(82) {
             using (Amanuensis) {
                 Amanuensis.Write((ushort)1);
-                new Terraria.Chat.ChatMessage(message).Serialize(Amanuensis);
-
+                Amanuensis.Write(id);
+                new NetworkText(message, NetworkText.Mode.Literal).Serialize(Amanuensis);
+                Amanuensis.Write(color);
                 Packetize();
             }
         }

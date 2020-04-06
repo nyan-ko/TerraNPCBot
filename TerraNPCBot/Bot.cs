@@ -45,7 +45,7 @@ namespace TerraNPCBot {
             Actions = new BotActions(this);
             IndexInOwnerBots = ownedBotsIndex;
 
-            _heartBeat = new Timer(10000);
+            _heartBeat = new Timer(8000);
             _heartBeat.Elapsed += SendAlive;
             _heartBeat.AutoReset = true;
         }
@@ -103,7 +103,7 @@ namespace TerraNPCBot {
             if (!ShouldSendAlive) 
                 return;
             
-            QueuePackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, AsTSPlayer.LastNetPosition));
+            QueuePackets(new Packets.Packet14(ID, true));
         }
 
         private bool ShouldSendAlive => Running && !_playingBack;
@@ -150,6 +150,11 @@ namespace TerraNPCBot {
         /// Gets the TSPlayer associated with the bot's index.
         /// </summary>
         public TSPlayer AsTSPlayer => TShock.Players[ID];
+
+        /// <summary>
+        /// Gets the bot's chat color based off its group on the server.
+        /// </summary>
+        public Microsoft.Xna.Framework.Color ChatColor => new Microsoft.Xna.Framework.Color(AsTSPlayer.Group.R, AsTSPlayer.Group.G, AsTSPlayer.Group.B);
 #endregion
     }
 
@@ -210,7 +215,7 @@ namespace TerraNPCBot {
         
         public virtual void PlayNote(float note) => QueuePackets(new Packets.Packet58(bot.ID, note));
 
-        public virtual void Chat(string message) => QueuePackets(new Packets.Packet82(message));
+        public virtual void Chat(string message) => QueuePackets(new Packets.Packet82(message, bot.ID, bot.ChatColor));
         
         /// <summary>
         /// Copies target's inventory and player info.
