@@ -29,8 +29,8 @@ namespace TerraNPCBot.Packets {
     /// </summary>
     public class Packet17Parser : ParsedPacketBase {
         public Packet17Parser(System.IO.Stream str) : base(17) {
-            using (_data = new System.IO.MemoryStream()) {
-                str.CopyTo(_data);
+            using (data = new System.IO.MemoryStream()) {
+                str.CopyTo(data);
             }
         }
     }

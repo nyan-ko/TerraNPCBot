@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot.Utils {
-    public static class StreamWriter {
+    public static class FileWriter {
 
         public static bool IsStreamCurrentVersion(byte version) {
             return version == Program.Program.PluginStreamVersion;
@@ -24,10 +24,10 @@ namespace TerraNPCBot.Utils {
                             new GZipStream(
                                     File.Open(PluginUtils.AllocateSavePath(player.SPlayer.User.ID), FileMode.Create), CompressionMode.Compress), Program.Program.BufferSize))) {
                 writer.Write(Program.Program.PluginStreamVersion);
-                writer.Write(player._autosave);
-                writer.Write(player._botLimit);
-                writer.Write(player._ownedBots.Count);
-                foreach (var b in player._ownedBots) {
+                writer.Write(player.autosave);
+                writer.Write(player.botLimit);
+                writer.Write(player.ownedBots.Count);
+                foreach (var b in player.ownedBots) {
                     BotToStream(writer, b);
                 }
             }
@@ -36,21 +36,21 @@ namespace TerraNPCBot.Utils {
 
         #region Bot
         public static void BotToStream(System.IO.BinaryWriter writer, Bot bot) {
-            PlrInfoToStream(writer, bot._player);
-            PlrInvToStream(writer, bot._player);
+            PlrInfoToStream(writer, bot.player);
+            PlrInvToStream(writer, bot.player);
 
-            if (bot._recordedPackets != null) {
-                writer.Write(bot._recordedPackets.Count);
-                foreach (var r in bot._recordedPackets) {
+            if (bot.recordedPackets != null) {
+                writer.Write(bot.recordedPackets.Count);
+                foreach (var r in bot.recordedPackets) {
                     RPToStream(writer, r);
                 }
             }
             else {
                 writer.Write(0);
             }
-            //if (bot._manager._listenReact != null) {
-            //    writer.Write(bot._manager._listenReact.Count);
-            //    foreach (var e in bot._manager._listenReact) {
+            //if (bot.manager.listenReact != null) {
+            //    writer.Write(bot.manager.listenReact.Count);
+            //    foreach (var e in bot.manager.listenReact) {
             //        FuncToStream(writer, e);
             //    }
             //}
@@ -134,10 +134,10 @@ namespace TerraNPCBot.Utils {
                                 new GZipStream(File.Open(path, FileMode.Open), CompressionMode.Decompress)))) {
                     if (!IsStreamCurrentVersion(reader.ReadByte()))
                         return null;
-                    plr._botLimit = reader.ReadUInt32();
+                    plr.botLimit = reader.ReadUInt32();
                     var count = reader.ReadInt32();
                     for (int i = 0; i < count; ++i) {
-                        plr._ownedBots.Add(BotFromStream(reader, index));
+                        plr.ownedBots.Add(BotFromStream(reader, index));
                     }
                 }
             }
@@ -151,17 +151,17 @@ namespace TerraNPCBot.Utils {
         }
 
         public static Bot BotFromStream(BinaryReader reader, int index) {
-            Bot b = new Bot(index, Program.Program.Players[index]._ownedBots.Count - 1) {
-                _player = PlayerFromStream(reader)
+            Bot b = new Bot(index, Program.Program.Players[index].ownedBots.Count - 1) {
+                player = PlayerFromStream(reader)
             };
             var count = reader.ReadInt32();
             for (int i = 0; i < count; ++i) {
-                b._recordedPackets.Add(RPFromStream(reader));
+                b.recordedPackets.Add(RPFromStream(reader));
             }
             count = reader.ReadInt32();
             //for (int i = 0; i < count; ++i) {
             //    var packetfuncpair = FuncFromStream(reader);
-            //    b._manager._listenReact.Add(packetfuncpair.packet, packetfuncpair.function);
+            //    b.manager.listenReact.Add(packetfuncpair.packet, packetfuncpair.function);
             //}
             return b;
         }

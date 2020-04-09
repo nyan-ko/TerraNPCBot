@@ -34,7 +34,7 @@ namespace TerraNPCBot.Utils {
             if (!File.Exists(path))
                 return;
             var now = DateTime.Now;
-            string oldpath = path.Insert(path.Length - 4, $"~{now.Year}_{now.Month}_{now.Day}_{now.Hour}_{now.Minute}~");
+            string oldpath = path.Insert(path.Length - 4, $"~{now.Year}{now.Month}{now.Day}{now.Hour}{now.Minute}~");
             if (File.Exists(oldpath)) {
                 File.Delete(oldpath);
             }

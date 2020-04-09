@@ -59,8 +59,8 @@ namespace TerraNPCBot.Packets {
 
     public class Packet13Parser : ParsedPacketBase {
         public Packet13Parser(Stream r) : base(0xD) {
-            using (_data = new MemoryStream()) {
-                r.CopyTo(_data);
+            using (data = new MemoryStream()) {
+                r.CopyTo(data);
             }
         }
     }

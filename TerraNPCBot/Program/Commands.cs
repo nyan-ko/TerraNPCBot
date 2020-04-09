@@ -144,7 +144,7 @@ namespace TerraNPCBot.Program {
             if (args.Parameters.Count > 1) {
                 BTSPlayer player = Program.Players[args.Player.Index];
                 string nameOrIndex = string.Join(" ", args.Parameters.Skip(1));
-                if (player._ownedBots == null || player._ownedBots.Count == 0) {
+                if (player.ownedBots == null || player.ownedBots.Count == 0) {
                     args.Player?.SendErrorMessage("You do not have any owned bots.");
                     return;
                 }
@@ -163,7 +163,7 @@ namespace TerraNPCBot.Program {
                     args.Player?.SendErrorMessage(stringnames);
                 }
                 else if (foundbots.Count == 1) {
-                    player._selected = foundbots[0].IndexInOwnerBots;
+                    player.selected = foundbots[0].IndexInOwnerBots;
                     args.Player?.SendSuccessMessage($"Selected bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots}.");
                 }
             }
@@ -197,19 +197,19 @@ namespace TerraNPCBot.Program {
                     }
                 }
 
-                Bot bot = new Bot(args.Player.Index, bp._ownedBots.Count - 1);
-                bot._client = new Client(port, bot);
-                bot._player = new Player(name);
+                Bot bot = new Bot(args.Player.Index, bp.ownedBots.Count);
+                bot.client = new Client(port, bot);
+                bot.player = new Player(name);
 
 
                 // Ports for each server Flag102
 
-                if (bp._ownedBots.Count + 1 > bp._botLimit) {
-                    args.Player?.SendErrorMessage($"You have reached the maximum number of bots you can create: {bp._botLimit}");
+                if (bp.ownedBots.Count + 1 > bp.botLimit) {
+                    args.Player?.SendErrorMessage($"You have reached the maximum number of bots you can create: {bp.botLimit}");
                     return;
                 }
-                bp._ownedBots.Add(bot);
-                bp._selected = bp._ownedBots.Count - 1;
+                bp.ownedBots.Add(bot);
+                bp.selected = bp.ownedBots.Count - 1;
 
                 args.Player?.SendInfoMessage(string.Format(Messages.BotSuccessCreateNew, bot.Name));
             }
@@ -238,7 +238,6 @@ namespace TerraNPCBot.Program {
             }
             else {
                 args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStarted, bot.Name));
-                //bot._checkJoin.Start(); 
             }
         }        
 
@@ -261,7 +260,8 @@ namespace TerraNPCBot.Program {
         private static void ConfirmedDelete(object obj) {
             CommandArgs args = (CommandArgs)obj;
             var player = Program.Players[args.Player.Index];
-            player._ownedBots.RemoveAt(player._selectedDelete);
+            player.SelectedBot.Shutdown();
+            player.ownedBots.RemoveAt(player.SelectedDelete);
             player.SPlayer?.SendSuccessMessage("Successfully deleted bot.");  
         }
 
@@ -270,14 +270,14 @@ namespace TerraNPCBot.Program {
                 return;
 
             var player = Program.Players[args.Player.Index];
-            if (args.Parameters.Count == 1 && player._selected != -1) {
-                player._selectedDelete = player._selected;
+            if (args.Parameters.Count == 1 && player.selected != -1) {
+                player.SelectedDelete = player.selected;
                 args.Player?.SendSuccessMessage("Currently selected bot will be deleted upon confirmation.");
                 args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
             }
             else if (args.Parameters.Count > 1) {
                 string nameOrIndex = string.Join(" ", args.Parameters.Skip(1)).Trim('"');
-                if (player._ownedBots == null || player._ownedBots.Count == 0) {
+                if (player.ownedBots == null || player.ownedBots.Count == 0) {
                     args.Player?.SendErrorMessage("You do not have any owned bots.");
                     return;
                 }
@@ -296,7 +296,7 @@ namespace TerraNPCBot.Program {
                     args.Player?.SendErrorMessage(stringnames);
                 }
                 else if (foundbots.Count == 1) {
-                    player._selectedDelete = foundbots[0].IndexInOwnerBots;
+                    player.SelectedDelete = foundbots[0].IndexInOwnerBots;
                     args.Player?.SendSuccessMessage($"Selecting bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots} to delete.");
                     args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
                 }
@@ -318,12 +318,12 @@ namespace TerraNPCBot.Program {
 
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
-                if (bot._recording) {
+                if (bot.recording) {
                     args.Player?.SendErrorMessage($"Selected bot \"{bot.Name}\" is already recording.");
                     return;
                 }
-                bot._recording = true;
-                bot._recordedPackets = new List<RecordedPacket>();
+                bot.recording = true;
+                bot.recordedPackets = new List<RecordedPacket>();
 
                 args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessRecording, bot.Name));
             } 
@@ -344,7 +344,7 @@ namespace TerraNPCBot.Program {
 
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
-                bot._recording = false;
+                bot.recording = false;
                 args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStopRecording, bot.Name));
             } 
             else {
@@ -364,7 +364,7 @@ namespace TerraNPCBot.Program {
 
             var bot = Program.Players[args.Player.Index]?.SelectedBot;
             if (bot != null) {
-                if (bot._recordedPackets.Count == 0) {
+                if (bot.recordedPackets.Count == 0) {
                     args.Player?.SendErrorMessage("No recorded actions found.");
                     return;
                 }
@@ -415,7 +415,7 @@ namespace TerraNPCBot.Program {
             else {
                 tstarget = args.Player;
             }
-            if (!Program.Players[tstarget.Index]._canBeCopied && !args.Player.HasPermission(Permissions.BotBypassCopy)) {
+            if (!Program.Players[tstarget.Index].canBeCopied && !args.Player.HasPermission(Permissions.BotBypassCopy)) {
                 args.Player?.SendErrorMessage("This player has disabled inventory copying.");
                 return;
             }
@@ -437,7 +437,7 @@ namespace TerraNPCBot.Program {
                 args.Player?.SendErrorMessage(Messages.NoPermission);
                 return;
             }
-            StreamWriter.BTSPlayerToStream(Program.Players[args.Player.Index]);
+            FileWriter.BTSPlayerToStream(Program.Players[args.Player.Index]);
             args.Player?.SendSuccessMessage("Successfully saved player data.");
         }
 
@@ -571,7 +571,7 @@ namespace TerraNPCBot.Program {
                 else {
                     tstarget = args.Player;
                 }
-                if (!Program.Players[tstarget.Index]._canBeTeleportedTo && !args.Player.HasPermission(Permissions.BotBypassTele)) {
+                if (!Program.Players[tstarget.Index].canBeTeleportedTo && !args.Player.HasPermission(Permissions.BotBypassTele)) {
                     args.Player?.SendErrorMessage("This player has disabled bot teleportation.");
                     return;
                 }

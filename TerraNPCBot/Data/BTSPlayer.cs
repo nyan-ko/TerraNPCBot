@@ -10,46 +10,56 @@ namespace TerraNPCBot {
         public static BTSPlayer BTSServerPlayer = new BTSPlayer();
 
         internal BTSPlayer() {
-            _ownedBots = new List<Bot>();
-            _selected = -1;
+            ownedBots = new List<Bot>();
+            selected = -1;
         }
 
         public BTSPlayer(int index) {
-            _ownedBots = new List<Bot>();
-            _selected = -1;
+            ownedBots = new List<Bot>();
+            selected = -1;
 
-            _serverIndex = index;
+            ServerIndex = index;
         }
 
-        private int _serverIndex;
-        public uint _botLimit = 10; //Flag102
-        public List<Bot> _ownedBots;
-        public int _selected;
-        public int _selectedDelete {
+        public int ServerIndex { get; private set; }
+        private int selectedDelete;
+        public int SelectedDelete {
             get {
-                int del = _selectedDelete;
-                _selectedDelete = -1;
+                int del = selectedDelete;
+                selectedDelete = -1;
                 return del;
             }
-            set { _selectedDelete = value; }
+            set { selectedDelete = value; }
         }
 
-        public bool _autosave;
-        public bool _canBeTeleportedTo;
-        public bool _canBeCopied;
+        public uint botLimit = 10;
+        public List<Bot> ownedBots;
+        public int selected;
 
+        public bool autosave = true;
+        public bool canBeTeleportedTo = false;
+        public bool canBeCopied = false;
+
+        /// <summary>
+        /// Finds a bot given its name or index within a player's owned bots.
+        /// </summary>
+        /// <param name="nameOrIndex"></param>
+        /// <returns></returns>
         public List<Bot> GetBotFromIndexOrName(string nameOrIndex) {
             List<Bot> found = new List<Bot>();
+            nameOrIndex = nameOrIndex.ToLower();
 
+            // Index search
             if (int.TryParse(nameOrIndex, out int index)) {
-                if (index < _ownedBots.Count && index >= 0)
-                    return new List<Bot> { _ownedBots[index] };
+                if (index < ownedBots.Count && index >= 0 && ownedBots?[index] != null)
+                    return new List<Bot> { ownedBots[index] };
                 else {
                     return found;
                 }
             }
 
-            foreach (Bot bot in _ownedBots) {
+            // Name search
+            foreach (Bot bot in ownedBots) {
                 if (bot.Name.ToLower() == nameOrIndex)
                     return new List<Bot> { bot };
                 if (bot.Name.ToLower().StartsWith(nameOrIndex))
@@ -60,11 +70,11 @@ namespace TerraNPCBot {
         }
 
         public Bot SelectedBot {
-            get { return _ownedBots.Count > 0 && _selected != -1 ? _ownedBots[_selected] : null; }
+            get { return ownedBots.Count > 0 && selected != -1 ? ownedBots[selected] : null; }
         }
 
         public TSPlayer SPlayer {
-            get { return TShock.Players[_serverIndex]; }
+            get { return TShock.Players[ServerIndex]; }
         }
     }
 }

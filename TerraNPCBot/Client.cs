@@ -17,36 +17,42 @@ namespace TerraNPCBot {
     /// </summary>
     public class Client {
         public const int BufferSize = 131072;       
-        public bool _running;
-        public int _port;
+        public bool running;
+        public int port;
 
-        private Bot _bot;
-        private Thread _writeThread;
-        public bool _sendPackets;
-        //private static CancellationTokenSource _cancelToken = new CancellationTokenSource();
-        private BlockingCollection<PacketBase> _writeQueue;
+        private Bot bot;
+        private Thread writeThread;
+        public bool sendPackets;
+        //private static CancellationTokenSource cancelToken = new CancellationTokenSource();
+        private BlockingCollection<PacketBase> writeQueue;
 
-        public Client (int port, Bot bot) {
-            _bot = bot;
-            _port = port;
-            _sendPackets = true;
-            _writeThread = new Thread(SendPackets);
-            _writeThread.IsBackground = true;
+        public Client (int _port, Bot _bot) {
+            bot = _bot;
+            port = _port;
+            sendPackets = true;
+            writeThread = new Thread(SendPackets);
+            writeThread.IsBackground = true;
 
-            _writeQueue = new BlockingCollection<PacketBase>();
+            writeQueue = new BlockingCollection<PacketBase>();
         }
 
         public void QueuePackets (params PacketBase[] packets) {
             foreach (var packet in packets) {
-                _writeQueue.Add(packet);
+                writeQueue.Add(packet);
             }
         }
 
         private void SendPackets() { 
-            while (_running) {
+            while (running) {
                 try {
-                    if (!_writeQueue.TryTake(out PacketBase packet, -1)) {
+                    if (!sendPackets || !writeQueue.TryTake(out PacketBase packet, -1)) {
                         continue; 
+                    }
+                    if (packet.packetType == 255) {
+                        // Plugin-exclusive shutdown packet, must follow a player active packet
+                        // with an inactive flag to both disconnect the bot and stop this write thread
+                        Stop();
+                        break;
                     }
                     packet.Send();
                 }
@@ -69,13 +75,13 @@ namespace TerraNPCBot {
         /// </summary>
         /// <returns></returns>
         public bool Start() {
-            if (!_writeThread.IsAlive) {
+            if (!writeThread.IsAlive) {
                 try {
                     int slot = FindOpenSlot();
                     if (slot == -1)
                         return false;
-                    _running = true;
-                    _bot.ID = (byte)slot;
+                    running = true;
+                    bot.ID = (byte)slot;
 
                     #region Slots
                     Main.player[slot] = new Terraria.Player();
@@ -83,10 +89,10 @@ namespace TerraNPCBot {
                     Netplay.Clients[slot] = new RemoteClient() {
                         Socket = new ConnectedFillerSocket()
                     };
-                    Program.Program.Bots[slot] = _bot;
+                    Program.Program.Bots[slot] = bot;
                     #endregion
 
-                    _writeThread.Start();
+                    writeThread.Start();
                 }
                 catch (Exception ex) {
                     Console.WriteLine($"Exception thrown while getting server info: {ex.ToString()} {ex.Source}");
@@ -94,7 +100,7 @@ namespace TerraNPCBot {
 
                     return false;
                 }
-                return _running;
+                return running;
             }
             return false;
         }
@@ -103,15 +109,15 @@ namespace TerraNPCBot {
         /// Stops the bot's write thread.
         /// </summary>
         public async void Stop() {
-            _running = false;
+            running = false;
             await Task.Delay(500);
-            _writeThread = new Thread(SendPackets);
-            _writeThread.IsBackground = true;
+            writeThread = new Thread(SendPackets);
+            writeThread.IsBackground = true;
         }
 
         public bool ToggleSendPackets() {
-            _sendPackets = !_sendPackets;
-            return _sendPackets;
+            sendPackets = !sendPackets;
+            return sendPackets;
         }
     }
 

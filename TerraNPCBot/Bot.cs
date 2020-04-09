@@ -14,83 +14,85 @@ namespace TerraNPCBot {
         public const int Protocol = 194;
         public const string Address = "127.0.0.1";
 
-        public int _owner;
+        public int owner;
       
-        public bool _recording;
-        public bool _actuallyJoined;
+        public bool recording;
+        public bool actuallyJoined;
 
-        //public EventManager _manager;
-        public Player _player;
-        public Client _client;
+        //public EventManager manager;
+        public Player player;
+        public Client client;
         public BotActions Actions;
 
-        private Timer _heartBeat;
+        private Timer heartBeat;
 
         #region Record Packets
-        public bool _playingBack;
-        public List<RecordedPacket> _recordedPackets;
+        public bool playingBack;
+        public List<RecordedPacket> recordedPackets;
 
-        public Stopwatch _timerBetweenPackets;
-        public StreamInfo _previousPacket;   
-        public Timer _delayBetweenPackets;
-        public int _PacketIndex;
+        public Stopwatch timerBetweenPackets;
+        public StreamInfo previousPacket;   
+        public Timer delayBetweenPackets;
+        public int PacketIndex;
         #endregion
 
         internal Bot() {
 
         }
 
-        public Bot(int owner, int ownedBotsIndex) {
-            _owner = owner;
+        public Bot(int _owner, int ownedBotsIndex) {
+            owner = _owner;
             Actions = new BotActions(this);
             IndexInOwnerBots = ownedBotsIndex;
 
-            _heartBeat = new Timer(8000);
-            _heartBeat.Elapsed += SendAlive;
-            _heartBeat.AutoReset = true;
+            heartBeat = new Timer(8000);
+            heartBeat.Elapsed += SendAlive;
+            heartBeat.AutoReset = true;
         }
 
         public bool Start() { 
-            if (_client.Start()) {
+            if (client.Start()) {
                 Program.Program.GlobalRunningBots.Add(this);
                 SendJoinPackets();
-                _heartBeat.Start();
+                heartBeat.Start();
                 return true;
             }
             else
                 return false;
         }
 
-        public async void Shutdown() {
-            QueuePackets(new Packets.Packet14(ID, false));
-            await Task.Delay(500);
-            _client.Stop();
+        /// <summary>
+        /// Sends a player inactive packet to all players, then waits 500ms before stopping its write thread.
+        /// </summary>
+        public void Shutdown() {
+            QueuePackets(new Packets.Packet14(ID, false),
+                new Packets.ShutdownPacket());
             Program.Program.GlobalRunningBots.Remove(this);
         }
 
         #region Record
         public void StartRecordTimer() {
-            _delayBetweenPackets = new Timer(10);
-            _delayBetweenPackets.Elapsed += RecordedPacketDelay;
-            _delayBetweenPackets.AutoReset = true;
-            _delayBetweenPackets.Start();
-            _playingBack = true;
+            delayBetweenPackets = new Timer(10);
+            delayBetweenPackets.Elapsed += RecordedPacketDelay;
+            delayBetweenPackets.AutoReset = true;
+            delayBetweenPackets.Start();
+            playingBack = true;
         }
 
         public void RecordedPacketDelay(object sender, ElapsedEventArgs args) {
             var timer = (Timer)sender;
-            var currentPacket = _recordedPackets[_PacketIndex];
-            bool lastPacket = _PacketIndex == (_recordedPackets.Count - 1);
+            var currentPacket = recordedPackets[PacketIndex];
+            bool lastPacket = PacketIndex == (recordedPackets.Count - 1);
 
             if (lastPacket) {
                 timer.Stop();
                 timer.Dispose();
-                _PacketIndex = 0;
-                _playingBack = false;
+                PacketIndex = 0;
+                playingBack = false;
             }
             else {
                 timer.Interval = currentPacket.timeBeforeNextPacket == 0 ? currentPacket.timeBeforeNextPacket + 1 : currentPacket.timeBeforeNextPacket;
-                ++_PacketIndex;
+                ++PacketIndex;
             }
 
             var packet = PacketBase.WriteFromRecorded(currentPacket.stream, this);
@@ -106,15 +108,15 @@ namespace TerraNPCBot {
             QueuePackets(new Packets.Packet14(ID, true));
         }
 
-        private bool ShouldSendAlive => Running && !_playingBack;
+        private bool ShouldSendAlive => Running && !playingBack;
 
-        private void QueuePackets(params PacketBase[] packets) => _client.QueuePackets(packets);
+        private void QueuePackets(params PacketBase[] packets) => client.QueuePackets(packets);
 
         private void SendJoinPackets() {
-            QueuePackets(new Packets.Packet4(_player),
-                new Packets.Packet16(ID, (short)_player.CurHP, (short)_player.MaxHP),
+            QueuePackets(new Packets.Packet4(player),
+                new Packets.Packet16(ID, (short)player.CurHP, (short)player.MaxHP),
                 new Packets.Packet30(ID, false),
-                new Packets.Packet42(ID, (short)_player.CurMana, (short)_player.MaxMana),
+                new Packets.Packet42(ID, (short)player.CurMana, (short)player.MaxMana),
                 new Packets.Packet45(ID, 0),
                 new Packets.Packet50(ID, new byte[22]),
                 new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
@@ -125,16 +127,16 @@ namespace TerraNPCBot {
         public byte ID {
             get {
                 if (Running)
-                    return (byte)_player.PlayerID;
+                    return (byte)player.PlayerID;
                 return 0;
             }
-            set => _player.PlayerID = value;
+            set => player.PlayerID = value;
         }
 
         /// <summary>
         /// Gets the bot's player name.
         /// </summary>
-        public string Name => _player.Name;
+        public string Name => player.Name;
 
         /// <summary>
         /// Gets the bot's position in the owner's owned bots.
@@ -144,7 +146,7 @@ namespace TerraNPCBot {
         /// <summary>
         /// Gets the bot's running status.
         /// </summary>
-        public bool Running => _client._running;
+        public bool Running => client.running;
 
         /// <summary>
         /// Gets the TSPlayer associated with the bot's index.
@@ -161,15 +163,15 @@ namespace TerraNPCBot {
     public class BotActions {
         private Bot bot;
 
-        public BotActions(Bot _bot) {
-            bot = _bot;
+        public BotActions(Bot b) {
+            bot = b;
         }
 
-        private void QueuePackets(params PacketBase[] packets) => bot._client.QueuePackets(packets);
+        private void QueuePackets(params PacketBase[] packets) => bot.client.QueuePackets(packets);
 
         public virtual void UpdateInventory() {
             byte i = 0;
-            foreach (var current in bot._player.InventorySlots) {
+            foreach (var current in bot.player.InventorySlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
                     current.stack,
@@ -177,7 +179,7 @@ namespace TerraNPCBot {
                     current.netID));
                 ++i;
             }
-            foreach (var current in bot._player.ArmorSlots) {
+            foreach (var current in bot.player.ArmorSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
                     current.stack,
@@ -185,7 +187,7 @@ namespace TerraNPCBot {
                     current.netID));
                 ++i;
             }
-            foreach (var current in bot._player.DyeSlots) {
+            foreach (var current in bot.player.DyeSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
                     current.stack,
@@ -193,7 +195,7 @@ namespace TerraNPCBot {
                     current.netID));
                 ++i;
             }
-            foreach (var current in bot._player.MiscEquipSlots) {
+            foreach (var current in bot.player.MiscEquipSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
                     current.stack,
@@ -201,7 +203,7 @@ namespace TerraNPCBot {
                     current.netID));
                 ++i;
             }
-            foreach (var current in bot._player.MiscDyeSlots) {
+            foreach (var current in bot.player.MiscDyeSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
                     current.stack,
@@ -231,21 +233,21 @@ namespace TerraNPCBot {
         /// </summary>
         /// <param name="target"></param>
         public virtual void InventoryCopy(Terraria.Player target) {
-            var _player = bot._player;
+            var player = bot.player;
             for (int i = 0; i < NetItem.InventorySlots; ++i) {
-                _player.InventorySlots[i] = ItemData.FromTerrariaItem(target.inventory[i]);
+                player.InventorySlots[i] = ItemData.FromTerrariaItem(target.inventory[i]);
             }
             for (int i = 0; i < NetItem.ArmorSlots; ++i) {
-                _player.ArmorSlots[i] = ItemData.FromTerrariaItem(target.armor[i]);
+                player.ArmorSlots[i] = ItemData.FromTerrariaItem(target.armor[i]);
             }
             for (int i = 0; i < NetItem.DyeSlots; ++i) {
-                _player.DyeSlots[i] = ItemData.FromTerrariaItem(target.dye[i]);
+                player.DyeSlots[i] = ItemData.FromTerrariaItem(target.dye[i]);
             }
             for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
-                _player.MiscDyeSlots[i] = ItemData.FromTerrariaItem(target.miscDyes[i]);
+                player.MiscDyeSlots[i] = ItemData.FromTerrariaItem(target.miscDyes[i]);
             }
             for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
-                _player.MiscEquipSlots[i] = ItemData.FromTerrariaItem(target.miscEquips[i]);
+                player.MiscEquipSlots[i] = ItemData.FromTerrariaItem(target.miscEquips[i]);
             }
             if (bot.Running)
                 UpdateInventory();
@@ -256,34 +258,34 @@ namespace TerraNPCBot {
         /// </summary>
         /// <param name="target"></param>
         public virtual void InfoCopy(Terraria.Player target) {
-            var _player = bot._player;
-            _player.HairType = (byte)target.hair;
-            _player.HairDye = target.hairDye;
-            _player.SkinVariant = (byte)target.skinVariant;
-            _player.HMisc = target.hideMisc;
+            var player = bot.player;
+            player.HairType = (byte)target.hair;
+            player.HairDye = target.hairDye;
+            player.SkinVariant = (byte)target.skinVariant;
+            player.HMisc = target.hideMisc;
 
-            _player.EyeColor = target.eyeColor;
-            _player.HairColor = target.hairColor;
-            _player.PantsColor = target.pantsColor;
-            _player.ShirtColor = target.shirtColor;
-            _player.ShoeColor = target.shoeColor;
-            _player.SkinColor = target.skinColor;
-            _player.UnderShirtColor = target.underShirtColor;
+            player.EyeColor = target.eyeColor;
+            player.HairColor = target.hairColor;
+            player.PantsColor = target.pantsColor;
+            player.ShirtColor = target.shirtColor;
+            player.ShoeColor = target.shoeColor;
+            player.SkinColor = target.skinColor;
+            player.UnderShirtColor = target.underShirtColor;
 
             // Terraria uses this struct so I'm doing it too
             BitsByte bit1 = 0;
             for (int i = 0; i < 8; ++i) {
                 bit1[i] = target.hideVisual[i];
             }
-            _player.HVisuals1 = bit1;
+            player.HVisuals1 = bit1;
             BitsByte bit2 = 0;
             for (int i = 8; i < 10; ++i) {
                 bit2[i] = target.hideVisual[i];
             }
-            _player.HVisuals2 = bit2;
+            player.HVisuals2 = bit2;
 
             if (bot.Running)
-                QueuePackets(new Packets.Packet4(_player));
+                QueuePackets(new Packets.Packet4(player));
         }
     }
 

@@ -13,33 +13,33 @@ using Terraria;
 namespace TerraNPCBot {
     public class PacketBase {
 
-        public byte _packetType;
+        public byte packetType;
         public List<int> targets = new List<int>();
 
-        private byte[] _data;
+        private byte[] data;
         protected BinaryWriter Amanuensis;
 
-        protected PacketBase(byte packetType) {
+        protected PacketBase(byte _packetType) {
             Amanuensis = new BinaryWriter(new MemoryStream());
-            _packetType = packetType;
+            packetType = _packetType;
         }
 
         /// <summary>
         /// Adds data to a packet from a stream.
         /// </summary>
         /// <param name="stream"></param>
-        protected void Packetize() {
+        protected void Packetize() { // I will NOT switch to American English
             using (MemoryStream stream = new MemoryStream()) {
                 short packetLength = (short)(Amanuensis.BaseStream.Position + 3);
                 Amanuensis.Write(packetLength);
-                Amanuensis.Write(_packetType);
+                Amanuensis.Write(packetType);
                 Amanuensis.BaseStream.Position = 0;
                 Amanuensis.BaseStream.CopyTo(stream);
-                _data = new byte[packetLength];
+                data = new byte[packetLength];
                 byte[] temp = stream.ToArray();
 
-                Buffer.BlockCopy(temp, 0, _data, 3, temp.Length - 3);
-                Buffer.BlockCopy(temp, packetLength - 3, _data, 0, 3);
+                Buffer.BlockCopy(temp, 0, data, 3, temp.Length - 3); // Copies actual packet data
+                Buffer.BlockCopy(temp, packetLength - 3, data, 0, 3); // Copies packet header (length, type)
                 
             }
         }
@@ -49,7 +49,7 @@ namespace TerraNPCBot {
             if (targets.Count != 0) {
                 foreach (int i in targets) {
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(_data, 0, _data.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
@@ -60,7 +60,7 @@ namespace TerraNPCBot {
             for (int i = 0; i < 256; ++i) {
                 if (Netplay.Clients[i].IsConnected()) {
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(_data, 0, _data.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
@@ -343,11 +343,11 @@ namespace TerraNPCBot {
     }
 
     public class ParsedPacketBase {
-        public MemoryStream _data;
-        public uint _packetType;
+        public MemoryStream data;
+        public uint packetType;
 
         public ParsedPacketBase(uint packet) {
-            _packetType = packet;
+            packetType = packet;
         }        
     }
 }
