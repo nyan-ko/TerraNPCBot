@@ -45,15 +45,16 @@ namespace TerraNPCBot {
         private void SendPackets() { 
             while (running) {
                 try {
-                    if (!sendPackets || !writeQueue.TryTake(out PacketBase packet, -1)) {
+                    if (!writeQueue.TryTake(out PacketBase packet, -1))
                         continue; 
-                    }
                     if (packet.packetType == 255) {
                         // Plugin-exclusive shutdown packet, must follow a player active packet
                         // with an inactive flag to both disconnect the bot and stop this write thread
                         Stop();
                         break;
                     }
+                    if (!sendPackets)
+                        continue;
                     packet.Send();
                 }
                 catch (OperationCanceledException) {

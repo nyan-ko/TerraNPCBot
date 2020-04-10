@@ -16,8 +16,8 @@ namespace TerraNPCBot.Program {
         public const string BotCopy = "bot.copy";
         public const string BotCopyOther = "bot.copy.other";
 
-        public const string BotBypassCopy = "bot.bypass.copy";
-        public const string BotBypassTele = "bot.bypass.teleportation";
+        public const string BotBypassCopy = "bot.bypass.copy"; // bypass BTSPlayer.canBeCopied
+        public const string BotBypassTeleport = "bot.bypass.teleportation"; // bypass BTSPlayer.canBeTeleportedTo
 
         public const string BotSave = "bot.save";
         public const string BotSavePruning = "bot.save.prune";

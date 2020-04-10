@@ -1,29 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Terraria;
 using TShockAPI;
 
 namespace TerraNPCBot.Utils {
     public static class PluginUtils {
-        public static void WriteColor(this BinaryWriter writer, Color color) {
-            writer.Write(color.R);
-            writer.Write(color.G);
-            writer.Write(color.B);
-        }
-
-        public static Color ReadColor(this BinaryReader reader) {
-            return new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
-        }
-
-        public static void MultiMsg(this TSPlayer player, List<string> msgs, Microsoft.Xna.Framework.Color color) {
-            foreach (var x in msgs) {
-                player?.SendMessage(x, color);
-            }
-            player?.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
-        }
-
+        private static Regex legalCharacters = new Regex(@"[^A-Z+a-z+0-9+-+_+,+.+~+*]");
         public static string AllocateSavePath(int id) {
             string path = Path.Combine(Program.Program.PluginSaveFolderLocation, $"bplayer-{id}.dat");
             CreateOld(path);
@@ -45,10 +30,25 @@ namespace TerraNPCBot.Utils {
             System.IO.DirectoryInfo dir = new System.IO.DirectoryInfo(Program.Program.PluginSaveFolderLocation);
             foreach (var file in dir.GetFiles()) {
                 DateTime fileCreation = file.CreationTime;
+                // DateTime.Compare() returns a 1 if 'prune' is later than the save file creation date
+                // effectively moving all files made earlier than 'prune' (0 or -1 from Compare()) to the pruned folder location
                 if (DateTime.Compare(prune, fileCreation) <= 0) {
                     file.MoveTo(Path.Combine(Program.Program.PluginPrunedSaveFolderLocation, file.Name));
                 }
             }
+        }
+
+        public static bool ValidBotName(ref string name) {
+            MatchCollection matchIllegals = legalCharacters.Matches(name);  // Find all characters not included in the RegEx
+            if (matchIllegals.Count > 0) {
+                char[] chars = name.ToCharArray();
+                foreach (Match match in matchIllegals) {
+                    chars[match.Index] = '*';  // Censor illegal character lol
+                }
+                name = new string(chars);
+                return false;
+            }
+            return true;
         }
     }
 }

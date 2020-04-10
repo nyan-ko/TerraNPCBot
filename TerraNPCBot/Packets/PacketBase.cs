@@ -25,7 +25,7 @@ namespace TerraNPCBot {
         }
 
         /// <summary>
-        /// Adds data to a packet from a stream.
+        /// Creates the actual packet from the data stream with a header.
         /// </summary>
         /// <param name="stream"></param>
         protected void Packetize() { // I will NOT switch to American English
@@ -40,14 +40,26 @@ namespace TerraNPCBot {
 
                 Buffer.BlockCopy(temp, 0, data, 3, temp.Length - 3); // Copies actual packet data
                 Buffer.BlockCopy(temp, packetLength - 3, data, 0, 3); // Copies packet header (length, type)
-                
             }
         }
 
         public void Send() {
+            // Force sent player active packet
+            // Must be initialized with a target in the 'targets' list
+            if (packetType == 254) { 
+                try {
+                    RemoteClient target = Netplay.Clients[targets[0]];
+                    target.Socket.AsyncSend(data, 0, data.Length, target.ServerWriteCallBack);
+                    return;
+                }
+                catch (IndexOutOfRangeException) { }
+            }
+
             // Specific targets
             if (targets.Count != 0) {
                 foreach (int i in targets) {
+                    if (Program.Program.Players[i].IgnoreBots)
+                        return;
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
@@ -58,7 +70,7 @@ namespace TerraNPCBot {
 
             // Entire server
             for (int i = 0; i < 256; ++i) {
-                if (Netplay.Clients[i].IsConnected()) {
+                if (Netplay.Clients[i].IsConnected() && !Program.Program.Players[i].IgnoreBots) {
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }
@@ -67,30 +79,26 @@ namespace TerraNPCBot {
             }
         }
 
-        /// <summary>
-        /// Parses stream of data into something usable. <para/> Packet structure from https://tshock.readme.io/v4.3.22/docs/multiplayer-packet-structure
-        /// </summary>
-        /// <param name="reader"></param>
-        public static ParsedPacketBase Parse(BinaryReader reader, Player plr, Bot bot) {
-            ParsedPacketBase packet = null;
+        //public static ParsedPacketBase Parse(BinaryReader reader, Player plr, Bot bot) {
+        //    ParsedPacketBase packet = null;
 
-            short length;
-            byte type;
+        //    short length;
+        //    byte type;
 
-            using (reader) {
-                length = reader.ReadInt16();
-                type = reader.ReadByte();
+        //    using (reader) {
+        //        length = reader.ReadInt16();
+        //        type = reader.ReadByte();
 
-                // Flag102
-                switch (type) {
-                    case 13: // player update
-                        packet = new Packets.Packet13Parser(reader.BaseStream);
-                        break;
-                }
-            }
+        //        // Flag102
+        //        switch (type) {
+        //            case 13: // player update
+        //                packet = new Packets.Packet13Parser(reader.BaseStream);
+        //                break;
+        //        }
+        //    }
 
-            return packet;
-        }
+        //    return packet;
+        //}
 
         public static PacketBase WriteFromRecorded(StreamInfo r, Bot b) {
             PacketBase packet = null;

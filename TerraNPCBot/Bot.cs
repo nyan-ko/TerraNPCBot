@@ -62,7 +62,7 @@ namespace TerraNPCBot {
         }
 
         /// <summary>
-        /// Sends a player inactive packet to all players, then waits 500ms before stopping its write thread.
+        /// Sends a player inactive packet to all players then tells itself to stop its write thread.
         /// </summary>
         public void Shutdown() {
             QueuePackets(new Packets.Packet14(ID, false),
@@ -79,7 +79,7 @@ namespace TerraNPCBot {
             playingBack = true;
         }
 
-        public void RecordedPacketDelay(object sender, ElapsedEventArgs args) {
+        private void RecordedPacketDelay(object sender, ElapsedEventArgs args) {
             var timer = (Timer)sender;
             var currentPacket = recordedPackets[PacketIndex];
             bool lastPacket = PacketIndex == (recordedPackets.Count - 1);
@@ -102,9 +102,8 @@ namespace TerraNPCBot {
         #endregion
 
         private void SendAlive(object source, ElapsedEventArgs args) {
-            if (!ShouldSendAlive) 
-                return;
-            
+            if (!ShouldSendAlive)
+                return;            
             QueuePackets(new Packets.Packet14(ID, true));
         }
 

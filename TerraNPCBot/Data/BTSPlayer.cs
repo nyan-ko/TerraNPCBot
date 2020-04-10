@@ -12,6 +12,8 @@ namespace TerraNPCBot {
         internal BTSPlayer() {
             ownedBots = new List<Bot>();
             selected = -1;
+
+            ServerIndex = -1;
         }
 
         public BTSPlayer(int index) {
@@ -39,6 +41,22 @@ namespace TerraNPCBot {
         public bool autosave = true;
         public bool canBeTeleportedTo = false;
         public bool canBeCopied = false;
+        private bool ignoreBots = false;
+        public bool IgnoreBots {
+            get {
+                return ignoreBots;
+            }
+            set {
+                ToggleBotVisibility(value);
+                ignoreBots = value;
+            }
+        }
+
+        private void ToggleBotVisibility(bool active) {
+            foreach (Bot bot in Program.Program.GlobalRunningBots) {
+                bot.client.QueuePackets(new Packets.IgnorePacket(bot.ID, !active) { targets = new List<int> { ServerIndex } });
+            }
+        }
 
         /// <summary>
         /// Finds a bot given its name or index within a player's owned bots.
@@ -51,6 +69,7 @@ namespace TerraNPCBot {
 
             // Index search
             if (int.TryParse(nameOrIndex, out int index)) {
+                index--;  // Indexes specified through commands are not zero-based because front-end shenanigans
                 if (index < ownedBots.Count && index >= 0 && ownedBots?[index] != null)
                     return new List<Bot> { ownedBots[index] };
                 else {
