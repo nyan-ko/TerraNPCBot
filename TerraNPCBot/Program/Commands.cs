@@ -13,7 +13,8 @@ using TShockAPI;
 
 namespace TerraNPCBot.Program {
     public class PluginCommands {
-        public static void BotMaster(BotCommandArgs args) {
+        public static void BotMaster(CommandArgs arg) {
+            BotCommandArgs args = new BotCommandArgs(arg);
             if (args.Parameters.Count > 0 && args.Player != null) {
                 switch (args.Parameters[0]) {
                     case "help":
@@ -21,6 +22,9 @@ namespace TerraNPCBot.Program {
                         break;
                     case "list":
                         List(args);
+                        break;
+                    case "ignore":
+                        Ignore(args);
                         break;
                     case "info":
                         Info(args);
@@ -234,14 +238,15 @@ namespace TerraNPCBot.Program {
                 string tempName = args.Parameters[1].Trim('"');
                 if (tempName.Length > 30) {
                     args.Player?.SendErrorMessage("Specified name exceeds 30 character limit. Defaulting to Michael Jackson.");
+                    tempName = "Michael Jackson";
                 }
                 else if (!PluginUtils.ValidBotName(ref tempName)) {
                     args.Player.SendErrorMessage("Found illegal characters in name, replacing with censored characters.");
-                    name = tempName;
                 }
+                name = tempName;
 
                 // Ports
-                if (args.Parameters.Count == 2 && !int.TryParse(args.Parameters[2], out port)) {
+                if (args.Parameters.Count == 3 && !int.TryParse(args.Parameters[2], out port)) {
                     args.Player?.SendErrorMessage("Specified port is not recognized. Defaulting to 7777.");
                 }
             }
@@ -630,8 +635,9 @@ namespace TerraNPCBot.Program {
             }
         }
 
-        public static void Debug(BotCommandArgs args) {
-            args.SelectedBot?.Actions.PlayNote(float.Parse(args.Parameters[0]));
+        public static void Debug(CommandArgs args) {
+            BotCommandArgs botArgs = new BotCommandArgs(args);
+            botArgs.SelectedBot?.Actions.PlayNote(float.Parse(args.Parameters[0]));
         }
     }
 }

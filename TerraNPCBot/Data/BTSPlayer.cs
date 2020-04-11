@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using Terraria;
 using TShockAPI;
 
 namespace TerraNPCBot {
@@ -47,14 +48,30 @@ namespace TerraNPCBot {
                 return ignoreBots;
             }
             set {
-                ToggleBotVisibility(value);
                 ignoreBots = value;
+                ToggleBotVisibility(value);
             }
         }
 
-        private void ToggleBotVisibility(bool active) {
-            foreach (Bot bot in Program.Program.GlobalRunningBots) {
-                bot.client.QueuePackets(new Packets.IgnorePacket(bot.ID, !active) { targets = new List<int> { ServerIndex } });
+        private void ToggleBotVisibility(bool visible) {
+            if (!visible) {
+                foreach (Bot bot in Program.Program.GlobalRunningBots) {
+                    // Resend join packets to the ignoring player
+                    // who needs code readability amirite
+                    bot.client.QueuePackets(new Packets.Packet4(bot.player) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet16(bot.ID, (short)bot.player.CurHP, (short)bot.player.MaxHP) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet30(bot.ID, false) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet42(bot.ID, (short)bot.player.CurMana, (short)bot.player.MaxMana) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet45(bot.ID, 0) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet50(bot.ID, new byte[22]) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet12(bot.ID, (short)bot.AsTSPlayer.TPlayer.position.X, (short)bot.AsTSPlayer.TPlayer.position.X) { targets = new List<int> { ServerIndex } });
+                }
+            }
+            else {
+                foreach (Bot bot in Program.Program.GlobalRunningBots) {
+                    // IgnorePacket bypasses player ignores to tell them bot has disconnected
+                    bot.client.QueuePackets(new Packets.IgnorePacket(bot.ID, false) { targets = new List<int> { ServerIndex } });
+                }
             }
         }
 

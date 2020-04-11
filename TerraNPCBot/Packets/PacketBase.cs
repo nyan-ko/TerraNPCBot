@@ -44,7 +44,7 @@ namespace TerraNPCBot {
         }
 
         public void Send() {
-            // Force sent player active packet
+            // Force sent packet
             // Must be initialized with a target in the 'targets' list
             if (packetType == 254) { 
                 try {
@@ -52,13 +52,13 @@ namespace TerraNPCBot {
                     target.Socket.AsyncSend(data, 0, data.Length, target.ServerWriteCallBack);
                     return;
                 }
-                catch (IndexOutOfRangeException) { }
+                catch (IndexOutOfRangeException) { return; }
             }
 
             // Specific targets
             if (targets.Count != 0) {
                 foreach (int i in targets) {
-                    if (Program.Program.Players[i].IgnoreBots)
+                    if (Program.Program.Players[i]?.IgnoreBots ?? true)
                         return;
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
@@ -70,7 +70,7 @@ namespace TerraNPCBot {
 
             // Entire server
             for (int i = 0; i < 256; ++i) {
-                if (Netplay.Clients[i].IsConnected() && !Program.Program.Players[i].IgnoreBots) {
+                if (Netplay.Clients[i].IsConnected() && Program.Program.Bots[i] == null && (!Program.Program.Players[i]?.IgnoreBots ?? false)) {
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
                     }

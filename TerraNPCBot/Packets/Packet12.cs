@@ -15,7 +15,7 @@ namespace TerraNPCBot.Packets {
         /// Spawn player (12)
         /// </summary>
         public Packet12(byte id, short x, short y) : base(0xC) { 
-            using (Amanuensis = new BinaryWriter(new MemoryStream())) {
+            using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
