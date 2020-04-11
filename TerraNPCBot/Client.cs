@@ -65,7 +65,7 @@ namespace TerraNPCBot {
 
         private int FindOpenSlot() {
             for (byte index = 254; index > 0; --index) {
-                if (!Netplay.Clients[index].IsConnected() && Program.Program.Bots[index] == null)
+                if (Program.Program.Bots[index] == null)
                     return index;
             }
             return -1;
@@ -87,9 +87,6 @@ namespace TerraNPCBot {
                     #region Slots
                     Main.player[slot] = new Terraria.Player();
                     TShockAPI.TShock.Players[slot] = new TShockAPI.TSPlayer(slot);
-                    Netplay.Clients[slot] = new RemoteClient() {
-                        Socket = new ConnectedFillerSocket()
-                    };
                     Program.Program.Bots[slot] = bot;
                     #endregion
 
@@ -120,46 +117,5 @@ namespace TerraNPCBot {
             sendPackets = !sendPackets;
             return sendPackets;
         }
-    }
-
-    /// <summary>
-    /// Takes up a slot in the players array to prevent index overlap.
-    /// </summary>
-    public class ConnectedFillerSocket : ISocket {
-        public bool IsConnected() {
-            return true;
-        }
-
-        #region Useless
-        public void AsyncReceive(byte[] data, int offset, int size, SocketReceiveCallback callback, object state = null) {
-        }
-
-        public void AsyncSend(byte[] data, int offset, int size, SocketSendCallback callback, object state = null) {
-        }
-
-        public void Close() {
-        }
-
-        public void Connect(RemoteAddress address) {
-        }
-
-        public RemoteAddress GetRemoteAddress() {
-            return null;
-        }
-
-        public bool IsDataAvailable() {
-            return false;
-        }
-
-        public void SendQueuedPackets() {
-        }
-
-        public bool StartListening(SocketConnectionAccepted callback) {
-            return false;
-        }
-
-        public void StopListening() {
-        }
-        #endregion
     }
 }

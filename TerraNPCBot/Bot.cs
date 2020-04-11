@@ -45,7 +45,7 @@ namespace TerraNPCBot {
             Actions = new BotActions(this);
             IndexInOwnerBots = ownedBotsIndex;
 
-            heartBeat = new Timer(8000);
+            heartBeat = new Timer(90000); // 1 minute 30 seconds, all players time out after 2 minutes
             heartBeat.Elapsed += SendAlive;
             heartBeat.AutoReset = true;
         }
@@ -103,8 +103,8 @@ namespace TerraNPCBot {
 
         private void SendAlive(object source, ElapsedEventArgs args) {
             if (!ShouldSendAlive)
-                return;            
-            QueuePackets(new Packets.Packet14(ID, true));
+                return;
+            QueuePackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, Position.X, Position.Y));
         }
 
         private bool ShouldSendAlive => Running && !playingBack;
