@@ -27,6 +27,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(vecY);
                 Packetize();
             }
+            Program.Program.Bots[id].Position = new Vector2(posX, posY);
         }
 
         /// <summary>
@@ -49,19 +50,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(posY);
                 Packetize();
             }
-        }
-
-        public Packet13(byte id, byte control, byte pulley, byte selected, Vector2 pos) : base(13) => new Packet13(id, control, pulley, selected, pos.X, pos.Y);
-
-        public Packet13(byte id, byte control, byte pulley, byte selected, Vector2 pos, Vector2 vel) : base(13) => new Packet13(id, control, pulley, selected, pos.X, pos.Y, vel.X, vel.Y);
-
-    }
-
-    public class Packet13Parser : ParsedPacketBase {
-        public Packet13Parser(Stream r) : base(0xD) {
-            using (data = new MemoryStream()) {
-                r.CopyTo(data);
-            }
+            Program.Program.Bots[id].Position = new Vector2(posX, posY);
         }
     }
 }

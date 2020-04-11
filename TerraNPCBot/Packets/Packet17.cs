@@ -23,15 +23,4 @@ namespace TerraNPCBot.Packets {
             }
         }
     }
-
-    /// <summary>
-    /// Modify tile (17) server ->
-    /// </summary>
-    public class Packet17Parser : ParsedPacketBase {
-        public Packet17Parser(System.IO.Stream str) : base(17) {
-            using (data = new System.IO.MemoryStream()) {
-                str.CopyTo(data);
-            }
-        }
-    }
 }

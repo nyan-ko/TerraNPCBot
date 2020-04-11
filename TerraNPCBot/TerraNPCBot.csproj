@@ -85,8 +85,6 @@
     <Compile Include="Packets\Packet16.cs" />
     <Compile Include="Packets\Packet17.cs" />
     <Compile Include="Packets\Packet19.cs" />
-    <Compile Include="Packets\Packet2.cs" />
-    <Compile Include="Packets\Packet3.cs" />
     <Compile Include="Packets\Packet30.cs" />
     <Compile Include="Packets\Packet31.cs" />
     <Compile Include="Packets\Packet32.cs" />
@@ -101,7 +99,6 @@
     <Compile Include="Packets\Packet61.cs" />
     <Compile Include="Packets\Packet65.cs" />
     <Compile Include="Packets\Packet67.cs" />
-    <Compile Include="Packets\Packet7.cs" />
     <Compile Include="Packets\Packet71.cs" />
     <Compile Include="Packets\Packet8.cs" />
     <Compile Include="Packets\Packet12.cs" />

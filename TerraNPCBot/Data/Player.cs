@@ -43,6 +43,11 @@ namespace TerraNPCBot {
         public ItemData[] MiscEquipSlots = new ItemData[NetItem.MiscEquipSlots];
         public ItemData[] MiscDyeSlots = new ItemData[NetItem.MiscDyeSlots];
 
+        public Vector2 position;
+        public Vector2 TilePosition {
+            get => new Vector2((int)(position.X / 16), (int)(position.Y / 16));
+        }
+
         /// <summary>
         /// Initializes the default bot player with a given name.
         /// </summary>
@@ -70,6 +75,8 @@ namespace TerraNPCBot {
 
             MaxMana = 200;
             CurMana = 200;
+
+            position = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16);
 
             for (int i = 0; i < NetItem.InventorySlots; ++i) {
                 InventorySlots[i] = new ItemData() { netID = 0, stack = 0, prefix = 0 }; // Do I need to do this

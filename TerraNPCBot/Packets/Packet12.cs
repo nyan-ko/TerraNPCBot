@@ -22,5 +22,14 @@ namespace TerraNPCBot.Packets {
                 Packetize();
             }
         }
+
+        public Packet12(byte id, Microsoft.Xna.Framework.Vector2 pos) : base(12) {
+            using (Amanuensis) {
+                Amanuensis.Write(id);
+                Amanuensis.Write((short)pos.X);
+                Amanuensis.Write((short)pos.Y);
+                Packetize();
+            }
+        }
     }
 }

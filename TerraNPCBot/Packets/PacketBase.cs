@@ -79,27 +79,6 @@ namespace TerraNPCBot {
             }
         }
 
-        //public static ParsedPacketBase Parse(BinaryReader reader, Player plr, Bot bot) {
-        //    ParsedPacketBase packet = null;
-
-        //    short length;
-        //    byte type;
-
-        //    using (reader) {
-        //        length = reader.ReadInt16();
-        //        type = reader.ReadByte();
-
-        //        // Flag102
-        //        switch (type) {
-        //            case 13: // player update
-        //                packet = new Packets.Packet13Parser(reader.BaseStream);
-        //                break;
-        //        }
-        //    }
-
-        //    return packet;
-        //}
-
         public static PacketBase WriteFromRecorded(StreamInfo r, Bot b) {
             PacketBase packet = null;
 
@@ -348,14 +327,5 @@ namespace TerraNPCBot {
             }
             return packet;
         }
-    }
-
-    public class ParsedPacketBase {
-        public MemoryStream data;
-        public uint packetType;
-
-        public ParsedPacketBase(uint packet) {
-            packetType = packet;
-        }        
     }
 }

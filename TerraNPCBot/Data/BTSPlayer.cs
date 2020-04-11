@@ -64,7 +64,7 @@ namespace TerraNPCBot {
                         new Packets.Packet42(bot.ID, (short)bot.player.CurMana, (short)bot.player.MaxMana) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet45(bot.ID, 0) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet50(bot.ID, new byte[22]) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet12(bot.ID, (short)bot.AsTSPlayer.TPlayer.position.X, (short)bot.AsTSPlayer.TPlayer.position.X) { targets = new List<int> { ServerIndex } });
+                        new Packets.Packet12(bot.ID, bot.TilePosition) { targets = new List<int> { ServerIndex } });
                 }
             }
             else {

@@ -118,7 +118,7 @@ namespace TerraNPCBot {
                 new Packets.Packet42(ID, (short)player.CurMana, (short)player.MaxMana),
                 new Packets.Packet45(ID, 0),
                 new Packets.Packet50(ID, new byte[22]),
-                new Packets.Packet12(ID, (short)Main.spawnTileX, (short)Main.spawnTileY));
+                new Packets.Packet12(ID, TilePosition));
             Actions.UpdateInventory();
         }
 
@@ -146,6 +146,19 @@ namespace TerraNPCBot {
         /// Gets the bot's running status.
         /// </summary>
         public bool Running => client.running;
+
+        /// <summary>
+        /// Gets or sets the bot's position on the server.
+        /// </summary>
+        public Microsoft.Xna.Framework.Vector2 Position {
+            get => player.position; 
+            set => player.position = value; 
+        }
+
+        public Microsoft.Xna.Framework.Vector2 TilePosition {
+            get => player.TilePosition;
+            set { Position = value * 16; }
+        }
 
         /// <summary>
         /// Gets the TSPlayer associated with the bot's index.
