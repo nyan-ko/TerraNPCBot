@@ -50,11 +50,13 @@ namespace TerraNPCBot.Program
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
             Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.BotMaster, "bot"));
-            Commands.ChatCommands.Add(new Command("", PluginCommands.Debug, "debug"));
+            //Commands.ChatCommands.Add(new Command("", PluginCommands.Debug, "debug"));
         }
         protected override void Dispose(bool disposing) {
             if (disposing) {
-                
+                ServerApi.Hooks.NetGreetPlayer.Deregister(this, PluginHooks.OnJoin);
+                ServerApi.Hooks.ServerLeave.Deregister(this, PluginHooks.OnLeave);
+                ServerApi.Hooks.NetGetData.Deregister(this, PluginHooks.OnGetData);
             }
         }
     }
