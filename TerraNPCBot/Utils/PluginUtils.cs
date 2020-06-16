@@ -2,12 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Text;
 using Microsoft.Xna.Framework;
 using Terraria;
 using TShockAPI;
 
 namespace TerraNPCBot.Utils {
     public static class PluginUtils {
+
+        /// <summary>
+        /// RegEx of all legal characters for bot names.
+        /// </summary>
+        // Could definitely be optimized but I have no idea how lol
         private static Regex legalCharacters = new Regex(@"[^A-Z+a-z+0-9+-+_+,+.+~+*]");
         public static string AllocateSavePath(int id) {
             string path = Path.Combine(Program.Program.PluginSaveFolderLocation, $"bplayer-{id}.dat");
@@ -38,14 +44,14 @@ namespace TerraNPCBot.Utils {
             }
         }
 
-        public static bool ValidBotName(ref string name) {
+        public static bool ValidateBotName(ref string name) {
             MatchCollection matchIllegals = legalCharacters.Matches(name);  // Find all characters not included in the RegEx
             if (matchIllegals.Count > 0) {
-                char[] chars = name.ToCharArray();
+                StringBuilder mutableString = new StringBuilder(name); // Create a stringbuilder from name to be able to edit it
                 foreach (Match match in matchIllegals) {
-                    chars[match.Index] = '*';  // Censor illegal character lol
+                    mutableString[match.Index] = '*';  // Censor illegal character lol
                 }
-                name = new string(chars);
+                name = mutableString.ToString();
                 return false;
             }
             return true;

@@ -11,20 +11,21 @@ namespace TerraNPCBot {
         public static BTSPlayer BTSServerPlayer = new BTSPlayer();
 
         internal BTSPlayer() {
-            ownedBots = new List<Bot>();
-            selected = -1;
+            OwnedBots = new List<Bot>();
+            Selected = -1;
 
             ServerIndex = -1;
         }
 
         public BTSPlayer(int index) {
-            ownedBots = new List<Bot>();
-            selected = -1;
+            OwnedBots = new List<Bot>();
+            Selected = -1;
 
             ServerIndex = index;
         }
 
         public int ServerIndex { get; private set; }
+
         private int selectedDelete;
         public int SelectedDelete {
             get {
@@ -35,13 +36,14 @@ namespace TerraNPCBot {
             set { selectedDelete = value; }
         }
 
-        public uint botLimit = 10;
-        public List<Bot> ownedBots;
-        public int selected;
+        public uint BotLimit { get; set; } = 5; // Arbitrary limit
+        public List<Bot> OwnedBots { get; set; } = new List<Bot>();
+        public int Selected { get; set; } = -1;
 
         public bool autosave = true;
         public bool canBeTeleportedTo = false;
         public bool canBeCopied = false;
+
         private bool ignoreBots = false;
         public bool IgnoreBots {
             get {
@@ -56,12 +58,11 @@ namespace TerraNPCBot {
         private void ToggleBotVisibility(bool visible) {
             if (!visible) {
                 foreach (Bot bot in Program.Program.GlobalRunningBots) {
-                    // Resend join packets to the ignoring player
-                    // who needs code readability amirite
-                    bot.client.QueuePackets(new Packets.Packet4(bot.player) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet16(bot.ID, (short)bot.player.CurHP, (short)bot.player.MaxHP) { targets = new List<int> { ServerIndex } },
+                    // Resend join packets to the player
+                    bot.Client.QueuePackets(new Packets.Packet4(bot.PlayerData) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet16(bot.ID, (short)bot.PlayerData.CurHP, (short)bot.PlayerData.MaxHP) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet30(bot.ID, false) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet42(bot.ID, (short)bot.player.CurMana, (short)bot.player.MaxMana) { targets = new List<int> { ServerIndex } },
+                        new Packets.Packet42(bot.ID, (short)bot.PlayerData.CurMana, (short)bot.PlayerData.MaxMana) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet45(bot.ID, 0) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet50(bot.ID, new byte[22]) { targets = new List<int> { ServerIndex } },
                         new Packets.Packet12(bot.ID, bot.TilePosition) { targets = new List<int> { ServerIndex } });
@@ -70,7 +71,7 @@ namespace TerraNPCBot {
             else {
                 foreach (Bot bot in Program.Program.GlobalRunningBots) {
                     // IgnorePacket bypasses player ignores to tell them bot has disconnected
-                    bot.client.QueuePackets(new Packets.IgnorePacket(bot.ID, false) { targets = new List<int> { ServerIndex } });
+                    bot.Client.QueuePackets(new Packets.IgnorePacket(bot.ID, false) { targets = new List<int> { ServerIndex } });
                 }
             }
         }
@@ -86,16 +87,16 @@ namespace TerraNPCBot {
 
             // Index search
             if (int.TryParse(nameOrIndex, out int index)) {
-                index--;  // Indexes specified through commands are not zero-based because front-end shenanigans
-                if (index < ownedBots.Count && index >= 0 && ownedBots?[index] != null)
-                    return new List<Bot> { ownedBots[index] };
+                index--;  // Indices specified through commands are not zero-based because front-end shenanigans
+                if (index < OwnedBots.Count && index >= 0 && OwnedBots?[index] != null)
+                    return new List<Bot> { OwnedBots[index] };
                 else {
                     return found;
                 }
             }
 
             // Name search
-            foreach (Bot bot in ownedBots) {
+            foreach (Bot bot in OwnedBots) {
                 if (bot.Name.ToLower() == nameOrIndex)
                     return new List<Bot> { bot };
                 if (bot.Name.ToLower().StartsWith(nameOrIndex))
@@ -106,7 +107,7 @@ namespace TerraNPCBot {
         }
 
         public Bot SelectedBot {
-            get { return ownedBots.Count > 0 && selected != -1 ? ownedBots[selected] : null; }
+            get { return OwnedBots.Count > 0 && Selected != -1 ? OwnedBots[Selected] : null; }
         }
 
         public TSPlayer SPlayer {

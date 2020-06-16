@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TerraNPCBot.Program {
     public static class Permissions {
         public const string Bot = "bot";
-        public const string BotUse = "bot.create";
+        public const string BotCreate = "bot.create";
 
         public const string BotRecord = "bot.record";
 
@@ -23,5 +23,7 @@ namespace TerraNPCBot.Program {
         public const string BotSavePruning = "bot.save.prune";
 
         public const string BotTeleport = "bot.teleport";
+
+        public const string BotIgnore = "bot.ignore";
     }
 }

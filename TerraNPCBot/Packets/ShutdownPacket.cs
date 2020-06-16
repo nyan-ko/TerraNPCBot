@@ -8,11 +8,11 @@ namespace TerraNPCBot.Packets {
     /// <summary>
     /// Tells the bot to stop its write thread when read from its write queue.
     /// </summary>
-    internal class ShutdownPacket : PacketBase {
+    public class ShutdownPacket : PacketBase {
         /// <summary>
         /// Tells the bot to stop its write thread when read from its write queue.
         /// </summary>
-        internal ShutdownPacket() : base(byte.MaxValue) {
+        public ShutdownPacket() : base(byte.MaxValue) {
 
         }
     }

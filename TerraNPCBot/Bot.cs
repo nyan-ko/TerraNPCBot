@@ -1,64 +1,162 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using TerraBotLib;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 using System.Timers;
 using Terraria;
 using TShockAPI;
+using TerraBotLib.Events;
 
 namespace TerraNPCBot {
     /// <summary>
     /// Comprises bot info and functions.
     /// </summary>
-    public class Bot {
-        public const int Protocol = 194;
-        public const string Address = "127.0.0.1";
-
-        public int owner;
-      
-        public bool recording;
-        public bool actuallyJoined;
-
-        //public EventManager manager;
-        public Player player;
-        public Client client;
-        public BotActions Actions;
-
-        private Timer heartBeat;
-
+    public class Bot : IBot {
+        #region Fields
+        #region Interface Fields
+        private Client client;
+        private int port = 0;
+            #endregion
         #region Record Packets
-        public bool playingBack;
-        public List<RecordedPacket> recordedPackets;
+            public bool recording;
 
-        public Stopwatch timerBetweenPackets;
-        public StreamInfo previousPacket;   
-        public Timer delayBetweenPackets;
-        public int PacketIndex;
+            public bool playingBack;
+            public List<RecordedPacket> recordedPackets;
+
+            public Stopwatch timerBetweenPackets;
+            public StreamInfo previousPacket;
+            public Timer delayBetweenPackets;
+            public int PacketIndex;
         #endregion
 
-        internal Bot() {
+        private int owner;
+        private int indexInOwnerBots;
+        private Vector2 position;
+        private Timer heartBeat;
+        #endregion
+        #region Properties
+        #region Interface Properties
+        public Hooks EventHooks { get; private set; } = new Hooks();
+        public IClient Client => client;
+        public AdditionalBotData AdditionalData { get; private set; } = new AdditionalBotData();
+        #endregion
 
+        public Player PlayerData { get; private set; }
+        public BotActions Actions { get; private set; }
+
+        public int Port {
+            get => port;
+            set {
+                if (EventHooks.PortChange.Invoke(this, new PortChangedEventArgs() { OldPort = port, NewPort = value }))
+                    return;
+                port = value;
+            }
         }
 
-        public Bot(int _owner, int ownedBotsIndex) {
+        /// <summary>
+        /// Gets or sets the bot's server index.
+        /// </summary>
+        public byte ID {
+            get => (byte)PlayerData.Index;
+            set => PlayerData.Index = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the bot's player name.
+        /// </summary>
+        public string Name {
+            get => PlayerData.Name;
+            set {
+                if (EventHooks.NameChange.Invoke(this, new NameChangedEventArgs() { OldName = PlayerData?.Name, NewName = value }))
+                    return;
+                PlayerData.Name = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the bot's owner.
+        /// </summary>
+        public int Owner {
+            get => owner;
+            set {
+                if (EventHooks.OwnerChange.Invoke(this, new OwnerChangedEventArgs() { OldOwner = owner, NewOwner = value }))
+                    return;
+                owner = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the bot's position in the owner's owned bots.
+        /// </summary>
+        public int IndexInOwnerBots {
+            get => indexInOwnerBots;
+            set {
+                if (EventHooks.OwnedIndexChange.Invoke(this, new OwnerIndexChangedEventArgs() { OldIndex = indexInOwnerBots, NewIndex = value }))
+                    return;
+                indexInOwnerBots = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the bot's running status.
+        /// </summary>
+        public bool Running => client.running;
+
+        /// <summary>
+        /// Gets or sets the bot's position on the server.
+        /// </summary>
+        public Vector2 Position {
+            get => position;
+            set {
+                if (EventHooks.PositionChange.Invoke(this, new PositionChangedEventArgs() { OldPosition = position, NewPosition = value }))
+                    return;
+                position = value;
+            }
+        }
+
+        public Vector2 TilePosition => Position / 16;
+
+        /// <summary>
+        /// Gets the TSPlayer associated with the bot's index.
+        /// </summary>
+        public TSPlayer AsTSPlayer => TShock.Players[ID];
+
+        /// <summary>
+        /// Gets the bot's chat color based off its group on the server.
+        /// </summary>
+        public Microsoft.Xna.Framework.Color ChatColor => new Microsoft.Xna.Framework.Color(AsTSPlayer.Group.R, AsTSPlayer.Group.G, AsTSPlayer.Group.B);
+        #endregion
+
+        public Bot(string name, int _owner, int ownedBotsIndex, int port) {
             owner = _owner;
+            client = new Client(port, this);
             Actions = new BotActions(this);
-            IndexInOwnerBots = ownedBotsIndex;
+            EventHooks = new Hooks();
+            PlayerData = new Player(name, this);
+
+            position = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16);
+            indexInOwnerBots = ownedBotsIndex;
 
             heartBeat = new Timer(90000); // 1 minute 30 seconds, all players time out after 2 minutes
             heartBeat.Elapsed += SendAlive;
             heartBeat.AutoReset = true;
+
+            Initialize();
+
         }
 
-        public bool Start() { 
-            if (client.Start()) {
-                Program.Program.GlobalRunningBots.Add(this);
-                SendJoinPackets();
-                heartBeat.Start();
-                return true;
-            }
-            else
-                return false;
+        public void Initialize() {
+            if (EventHooks.BotCreate.Invoke(this, new CreateBotEventArgs() { WhoAsked = Owner, Bot = this }))
+                return;
+
+            client.Initialize();
+        }
+
+        public bool Start() {
+            Client.Start();
+            return Running;
         }
 
         /// <summary>
@@ -71,7 +169,7 @@ namespace TerraNPCBot {
         }
 
         #region Record
-        public void StartRecordTimer() {
+        public void StartPlaybackTimer() {
             delayBetweenPackets = new Timer(10);
             delayBetweenPackets.Elapsed += RecordedPacketDelay;
             delayBetweenPackets.AutoReset = true;
@@ -91,7 +189,7 @@ namespace TerraNPCBot {
                 playingBack = false;
             }
             else {
-                timer.Interval = currentPacket.timeBeforeNextPacket == 0 ? currentPacket.timeBeforeNextPacket + 1 : currentPacket.timeBeforeNextPacket;
+                timer.Interval = currentPacket.timeBeforeNextPacket == 0 ? 1 : currentPacket.timeBeforeNextPacket;
                 ++PacketIndex;
             }
 
@@ -110,66 +208,6 @@ namespace TerraNPCBot {
         private bool ShouldSendAlive => Running && !playingBack;
 
         private void QueuePackets(params PacketBase[] packets) => client.QueuePackets(packets);
-
-        private void SendJoinPackets() {
-            QueuePackets(new Packets.Packet4(player),
-                new Packets.Packet16(ID, (short)player.CurHP, (short)player.MaxHP),
-                new Packets.Packet30(ID, false),
-                new Packets.Packet42(ID, (short)player.CurMana, (short)player.MaxMana),
-                new Packets.Packet45(ID, 0),
-                new Packets.Packet50(ID, new byte[22]),
-                new Packets.Packet12(ID, TilePosition));
-            Actions.UpdateInventory();
-        }
-
-        #region Properties
-        public byte ID {
-            get {
-                if (Running)
-                    return (byte)player.PlayerID;
-                return 0;
-            }
-            set => player.PlayerID = value;
-        }
-
-        /// <summary>
-        /// Gets the bot's player name.
-        /// </summary>
-        public string Name => player.Name;
-
-        /// <summary>
-        /// Gets the bot's position in the owner's owned bots.
-        /// </summary>
-        public int IndexInOwnerBots { get; set; }
-
-        /// <summary>
-        /// Gets the bot's running status.
-        /// </summary>
-        public bool Running => client.running;
-
-        /// <summary>
-        /// Gets or sets the bot's position on the server.
-        /// </summary>
-        public Microsoft.Xna.Framework.Vector2 Position {
-            get => player.position; 
-            set => player.position = value; 
-        }
-
-        public Microsoft.Xna.Framework.Vector2 TilePosition {
-            get => player.TilePosition;
-            set { Position = value * 16; }
-        }
-
-        /// <summary>
-        /// Gets the TSPlayer associated with the bot's index.
-        /// </summary>
-        public TSPlayer AsTSPlayer => TShock.Players[ID];
-
-        /// <summary>
-        /// Gets the bot's chat color based off its group on the server.
-        /// </summary>
-        public Microsoft.Xna.Framework.Color ChatColor => new Microsoft.Xna.Framework.Color(AsTSPlayer.Group.R, AsTSPlayer.Group.G, AsTSPlayer.Group.B);
-#endregion
     }
 
     public class BotActions {
@@ -179,48 +217,48 @@ namespace TerraNPCBot {
             bot = b;
         }
 
-        private void QueuePackets(params PacketBase[] packets) => bot.client.QueuePackets(packets);
+        private void QueuePackets(params PacketBase[] packets) => bot.Client.QueuePackets(packets);
 
         public virtual void UpdateInventory() {
             byte i = 0;
-            foreach (var current in bot.player.InventorySlots) {
+            foreach (var current in bot.PlayerData.InventorySlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
-                    current.stack,
-                    current.prefix,
-                    current.netID));
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId));
                 ++i;
             }
-            foreach (var current in bot.player.ArmorSlots) {
+            foreach (var current in bot.PlayerData.ArmorSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
-                    current.stack,
-                    current.prefix,
-                    current.netID));
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId));
                 ++i;
             }
-            foreach (var current in bot.player.DyeSlots) {
+            foreach (var current in bot.PlayerData.DyeSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
-                    current.stack,
-                    current.prefix,
-                    current.netID));
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId));
                 ++i;
             }
-            foreach (var current in bot.player.MiscEquipSlots) {
+            foreach (var current in bot.PlayerData.MiscEquipSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
-                    current.stack,
-                    current.prefix,
-                    current.netID));
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId));
                 ++i;
             }
-            foreach (var current in bot.player.MiscDyeSlots) {
+            foreach (var current in bot.PlayerData.MiscDyeSlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
-                    current.stack,
-                    current.prefix,
-                    current.netID));
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId));
                 ++i;
             }
         }
@@ -245,21 +283,21 @@ namespace TerraNPCBot {
         /// </summary>
         /// <param name="target"></param>
         public virtual void InventoryCopy(Terraria.Player target) {
-            var player = bot.player;
+            var player = bot.PlayerData;
             for (int i = 0; i < NetItem.InventorySlots; ++i) {
-                player.InventorySlots[i] = ItemData.FromTerrariaItem(target.inventory[i]);
+                player.InventorySlots[i] = (NetItem)target.inventory[i];
             }
             for (int i = 0; i < NetItem.ArmorSlots; ++i) {
-                player.ArmorSlots[i] = ItemData.FromTerrariaItem(target.armor[i]);
+                player.ArmorSlots[i] = (NetItem)target.inventory[i];
             }
             for (int i = 0; i < NetItem.DyeSlots; ++i) {
-                player.DyeSlots[i] = ItemData.FromTerrariaItem(target.dye[i]);
+                player.DyeSlots[i] = (NetItem)target.inventory[i];
             }
             for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
-                player.MiscDyeSlots[i] = ItemData.FromTerrariaItem(target.miscDyes[i]);
+                player.MiscDyeSlots[i] = (NetItem)target.inventory[i];
             }
             for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
-                player.MiscEquipSlots[i] = ItemData.FromTerrariaItem(target.miscEquips[i]);
+                player.MiscEquipSlots[i] = (NetItem)target.inventory[i];
             }
             if (bot.Running)
                 UpdateInventory();
@@ -270,11 +308,11 @@ namespace TerraNPCBot {
         /// </summary>
         /// <param name="target"></param>
         public virtual void InfoCopy(Terraria.Player target) {
-            var player = bot.player;
+            var player = bot.PlayerData;
             player.HairType = (byte)target.hair;
             player.HairDye = target.hairDye;
             player.SkinVariant = (byte)target.skinVariant;
-            player.HMisc = target.hideMisc;
+            player.HideMisc = target.hideMisc;
 
             player.EyeColor = target.eyeColor;
             player.HairColor = target.hairColor;
@@ -282,22 +320,22 @@ namespace TerraNPCBot {
             player.ShirtColor = target.shirtColor;
             player.ShoeColor = target.shoeColor;
             player.SkinColor = target.skinColor;
-            player.UnderShirtColor = target.underShirtColor;
+            player.UndershirtColor = target.underShirtColor;
 
             // Terraria uses this struct so I'm doing it too
             BitsByte bit1 = 0;
             for (int i = 0; i < 8; ++i) {
                 bit1[i] = target.hideVisual[i];
             }
-            player.HVisuals1 = bit1;
+            player.HideVisuals = bit1;
             BitsByte bit2 = 0;
             for (int i = 8; i < 10; ++i) {
                 bit2[i] = target.hideVisual[i];
             }
-            player.HVisuals2 = bit2;
+            player.HideVisuals2 = bit2;
 
             if (bot.Running)
-                QueuePackets(new Packets.Packet4(player));
+                QueuePackets(new Packets.Packet4(bot.PlayerData));
         }
     }
 

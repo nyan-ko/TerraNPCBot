@@ -17,17 +17,17 @@ namespace TerraNPCBot.Program {
             if (Program.Players[args.Who] == null)
                 return;
             if (Program.Bots[args.Who] == null && Program.Players[args.Who].autosave) {
-                Utils.FileWriter.BTSPlayerToStream(Program.Players[args.Who]);
+                //Utils.FileWriter.BTSPlayerToStream(Program.Players[args.Who]);
             }            
             Program.Players[args.Who] = null;
         } 
 
         public static void OnGetData(GetDataEventArgs args) {
-            Bot p = Program.Players[args.Msg.whoAmI]?.ownedBots?.FirstOrDefault(x => x.recording);
+            Bot p = Program.Players[args.Msg.whoAmI]?.OwnedBots?.FirstOrDefault(x => x.recording);
             if (p != null) {
                 using (MemoryStream m = new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)) {
 
-                    if (args.Msg.whoAmI != p.owner) return;
+                    if (args.Msg.whoAmI != p.Owner) return;
 
                     if (p.timerBetweenPackets == null) {
                         p.timerBetweenPackets = new System.Diagnostics.Stopwatch();

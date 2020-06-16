@@ -8,31 +8,61 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TerrariaApi.Server;
+using TerraBotLib;
+using TerraNPCBot.Utils;
 using Terraria;
 
 namespace TerraNPCBot {
-    public class PacketBase {
+    public class PacketBase : IPacket {
+        #region Properties
+        public short TotalLength => (short)data.Length;
 
+        public byte Type => packetType;
+
+        public byte[] Data => data;
+
+        #endregion
+        #region Fields
         public byte packetType;
         public List<int> targets = new List<int>();
 
         private byte[] data;
         protected BinaryWriter Amanuensis;
+        #endregion
 
         protected PacketBase(byte _packetType) {
             Amanuensis = new BinaryWriter(new MemoryStream());
             packetType = _packetType;
         }
 
+        public static byte[] PacketizeData(byte type, params object[] data) {
+            using (BinaryWriter writer = new BinaryWriter(new MemoryStream())) {
+                writer.BaseStream.Position += 2;  // Offset to create space for length (2 bytes)
+                writer.Write(type);
+
+                foreach (object obj in data) {
+                    writer.WriteObject(obj);  // Write object data with a horribly cursed method
+                }
+
+                short length = (short)writer.BaseStream.Position;
+                writer.BaseStream.Position = 0;
+                writer.Write(length);
+
+                writer.BaseStream.Position = 0;  // ToArray() breaks unless position is reset (i.e. set to 0) despite it saying otherwise
+                return ((MemoryStream)writer.BaseStream).ToArray();
+            }
+        }
+
+
         /// <summary>
         /// Creates the actual packet from the data stream with a header.
         /// </summary>
         /// <param name="stream"></param>
-        protected void Packetize() { // I will NOT switch to American English
+        protected void Packetize(bool bypass = false) { // I will NOT switch to American English
             using (MemoryStream stream = new MemoryStream()) {
                 short packetLength = (short)(Amanuensis.BaseStream.Position + 3);
                 Amanuensis.Write(packetLength);
-                Amanuensis.Write(packetType);
+                Amanuensis.Write(Type);
                 Amanuensis.BaseStream.Position = 0;
                 Amanuensis.BaseStream.CopyTo(stream);
                 data = new byte[packetLength];
@@ -41,18 +71,24 @@ namespace TerraNPCBot {
                 Buffer.BlockCopy(temp, 0, data, 3, temp.Length - 3); // Copies actual packet data
                 Buffer.BlockCopy(temp, packetLength - 3, data, 0, 3); // Copies packet header (length, type)
             }
+            if (bypass && targets.Count > 0) {
+                BypassIgnore();
+            }
         }
 
-        public void Send() {
+        public void Send() { 
             // Force sent packet
             // Must be initialized with a target in the 'targets' list
             if (packetType == 254) { 
                 try {
-                    RemoteClient target = Netplay.Clients[targets[0]];
-                    target.Socket.AsyncSend(data, 0, data.Length, target.ServerWriteCallBack);
-                    return;
+                    foreach (int target in targets) {
+                        RemoteClient client = Netplay.Clients[target];
+                        client.Socket.AsyncSend(Data, 0, TotalLength, client.ServerWriteCallBack);
+                    }
                 }
-                catch (IndexOutOfRangeException) { return; }
+                catch { }
+
+                return;
             }
 
             // Specific targets
@@ -61,7 +97,7 @@ namespace TerraNPCBot {
                     if (Program.Program.Players[i]?.IgnoreBots ?? true)
                         return;
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(Data, 0, TotalLength, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
@@ -72,11 +108,18 @@ namespace TerraNPCBot {
             for (int i = 0; i < 256; ++i) {
                 if (Netplay.Clients[i].IsConnected() && Program.Program.Bots[i] == null && (!Program.Program.Players[i]?.IgnoreBots ?? false)) {
                     try {
-                        Netplay.Clients[i].Socket.AsyncSend(data, 0, data.Length, Netplay.Clients[i].ServerWriteCallBack);
+                        Netplay.Clients[i].Socket.AsyncSend(Data, 0, TotalLength, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
             }
+        }
+
+        /// <summary>
+        /// Changes packet type so it is forcefully sent and bypasses player ignores. Only call after Packetize() pweez
+        /// </summary>
+        protected void BypassIgnore() {
+            packetType = 254;
         }
 
         public static PacketBase WriteFromRecorded(StreamInfo r, Bot b) {
@@ -115,6 +158,8 @@ namespace TerraNPCBot {
                                 if ((num2 & 4) == 4) {
                                     num6 = reader.ReadSingle();
                                     num7 = reader.ReadSingle();
+                                    packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5);
+                                    break;
                                 }  // update velocity
 
                                 packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);

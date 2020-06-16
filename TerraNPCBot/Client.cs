@@ -9,22 +9,24 @@ using System.Net;
 using Terraria;
 using System.Net.Sockets;
 using System.Threading;
+using TerraBotLib;
 using Terraria.Net;
+using TerraBotLib.Events;
 
 namespace TerraNPCBot {
     /// <summary>
     /// Manages connections for the bot.
     /// </summary>
-    public class Client {
-        public const int BufferSize = 131072;       
+    public class Client : IClient {
+        #region Fields
         public bool running;
         public int port;
 
         private Bot bot;
         private Thread writeThread;
         public bool sendPackets;
-        //private static CancellationTokenSource cancelToken = new CancellationTokenSource();
-        private BlockingCollection<PacketBase> writeQueue;
+        private BlockingCollection<IPacket > writeQueue;
+#endregion
 
         public Client (int _port, Bot _bot) {
             bot = _bot;
@@ -33,21 +35,37 @@ namespace TerraNPCBot {
             writeThread = new Thread(SendPackets);
             writeThread.IsBackground = true;
 
-            writeQueue = new BlockingCollection<PacketBase>();
+            writeQueue = new BlockingCollection<IPacket>();
         }
 
-        public void QueuePackets (params PacketBase[] packets) {
-            foreach (var packet in packets) {
-                writeQueue.Add(packet);
-            }
+        public void Initialize() {
+            bot.EventHooks.ClientStart.Register(InternalStart, HandlerPriority.BelowNormal);
+            bot.EventHooks.ClientStart.Register(SendJoinPackets, HandlerPriority.Low);
+            bot.EventHooks.ClientStop.Register(InternalStop);
+        }
+
+        private void SendJoinPackets(object source, StartEventArgs args) {
+            byte id = bot.ID;
+            QueuePackets(new Packets.Packet4(bot.PlayerData),
+                new Packets.Packet16(id, (short)bot.PlayerData.CurHP, (short)bot.PlayerData.MaxHP),
+                new Packets.Packet30(id, false),
+                new Packets.Packet42(id, (short)bot.PlayerData.CurMana, (short)bot.PlayerData.MaxMana),
+                new Packets.Packet45(id, 0),
+                new Packets.Packet50(id, new byte[22]),
+                new Packets.Packet12(id, bot.TilePosition));
+            bot.Actions.UpdateInventory();
         }
 
         private void SendPackets() { 
             while (running) {
                 try {
-                    if (!writeQueue.TryTake(out PacketBase packet, -1))
-                        continue; 
-                    if (packet.packetType == 255) {
+                    if (!writeQueue.TryTake(out IPacket packet, -1))
+                        continue;
+
+                    if (bot.EventHooks.ClientSendPacket.Invoke(bot, new PacketSentEventArgs { Packet = packet, PacketData = packet.Data, Port = port }))
+                        return;
+                   
+                    if (packet.Type == 255) {
                         // Plugin-exclusive shutdown packet, must follow a player active packet
                         // with an inactive flag to both disconnect the bot and stop this write thread
                         Stop();
@@ -75,40 +93,28 @@ namespace TerraNPCBot {
         /// Allocates an index and starts the packet writing thread.
         /// </summary>
         /// <returns></returns>
-        public bool Start() {
+        private void InternalStart(object source, StartEventArgs args) {
             if (!writeThread.IsAlive) {
-                try {
-                    int slot = FindOpenSlot();
-                    if (slot == -1)
-                        return false;
-                    running = true;
-                    bot.ID = (byte)slot;
+                int slot = FindOpenSlot();
+                if (slot == -1)
+                    return;
+                running = true;
+                bot.ID = (byte)slot;
 
-                    #region Slots
-                    Main.player[slot] = new Terraria.Player();
-                    TShockAPI.TShock.Players[slot] = new TShockAPI.TSPlayer(slot);
-                    Program.Program.Bots[slot] = bot;
-                    #endregion
+                #region Slots
+                Main.player[slot] = new Terraria.Player();
+                TShockAPI.TShock.Players[slot] = new TShockAPI.TSPlayer(slot);
+                Program.Program.Bots[slot] = bot;
+                #endregion
 
-                    writeThread.Start();
-                }
-                catch (Exception ex) {
-                    Console.WriteLine($"Exception thrown while getting server info: {ex.ToString()} {ex.Source}");
-                    TShockAPI.TShock.Log.Write($"Exception thrown while getting server info (Start()): {ex.ToString()} {ex.Source}", System.Diagnostics.TraceLevel.Error);
-
-                    return false;
-                }
-                return running;
+                writeThread.Start();
             }
-            return false;
         }
 
-        /// <summary>
-        /// Stops the bot's write thread.
-        /// </summary>
-        public async void Stop() {
-            running = false;
-            await Task.Delay(500);
+        private void InternalStop(object source, StopEventArgs args) {
+            running = false;  // stop writeThread's while running loop
+            writeThread.Join();  // wait for writeThread to finish
+
             writeThread = new Thread(SendPackets);
             writeThread.IsBackground = true;
         }
@@ -117,5 +123,23 @@ namespace TerraNPCBot {
             sendPackets = !sendPackets;
             return sendPackets;
         }
+
+        public void QueuePackets(params IPacket[] packets) {
+            foreach (var packet in packets) {
+                writeQueue.Add(packet);
+            }
+        }
+
+        public void Start() {
+            bot.EventHooks.ClientStart.Invoke(bot, new StartEventArgs() { WhoAsked = bot.Owner });
+        }
+
+        public void Stop() {
+            bot.EventHooks.ClientStop.Invoke(bot, new StopEventArgs() { WhoAsked = bot.Owner });
+        }
+
+        public bool CanSendPackets => sendPackets;
+
+        public bool Running => running;
     }
 }

@@ -19,10 +19,10 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write(active);
 
                 // Write normal player active packet to byte array with packet type 14
-                Packetize();
+
                 // Set packet type to exclusive plugin packet type so it is recognized by bots
-                // without changing actual data of the packet
-                packetType = 254;
+                // without changing the actual byte array of the packet
+                Packetize(true);
             }
         }
     }
