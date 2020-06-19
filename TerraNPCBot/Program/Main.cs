@@ -69,9 +69,12 @@ namespace TerraNPCBot.Program
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
             Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.AddCommand, "bot"));
+            Commands.ChatCommands.Add(new Command("bot.debug", PluginCommands.Debug, "debug"));
 
             // Call PluginCommands.CommandThread on a separate thread to handle commands
             ThreadPool.QueueUserWorkItem(PluginCommands.CommandThread);
+            // Same thing for packet queue
+            ThreadPool.QueueUserWorkItem(PacketBase.PacketSendThread);
         }
         protected override void Dispose(bool disposing) {
             if (disposing) {

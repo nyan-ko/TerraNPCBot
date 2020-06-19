@@ -14,20 +14,13 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Spawn player (12)
         /// </summary>
-        public Packet12(byte id, short x, short y) : base(0xC) { 
+        public Packet12(byte id, short x, short y, int respawnTimeRemaining, byte context) : base(0xC) {
             using (Amanuensis) {
                 Amanuensis.Write(id);
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
-                Packetize();
-            }
-        }
-
-        public Packet12(byte id, Microsoft.Xna.Framework.Vector2 pos) : base(12) {
-            using (Amanuensis) {
-                Amanuensis.Write(id);
-                Amanuensis.Write((short)pos.X);
-                Amanuensis.Write((short)pos.Y);
+                Amanuensis.Write(respawnTimeRemaining);
+                Amanuensis.Write(context);
                 Packetize();
             }
         }

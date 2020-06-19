@@ -187,7 +187,7 @@ namespace TerraNPCBot.Program {
                 return;
 
             if (args.Player.HasPermission(Permissions.BotIgnore)) {
-                args.Player.MultiMsg(Color.Yellow, Messages.NoPermission);
+                args.Player.SendErrorMessage(Messages.NoPermission);
                 return;
             }
 
@@ -528,12 +528,12 @@ namespace TerraNPCBot.Program {
                         PlayRecording(args);
                         break;
                     default:
-                        args.Player.MultiMsg(Color.Yellow, Messages.Record);
+                        args.Player.MultiMsg(Messages.Record, Color.Yellow);
                         break;
                 }
             }
             else {
-                args.Player.MultiMsg(Color.Yellow, Messages.Record);
+                args.Player.MultiMsg(Messages.Record, Color.Yellow);
             }
             
         }
@@ -725,7 +725,7 @@ namespace TerraNPCBot.Program {
 
         public static void Debug(CommandArgs args) {
             BotCommandArgs botArgs = new BotCommandArgs(args);
-            botArgs.SelectedBot?.Actions.PlayNote(float.Parse(args.Parameters[0]));
+            botArgs.SelectedBot.Actions.UpdateInventory();
         }
 
         //private static void Save(BotCommandArgs args) {

@@ -8,6 +8,7 @@ using System.Text;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using TerrariaApi.Server;
+using System.Collections.Concurrent;
 using TerraBotLib;
 using TerraNPCBot.Utils;
 using Terraria;
@@ -15,6 +16,8 @@ using Terraria;
 namespace TerraNPCBot {
     public class PacketBase : IPacket {
         #region Properties
+        public IClient Sender { get; set; }
+
         public short TotalLength => (short)data.Length;
 
         public byte Type => packetType;
@@ -34,25 +37,6 @@ namespace TerraNPCBot {
             Amanuensis = new BinaryWriter(new MemoryStream());
             packetType = _packetType;
         }
-
-        public static byte[] PacketizeData(byte type, params object[] data) {
-            using (BinaryWriter writer = new BinaryWriter(new MemoryStream())) {
-                writer.BaseStream.Position += 2;  // Offset to create space for length (2 bytes)
-                writer.Write(type);
-
-                foreach (object obj in data) {
-                    writer.WriteObject(obj);  // Write object data with a horribly cursed method
-                }
-
-                short length = (short)writer.BaseStream.Position;
-                writer.BaseStream.Position = 0;
-                writer.Write(length);
-
-                writer.BaseStream.Position = 0;  // ToArray() breaks unless position is reset (i.e. set to 0) despite it saying otherwise
-                return ((MemoryStream)writer.BaseStream).ToArray();
-            }
-        }
-
 
         /// <summary>
         /// Creates the actual packet from the data stream with a header.
@@ -79,7 +63,7 @@ namespace TerraNPCBot {
         public void Send() { 
             // Force sent packet
             // Must be initialized with a target in the 'targets' list
-            if (packetType == 254) { 
+            if (packetType == (byte)ExtendedPacketTypes.ForceSend) { 
                 try {
                     foreach (int target in targets) {
                         RemoteClient client = Netplay.Clients[target];
@@ -130,7 +114,7 @@ namespace TerraNPCBot {
                     switch (r.Type) {
                         case 5: {
                                 reader.BaseStream.Position += 1;
-                                var slot = reader.ReadByte();
+                                var slot = reader.ReadInt16();
                                 var stack = reader.ReadInt16();
                                 var prefix = reader.ReadByte();
                                 var id = reader.ReadInt16();
@@ -142,27 +126,40 @@ namespace TerraNPCBot {
                                 reader.BaseStream.Position += 1;
                                 var spawnx = reader.ReadInt16();
                                 var spawny = reader.ReadInt16();
+                                var timeRemain = reader.ReadInt32();
+                                var context = reader.ReadByte();
 
-                                packet = new Packets.Packet12(b.ID, spawnx, spawny);
+                                packet = new Packets.Packet12(b.ID, spawnx, spawny, timeRemain, context);
                             }
                             break;  // player spawn
                         case 13: {
                                 reader.BaseStream.Position += 1;
-                                var num1 = reader.ReadByte();
-                                var num2 = reader.ReadByte();
-                                var num3 = reader.ReadByte();
-                                var num4 = reader.ReadSingle();
-                                var num5 = reader.ReadSingle();
-                                float num6 = 0.0F;
-                                float num7 = 0.0F;
-                                if ((num2 & 4) == 4) {
-                                    num6 = reader.ReadSingle();
-                                    num7 = reader.ReadSingle();
-                                    packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5);
-                                    break;
+                                var control = reader.ReadByte();
+                                var pulley = reader.ReadByte();
+                                var misc = reader.ReadByte();
+                                var sleepingInfo = reader.ReadByte();
+                                var selectedItem = reader.ReadByte();
+                                var posX = reader.ReadSingle();
+                                var posY = reader.ReadSingle();
+                                float vecX = 0.0F;
+                                float vecY = 0.0F;
+                                float oPosX = 0.0F;
+                                float oPosY = 0.0F;
+                                float hPosX = 0.0F;
+                                float hPosY = 0.0F;
+                                if ((pulley & 4) == 4) {
+                                    vecX = reader.ReadSingle();
+                                    vecY = reader.ReadSingle();
                                 }  // update velocity
+                                if ((misc & 64) == 64) {
+                                    oPosX = reader.ReadSingle();
+                                    oPosY = reader.ReadSingle();
+                                    hPosX = reader.ReadSingle();
+                                    hPosY = reader.ReadSingle();
+                                }  // used potion of return
 
-                                packet = new Packets.Packet13(b.ID, num1, num2, num3, num4, num5, num6, num7);
+                                packet = new Packets.Packet13(b.ID, control, pulley, misc, sleepingInfo, selectedItem, posX, posY,
+                                    vecX, vecY, oPosX, oPosY, hPosX, hPosY);
                             }
                             break;  // player update
                         case 16: {
@@ -240,7 +237,10 @@ namespace TerraNPCBot {
                             break;  // player team
                         case 50: {
                                 reader.BaseStream.Position += 1;
-                                var buffs = reader.ReadBytes(22);
+                                ushort[] buffs = new ushort[22];
+                                for (int i = 0; i < buffs.Length; i++) {
+                                    buffs[i] = reader.ReadUInt16();
+                                }
 
                                 packet = new Packets.Packet50(b.ID, buffs);
                             }
@@ -372,5 +372,37 @@ namespace TerraNPCBot {
             }
             return packet;
         }
+
+        private static BlockingCollection<IPacket> packetQueue = new BlockingCollection<IPacket>();
+
+        public static void AddPacket(IPacket packet) => packetQueue.Add(packet);
+
+        internal static void PacketSendThread(object unused) {
+            while (true) {
+                try {
+                    if (!packetQueue.TryTake(out IPacket packet, -1))
+                        continue;
+
+                    if (packet.Type == (byte)ExtendedPacketTypes.Shutdown) {
+                        // Plugin-exclusive shutdown packet, must follow a player active packet
+                        packet.Sender.Stop();
+                        continue;
+                    }
+                    if (!packet.Sender.CanSendPackets)
+                        continue;
+
+                    packet.Send();
+                }
+                catch (OperationCanceledException) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    public enum ExtendedPacketTypes {
+        Shutdown = 255,
+        ForceSend = 254
+
     }
 }

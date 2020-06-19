@@ -12,7 +12,7 @@ namespace TerraNPCBot.Packets {
     /// </summary>
     public class Packet4 : PacketBase {
         /// <summary>
-        /// Player info (4) //TODO
+        /// Player info (4)
         /// </summary>
         public Packet4 (Player plr) : base(0x4) {
             using (Amanuensis) {

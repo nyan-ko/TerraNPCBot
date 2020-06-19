@@ -202,12 +202,12 @@ namespace TerraNPCBot {
         private void SendAlive(object source, ElapsedEventArgs args) {
             if (!ShouldSendAlive)
                 return;
-            QueuePackets(new Packets.Packet13(ID, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, Position.X, Position.Y));
+            QueuePackets(new Packets.Packet13(ID, 0, 0, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, Position.X, Position.Y));
         }
 
         private bool ShouldSendAlive => Running && !playingBack;
 
-        private void QueuePackets(params PacketBase[] packets) => client.QueuePackets(packets);
+        private void QueuePackets(params IPacket[] packets) => client.QueuePackets(packets);
     }
 
     public class BotActions {
@@ -220,7 +220,7 @@ namespace TerraNPCBot {
         private void QueuePackets(params PacketBase[] packets) => bot.Client.QueuePackets(packets);
 
         public virtual void UpdateInventory() {
-            byte i = 0;
+            short i = 0;
             foreach (var current in bot.PlayerData.InventorySlots) {
                 QueuePackets(new Packets.Packet5(bot.ID,
                     i,
@@ -263,7 +263,7 @@ namespace TerraNPCBot {
             }
         }
 
-        public virtual void Teleport(Microsoft.Xna.Framework.Vector2 pos) => QueuePackets(new Packets.Packet13(bot.ID, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
+        public virtual void Teleport(Microsoft.Xna.Framework.Vector2 pos) => QueuePackets(new Packets.Packet13(bot.ID, 0, 0, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
         
         public virtual void PlayNote(float note) => QueuePackets(new Packets.Packet58(bot.ID, note));
 
@@ -288,16 +288,16 @@ namespace TerraNPCBot {
                 player.InventorySlots[i] = (NetItem)target.inventory[i];
             }
             for (int i = 0; i < NetItem.ArmorSlots; ++i) {
-                player.ArmorSlots[i] = (NetItem)target.inventory[i];
+                player.ArmorSlots[i] = (NetItem)target.armor[i];
             }
             for (int i = 0; i < NetItem.DyeSlots; ++i) {
-                player.DyeSlots[i] = (NetItem)target.inventory[i];
+                player.DyeSlots[i] = (NetItem)target.dye[i];
             }
             for (int i = 0; i < NetItem.MiscDyeSlots; ++i) {
-                player.MiscDyeSlots[i] = (NetItem)target.inventory[i];
+                player.MiscDyeSlots[i] = (NetItem)target.miscDyes[i];
             }
             for (int i = 0; i < NetItem.MiscEquipSlots; ++i) {
-                player.MiscEquipSlots[i] = (NetItem)target.inventory[i];
+                player.MiscEquipSlots[i] = (NetItem)target.miscEquips[i];
             }
             if (bot.Running)
                 UpdateInventory();
@@ -325,12 +325,12 @@ namespace TerraNPCBot {
             // Terraria uses this struct so I'm doing it too
             BitsByte bit1 = 0;
             for (int i = 0; i < 8; ++i) {
-                bit1[i] = target.hideVisual[i];
+                bit1[i] = target.hideVisibleAccessory[i];
             }
             player.HideVisuals = bit1;
             BitsByte bit2 = 0;
             for (int i = 8; i < 10; ++i) {
-                bit2[i] = target.hideVisual[i];
+                bit2[i] = target.hideVisibleAccessory[i];
             }
             player.HideVisuals2 = bit2;
 

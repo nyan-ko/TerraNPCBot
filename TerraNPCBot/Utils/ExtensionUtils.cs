@@ -6,63 +6,94 @@ using System.Threading.Tasks;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Terraria.Server;
+using Terraria;
 using TShockAPI;
 
 namespace TerraNPCBot.Utils {
     public static class ExtensionUtils {
 
-        /// <summary>
-        /// Writes an object casted to its underlying type.
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="o"></param>
+        #region Unused, thank god
+        //       public enum TypeSerialization {
+        //           Boolean, Byte, SByte, Int16, UInt16, Int32, UInt32, Int64, UInt64, Single, String, Vector2, Color
+        //       }
 
-        // Absolutely disgusting, you have been warned
-        public static void WriteObject(this BinaryWriter writer, object o) {
-            switch (Type.GetTypeCode(o.GetType())) {
-                case TypeCode.Boolean:
-                    writer.Write((bool)o);
-                    break;
+        //       private static Dictionary<Type, TypeSerialization> serializationByType = new Dictionary<Type, TypeSerialization> {
+        //           { typeof(bool), TypeSerialization.Boolean },
+        //           { typeof(byte), TypeSerialization.Byte },
+        //           { typeof(sbyte), TypeSerialization.SByte },
+        //           { typeof(short), TypeSerialization.Int16 },
+        //           { typeof(ushort), TypeSerialization.UInt16 },
+        //           { typeof(int), TypeSerialization.Int32 },
+        //           { typeof(uint), TypeSerialization.UInt32 },
+        //           { typeof(long), TypeSerialization.Int64 },
+        //           { typeof(ulong), TypeSerialization.UInt64 },
+        //           { typeof(string), TypeSerialization.String },
+        //           { typeof(Vector2), TypeSerialization.Vector2 },
+        //           { typeof(Color), TypeSerialization.Color }
+        //       };
 
-                case TypeCode.Byte:
-                    writer.Write((byte)o);
-                    break;
-                case TypeCode.SByte:
-                    writer.Write((sbyte)o);
-                    break;
+        //       /// <summary>
+        //       /// Writes an object casted to its underlying type.
+        //       /// </summary>
+        //       /// <param name="writer"></param>
+        //       /// <param name="o"></param>
+        //       // Absolutely disgusting
+        //       public static void WriteObject(this BinaryWriter writer, object o) {
+        //           if (serializationByType.TryGetValue(o.GetType(), out TypeSerialization type)) {
+        //               switch (type) {
+        //                   case TypeSerialization.Boolean:
+        //                       writer.Write((bool)o);
+        //                       break;
 
-                case TypeCode.Int16:
-                    writer.Write((short)o);
-                    break;
-                case TypeCode.UInt16:
-                    writer.Write((ushort)o);
-                    break;
+        //                   case TypeSerialization.Byte:
+        //                       writer.Write((byte)o);
+        //                       break;
+        //                   case TypeSerialization.SByte:
+        //                       writer.Write((sbyte)o);
+        //                       break;
 
-                case TypeCode.Int32:
-                    writer.Write((int)o);
-                    break;
-                case TypeCode.UInt32:
-                    writer.Write((uint)o);
-                    break;
+        //                   case TypeSerialization.Int16:
+        //                       writer.Write((short)o);
+        //                       break;
+        //                   case TypeSerialization.UInt16:
+        //                       writer.Write((ushort)o);
+        //                       break;
 
-                case TypeCode.Int64:
-                    writer.Write((long)o);
-                    break;
-                case TypeCode.UInt64:
-                    writer.Write((ulong)o);
-                    break;
+        //                   case TypeSerialization.Int32:
+        //                       writer.Write((int)o);
+        //                       break;
+        //                   case TypeSerialization.UInt32:
+        //                       writer.Write((uint)o);
+        //                       break;
 
-                case TypeCode.Single:
-                    writer.Write((float)o);
-                    break;  // Doubles are not used in terraria packets
-                case TypeCode.String:
-                    writer.Write((string)o);
-                    break;
+        //                   case TypeSerialization.Int64:
+        //                       writer.Write((long)o);
+        //                       break;
+        //                   case TypeSerialization.UInt64:
+        //                       writer.Write((ulong)o);
+        //                       break;
 
-                default:
-                    throw new InvalidOperationException();
-            }
-        }
+        //                   case TypeSerialization.Single:
+        //                       writer.Write((float)o);
+        //                       break;  // Doubles are not used in terraria packets
+        //                   case TypeSerialization.String:
+        //                       writer.Write((string)o);
+        //                       break;
+
+        //                   case TypeSerialization.Vector2:
+        //                       writer.WriteVector2((Vector2)o);
+        //                       break;
+        //                   case TypeSerialization.Color:
+        //                       writer.WriteColor((Color)o);
+        //                       break;
+
+        //                   default:
+        //                       throw new InvalidOperationException();
+        //}
+        //           }
+        //       }
+
+        #endregion
 
         public static void WriteColor(this BinaryWriter writer, Color color) {
             writer.Write(color.R);

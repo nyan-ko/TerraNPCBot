@@ -19,7 +19,7 @@ namespace TerraNPCBot.Packets {
                 Amanuensis.Write((ushort)1);
                 Amanuensis.Write(id);
                 new NetworkText(message, NetworkText.Mode.Literal).Serialize(Amanuensis);
-                Amanuensis.Write(color);
+                Amanuensis.WriteColor(color);
                 Packetize();
             }
         }
