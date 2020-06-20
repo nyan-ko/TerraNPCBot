@@ -140,21 +140,21 @@ namespace TerraNPCBot.Program {
         public const string MultipleBotsFound = "Multiple bots matched your search criteria: ";
         public const string NoOwnedBots = "You do not have any owned bots.";
 
-        public static readonly string NoPermission = "You do not have permission to use this command.";
-        public static readonly string BotErrorGeneric = "Something went wrong: {0}. Report to staff if you see this.";
+        public const string NoPermission = "You do not have permission to use this command.";
+        public const string BotErrorGeneric = "Something went wrong: {0}. Report to staff if you see this.";
 
-        public static readonly string BotErrorNotFound = "Could not find selected bot.";
-        public static readonly string BotErrorNotRunning = "Selected bot \"{0}\" is not currently running.";
-        public static readonly string BotErrorAlreadyRunning = "Selected bot \"{0}\" is already running.";
-        public static readonly string BotErrorCouldNotStart = "Selected bot \"{0}\" could not establish a connection. Retry?";
+        public const string BotErrorNotFound = "Could not find selected bot.";
+        public const string BotErrorNotRunning = "Selected bot \"{0}\" is not currently running.";
+        public const string BotErrorAlreadyRunning = "Selected bot \"{0}\" is already running.";
+        public const string BotErrorCouldNotStart = "Selected bot \"{0}\" could not establish a connection. Retry?";
 
-        public static readonly string BotSuccessCreateNew = "Created a new bot with name \"{0}\".";
+        public const string BotSuccessCreateNew = "Created a new bot with name \"{0}\".";
 
-        public static readonly string BotSuccessStopped = "Stopped selected bot \"{0}\".";
-        public static readonly string BotSuccessStarted = "Started selected bot \"{0}\".";
+        public const string BotSuccessStopped = "Stopped selected bot \"{0}\".";
+        public const string BotSuccessStarted = "Started selected bot \"{0}\".";
 
-        public static readonly string BotSuccessRecording = "Selected bot \"{0}\" is now recording.";
-        public static readonly string BotSuccessStopRecording = "Selected bot \"{0}\" has stopped recording.";
+        public const string BotSuccessRecording = "Selected bot \"{0}\" is now recording.";
+        public const string BotSuccessStopRecording = "Selected bot \"{0}\" has stopped recording.";
 
     }
 }

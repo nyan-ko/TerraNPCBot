@@ -22,9 +22,6 @@ namespace TerraNPCBot.Program
         public override string Author => "nyan";
         #endregion
 
-        public const byte PluginStreamVersion = 1;
-        public const int BufferSize = 262143;
-
         public const string PluginFolderName = "TerraNPCBot";
         public static readonly string PluginFolderLocation = Path.Combine(TShock.SavePath, PluginFolderName);
         public static readonly string PluginSaveFolderLocation = Path.Combine(PluginFolderLocation, "saves");
@@ -72,9 +69,9 @@ namespace TerraNPCBot.Program
             Commands.ChatCommands.Add(new Command("bot.debug", PluginCommands.Debug, "debug"));
 
             // Call PluginCommands.CommandThread on a separate thread to handle commands
-            ThreadPool.QueueUserWorkItem(PluginCommands.CommandThread);
+            //ThreadPool.QueueUserWorkItem(PluginCommands.CommandThread);
             // Same thing for packet queue
-            ThreadPool.QueueUserWorkItem(PacketBase.PacketSendThread);
+            //ThreadPool.QueueUserWorkItem(PacketBase.PacketSendThread);
         }
         protected override void Dispose(bool disposing) {
             if (disposing) {

@@ -318,7 +318,7 @@ namespace TerraNPCBot.Program {
             // Example command
             //       0     1    2     3        4
             // /bot new Michael F. Jackson 7777/nexus
-            // Since port (if it is specified) is always be the last parameter, the range between 'new' and the port will yield the full name.
+            // Since port (if it is specified) will always be the last parameter, the range between 'new' and the port will yield the full name.
 
             if (args.BPlayer.OwnedBots.Count + 1 > args.BPlayer.BotLimit) {
                 args.Player?.SendErrorMessage($"You have reached the maximum number of bots you can create: {args.BPlayer.BotLimit}");
