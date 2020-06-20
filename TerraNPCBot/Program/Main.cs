@@ -34,14 +34,14 @@ namespace TerraNPCBot.Program
         public static Bot[] Bots = new Bot[256];
         public static List<Bot> GlobalRunningBots = new List<Bot>();
 
-        public static Dictionary<int, string> ServersByPorts = new Dictionary<int, string> {
-            { 7777, "Nexus" },
-            { 7770, "Items" },
-            { 7771, "Freebuild" },
-            { 7779, "Freebuild+" },
-            { 7773, "PvP" },
-            { 7772, "PvE" },
-            { 7774, "CTF" }
+        public static Dictionary<string, string> ServersByPorts = new Dictionary<string, string> {
+            { "7777", "Nexus" },
+            { "7770", "Items" },
+            { "7771", "Freebuild" },
+            { "7779", "Freebuild+" },
+            { "7773", "PvP" },
+            { "7772", "PvE" },
+            { "7774", "CTF" }
         };
         public static Dictionary<string, int> PortsByServers = new Dictionary<string, int> {
             { "nexus", 7777 },

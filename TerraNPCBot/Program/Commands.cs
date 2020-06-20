@@ -26,11 +26,11 @@ namespace TerraNPCBot.Program {
             { "new", NewBot },
             { "start", StartBot },
             { "stop", StopBot },
-            { "delete", DeleteBot },
-            { "record", RecordMaster },
+            { "delete", DeleteBot }, { "del", DeleteBot },
+            { "record", RecordMaster }, { "rec", RecordMaster },
             { "copy", Copy },
             { "chat", Chat },
-            { "teleport", Teleport }
+            { "teleport", Teleport }, { "tp", Teleport }
         };
 
         private static BlockingCollection<BotCommandArgs> CommandQueue = new BlockingCollection<BotCommandArgs>();
@@ -250,7 +250,7 @@ namespace TerraNPCBot.Program {
                 }
                 else {
                     Bot foundBot = bots[0];
-                    if (Program.ServersByPorts.TryGetValue(foundBot.Port, out string serverName)) {
+                    if (Program.ServersByPorts.TryGetValue(foundBot.Port.ToString(), out string serverName)) {
                         serverName = "none..?";
                     }
                     args.Player.MultiMsg(Color.Yellow, $"Bot name: {foundBot.Name}",
@@ -343,7 +343,13 @@ namespace TerraNPCBot.Program {
                 // The last parameter which may or may not be the port
                 string potentialPort = currentSection[currentSection.Count - 1];
                 // Whether the user has specified a port, which is present in the last parameter
-                bool hasSpecifiedPort = int.TryParse(potentialPort, out port) || Program.PortsByServers.TryGetValue(potentialPort.ToLower(), out port);
+                bool hasSpecifiedPort = false;
+                if (Program.ServersByPorts.ContainsKey(potentialPort)) {
+                    hasSpecifiedPort = true;
+                    port = int.Parse(potentialPort);
+                }
+                else if (Program.PortsByServers.TryGetValue(potentialPort.ToLower(), out port))
+                    hasSpecifiedPort = true;
                 // Gets the range in the parameter list that contains the user specified name.
                 // If there is a port, get the range between 'new' and the port
                 // Else, skip 'new' in the current secton to get the range.
@@ -684,9 +690,17 @@ namespace TerraNPCBot.Program {
             if (bot != null) {
                 TSPlayer tstarget;
                 if (currentSection.Count > 1) {
+
+                    if (currentSection.Count == 3 && int.TryParse(args.Parameters[1], out int x) && int.TryParse(args.Parameters[2], out int y)) {
+                        Vector2 newPos = new Vector2(x, y);
+                        bot.Actions.Teleport(newPos);
+
+                        args.Player?.SendSuccessMessage($"Teleporting bot to ({x}, {y}).");
+                        return;
+                    }
+
                     string namewithspaces = string.Join(" ", currentSection.Skip(1)).Trim('"');
 
-                    
                     var found = TSPlayer.FindByNameOrID(namewithspaces);
                     if (found.Count == 0 || found == null) {
                         args.Player?.SendErrorMessage($"No matches found for \"{namewithspaces}\".");

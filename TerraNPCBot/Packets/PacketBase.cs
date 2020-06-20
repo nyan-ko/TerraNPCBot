@@ -55,9 +55,12 @@ namespace TerraNPCBot {
                 Buffer.BlockCopy(temp, 0, data, 3, temp.Length - 3); // Copies actual packet data
                 Buffer.BlockCopy(temp, packetLength - 3, data, 0, 3); // Copies packet header (length, type)
             }
-            if (bypass && targets.Count > 0) {
+            if (bypass) {
+                if (targets.Count == 0)
+                    throw new Exception();
                 BypassIgnore();
             }
+
         }
 
         public void Send() { 
