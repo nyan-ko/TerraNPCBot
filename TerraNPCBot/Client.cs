@@ -23,7 +23,6 @@ namespace TerraNPCBot {
         public int port;
 
         private Bot bot;
-        private bool sendPackets;
 #endregion
 
         public Client (int _port, Bot _bot) {

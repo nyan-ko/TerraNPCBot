@@ -37,7 +37,7 @@ namespace TerraNPCBot.Program {
 
         internal static void CommandThread(object state) {
             while (true) {
-                if (!CommandQueue.TryTake(out BotCommandArgs args)) {
+                if (!CommandQueue.TryTake(out BotCommandArgs args, -1)) {
                     continue;
                 }
 
@@ -64,64 +64,70 @@ namespace TerraNPCBot.Program {
         /// <param name="arg"></param>
         public static void BotMaster(CommandArgs arg) {
             BotCommandArgs args = new BotCommandArgs(arg);
-            if (args.Parameters.Count > 0 && args.Player != null) {
-                switch (args.Parameters[0]) {
-                    case "help":
-                        Help(args);
-                        break;
-                    case "list":
-                        List(args);
-                        break;
-                    case "ignore":
-                        Ignore(args);
-                        break;
-                    case "info":
-                        Info(args);
-                        break;
-                    case "select":
-                        Select(args);
-                        break;
-                    case "new":
-                        NewBot(args);
-                        break;
-                    case "start":
-                        StartBot(args);
-                        break;
-                    case "stop":
-                        StopBot(args);
-                        break;
-                    case "copy":
-                        Copy(args);
-                        break;
-                    case "record":
-                        RecordMaster(args);
-                        break;
-                    case "delete":
-                        DeleteBot(args);
-                        break;
-                    //case "save":
-                    //    if (args.Parameters.Count > 1) {
-                    //        switch (args.Parameters[1]) {
-                    //            case "prune":
-                    //                Prune(args);
-                    //                break;
-                    //        }
-                    //    }
-                    //    Save(args);
-                    //    break;
-                    case "chat":
-                        Chat(args);
-                        break;
-                    case "teleport":
-                        Teleport(args);
-                        break;
-                    default:
-                        args.Player.MultiMsg(Messages.Master1, Color.Yellow);
-                        break;
+            if (args.Player != null) {
+                if (args.Parameters.Count == 0) {
+                    args.Player.MultiMsg(Messages.Master1, Color.Yellow);
+                    return;
                 }
-            }
-            else {
-                args.Player.MultiMsg(Messages.Master1, Color.Yellow);
+                for (int i = 0; i < args.Parameters.Count; ++i) {
+                    switch (args.Parameters[i]) {
+                        case "help":
+                            Help(args);
+                            break;
+                        case "list":
+                            List(args);
+                            break;
+                        case "ignore":
+                            Ignore(args);
+                            break;
+                        case "info":
+                            Info(args);
+                            break;
+                        case "select":
+                            Select(args);
+                            break;
+                        case "new":
+                            NewBot(args);
+                            break;
+                        case "start":
+                            StartBot(args);
+                            break;
+                        case "stop":
+                            StopBot(args);
+                            break;
+                        case "copy":
+                            Copy(args);
+                            break;
+                        case "record":
+                            RecordMaster(args);
+                            break;
+                        case "delete":
+                            DeleteBot(args);
+                            break;
+                        //case "save":
+                        //    if (args.Parameters.Count > 1) {
+                        //        switch (args.Parameters[1]) {
+                        //            case "prune":
+                        //                Prune(args);
+                        //                break;
+                        //        }
+                        //    }
+                        //    Save(args);
+                        //    break;
+                        case "chat":
+                            Chat(args);
+                            break;
+                        case "teleport":
+                            Teleport(args);
+                            break;
+                        default:
+                            args.Player.MultiMsg(Messages.Master1, Color.Yellow);
+                            break;
+                    }
+
+                    args.OffsetToNextSection();
+                    i = args.LowerSplitterBound;
+                }
             }
         }
 

@@ -69,9 +69,9 @@ namespace TerraNPCBot.Program
             Commands.ChatCommands.Add(new Command("bot.debug", PluginCommands.Debug, "debug"));
 
             // Call PluginCommands.CommandThread on a separate thread to handle commands
-            //ThreadPool.QueueUserWorkItem(PluginCommands.CommandThread);
+            ThreadPool.QueueUserWorkItem(PluginCommands.CommandThread);
             // Same thing for packet queue
-            //ThreadPool.QueueUserWorkItem(PacketBase.PacketSendThread);
+            ThreadPool.QueueUserWorkItem(PacketBase.PacketSendThread);
         }
         protected override void Dispose(bool disposing) {
             if (disposing) {
