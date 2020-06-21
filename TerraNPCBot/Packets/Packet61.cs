@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
+    [Obsolete]
     /// <summary>
     /// Spawn boss invasion (61)
     /// </summary>

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
+    [Obsolete]
     /// <summary>
     /// Release npc (71)
     /// </summary>

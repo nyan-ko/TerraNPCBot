@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
+    [Obsolete]
     /// <summary>
     /// Mass wire operation (109)
     /// </summary>

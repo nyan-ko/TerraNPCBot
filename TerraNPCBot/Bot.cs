@@ -193,7 +193,7 @@ namespace TerraNPCBot {
                 ++PacketIndex;
             }
 
-            var packet = PacketBase.WriteFromRecorded(currentPacket.stream, this);
+            var packet = RecordedPacket.WriteFromRecorded(currentPacket.stream, this);
             if (packet != null)
                 QueuePackets(packet);
         }

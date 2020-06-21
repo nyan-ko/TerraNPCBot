@@ -12,12 +12,16 @@ namespace TerraNPCBot.Packets {
         /// <summary>
         /// Player npc teleport (65)
         /// </summary>
-        public Packet65(byte flag, short target, float x, float y) : base(65) {
+        public Packet65(byte flag, short target, float x, float y, byte style, int extra = 0) : base(65) {
             using (Amanuensis) {
                 Amanuensis.Write(flag);
                 Amanuensis.Write(target);
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
+                Amanuensis.Write(style);
+                if ((flag & 8) == 8) {
+                    Amanuensis.Write(extra);
+                }
                 Packetize();
             }
         }
