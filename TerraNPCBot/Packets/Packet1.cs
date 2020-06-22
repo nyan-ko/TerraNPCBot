@@ -6,17 +6,15 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Add player buff (55)
+    /// Connect request (1)
     /// </summary>
-    public class Packet55 : PacketBase {
+    public class Packet1 : PacketBase {
         /// <summary>
-        /// Add player buff (55)
+        /// Connect request (1)
         /// </summary>
-        public Packet55(byte id, byte buff, int time) : base(55) {
+        public Packet1 (int protocol) : base(0x1){
             using (Amanuensis) {
-                Amanuensis.Write(id);
-                Amanuensis.Write(buff);
-                Amanuensis.Write(time);
+                Amanuensis.Write($"Terraria{protocol}");
                 Packetize();
             }
         }

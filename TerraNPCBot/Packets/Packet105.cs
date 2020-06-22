@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Player npc teleport (65)
+    /// Gem lock toggle (105)
     /// </summary>
-    public class Packet65 : PacketBase {
+    public class Packet105 : PacketBase {
         /// <summary>
-        /// Player npc teleport (65)
+        /// Gem lock toggle (105)
         /// </summary>
-        public Packet65(byte flag, short target, float x, float y) : base(65) {
+        public Packet105(short x, short y, bool on) : base(105){
             using (Amanuensis) {
-                Amanuensis.Write(flag);
-                Amanuensis.Write(target);
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
+                Amanuensis.Write(on);
                 Packetize();
             }
         }

@@ -6,17 +6,16 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Add player buff (55)
+    /// Spawn boss invasion (61)
     /// </summary>
-    public class Packet55 : PacketBase {
+    public class Packet61 : PacketBase {
         /// <summary>
-        /// Add player buff (55)
+        /// Spawn boss invasion (61)
         /// </summary>
-        public Packet55(byte id, byte buff, int time) : base(55) {
+        public Packet61(short id, short type) : base(61) {
             using (Amanuensis) {
                 Amanuensis.Write(id);
-                Amanuensis.Write(buff);
-                Amanuensis.Write(time);
+                Amanuensis.Write(type);
                 Packetize();
             }
         }

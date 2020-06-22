@@ -6,18 +6,19 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Packets {
     /// <summary>
-    /// Player npc teleport (65)
+    /// Place item frame (89)
     /// </summary>
-    public class Packet65 : PacketBase {
+    public class Packet89 : PacketBase {
         /// <summary>
-        /// Player npc teleport (65)
+        /// Place item frame (89)
         /// </summary>
-        public Packet65(byte flag, short target, float x, float y) : base(65) {
+        public Packet89(short x, short y, short id, byte pre, short stack) : base(89) {
             using (Amanuensis) {
-                Amanuensis.Write(flag);
-                Amanuensis.Write(target);
                 Amanuensis.Write(x);
                 Amanuensis.Write(y);
+                Amanuensis.Write(id);
+                Amanuensis.Write(pre);
+                Amanuensis.Write(stack);
                 Packetize();
             }
         }
