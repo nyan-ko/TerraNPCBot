@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace TerraNPCBot.DatabaseItems {
     public class DBPlayer {
         public List<DBBot> OwnedBots;
-        public uint BotLimit;
+        public int BotLimit;
         public bool Teleportable;
         public bool Copyable;
         public bool Ignoring;

@@ -2,6 +2,7 @@
 using System.IO;
 using Terraria;
 using TShockAPI;
+using TerraNPCBot.Program;
 
 namespace TerraNPCBot {
     /// <summary>
@@ -29,6 +30,7 @@ namespace TerraNPCBot {
         }
 
         internal BTSPlayer() {
+            BotLimit = PluginMain.Config.DefaultBotLimit;
             OwnedBots = new List<Bot>();
             GroupedBots = new List<int>();
 
@@ -36,6 +38,7 @@ namespace TerraNPCBot {
         }
 
         public BTSPlayer(int index) {
+            BotLimit = PluginMain.Config.DefaultBotLimit;
             OwnedBots = new List<Bot>();
             GroupedBots = new List<int>();
 
@@ -54,7 +57,7 @@ namespace TerraNPCBot {
 
         public void SetSelectedDelete(int selectedIndex) { selectedDelete = selectedIndex; }
 
-        public uint BotLimit { get; set; } = 5; // Arbitrary limit
+        public int BotLimit { get; set; }
         public List<Bot> OwnedBots { get; set; }
         public List<int> GroupedBots { get; set; }
         public int Selected { get; set; } = -1;
