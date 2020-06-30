@@ -10,70 +10,74 @@ namespace TerraNPCBot {
     public class BTSPlayer {
         public static BTSPlayer BTSServerPlayer = new BTSPlayer();
 
+        internal BTSPlayer(DatabaseItems.DBPlayer dbPlayer, int index) {
+            BotLimit = dbPlayer.BotLimit;
+            CanBeTeleportedTo = dbPlayer.Teleportable;
+            CanBeCopied = dbPlayer.Copyable;
+            IgnoreBots = dbPlayer.Ignoring;
+
+            List<Bot> bots = new List<Bot>();
+            int indexInOwnedBots = 0;
+            foreach (var bot in dbPlayer.OwnedBots) {
+                bots.Add(bot.ConvertDBItem(index, indexInOwnedBots));
+                indexInOwnedBots++;
+            }
+
+            OwnedBots = bots;
+            GroupedBots = new List<int>();
+            Index = index;
+        }
+
         internal BTSPlayer() {
             OwnedBots = new List<Bot>();
-            Selected = -1;
+            GroupedBots = new List<int>();
 
-            ServerIndex = -1;
+            Index = -1;
         }
 
         public BTSPlayer(int index) {
             OwnedBots = new List<Bot>();
-            Selected = -1;
+            GroupedBots = new List<int>();
 
-            ServerIndex = index;
+            Index = index;
         }
 
-        public int ServerIndex { get; private set; }
+        public int Index { get; private set; }
 
         private int selectedDelete;
-        public int SelectedDelete {
-            get {
-                int del = selectedDelete;
-                selectedDelete = -1;
-                return del;
-            }
-            set { selectedDelete = value; }
+
+        public int GetSelectedDelete() {
+            int del = selectedDelete;
+            selectedDelete = -1;
+            return del;
         }
+
+        public void SetSelectedDelete(int selectedIndex) { selectedDelete = selectedIndex; }
 
         public uint BotLimit { get; set; } = 5; // Arbitrary limit
-        public List<Bot> OwnedBots { get; set; } = new List<Bot>();
+        public List<Bot> OwnedBots { get; set; }
+        public List<int> GroupedBots { get; set; }
         public int Selected { get; set; } = -1;
 
-        public bool autosave = true;
-        public bool canBeTeleportedTo = false;
-        public bool canBeCopied = false;
+        public bool CanBeTeleportedTo { get; set; } = false;
+        public bool CanBeCopied { get; set; } = false;
+        public bool IgnoreBots { get; private set; } = false;
 
-        private bool ignoreBots = false;
-        public bool IgnoreBots {
-            get {
-                return ignoreBots;
-            }
-            set {
-                ignoreBots = value;
-                ToggleBotVisibility(value);
-            }
-        }
-
-        private void ToggleBotVisibility(bool visible) {
-            if (!visible) {
-                foreach (Bot bot in Program.Program.GlobalRunningBots) {
+        public void ToggleBotVisibility(bool visible) {
+            if (visible) {
+                foreach (Bot bot in Program.PluginMain.GlobalRunningBots) {
                     // Resend join packets to the player
-                    bot.Client.QueuePackets(new Packets.Packet4(bot.PlayerData) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet16(bot.ID, (short)bot.PlayerData.CurHP, (short)bot.PlayerData.MaxHP) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet30(bot.ID, false) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet42(bot.ID, (short)bot.PlayerData.CurMana, (short)bot.PlayerData.MaxMana) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet45(bot.ID, 0) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet50(bot.ID, new ushort[22]) { targets = new List<int> { ServerIndex } },
-                        new Packets.Packet12(bot.ID, (short)bot.TilePosition.X, (short)bot.TilePosition.Y, 0, (byte)PlayerSpawnContext.SpawningIntoWorld) { targets = new List<int> { ServerIndex } });
+                    bot.RequestJoinPackets(Index);
                 }
             }
             else {
-                foreach (Bot bot in Program.Program.GlobalRunningBots) {
+                foreach (Bot bot in Program.PluginMain.GlobalRunningBots) {
                     // IgnorePacket bypasses player ignores to tell them bot has disconnected
-                    bot.Client.QueuePackets(new Packets.IgnorePacket(bot.ID, false) { targets = new List<int> { ServerIndex } });
+                    bot.Client.QueuePackets(new Packets.IgnorePacket(bot.ID, false).AddTargets(Index));
                 }
             }
+
+            IgnoreBots = !visible;
         }
 
         /// <summary>
@@ -111,7 +115,7 @@ namespace TerraNPCBot {
         }
 
         public TSPlayer SPlayer {
-            get { return TShock.Players[ServerIndex]; }
+            get { return TShock.Players[Index]; }
         }
     }
 }

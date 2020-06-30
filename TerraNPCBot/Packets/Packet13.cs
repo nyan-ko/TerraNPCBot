@@ -53,7 +53,7 @@ namespace TerraNPCBot.Packets {
                 }
                 Packetize();
             }
-            Program.Program.Bots[id].Position = new Vector2(posX, posY);
+            Program.PluginMain.Bots[id].Position = new Vector2(posX, posY);
         }
     }
 }

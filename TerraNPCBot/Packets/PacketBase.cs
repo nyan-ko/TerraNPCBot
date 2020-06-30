@@ -18,23 +18,22 @@ namespace TerraNPCBot {
         #region Properties
         public IClient Sender { get; set; }
 
-        public short TotalLength => (short)data.Length;
+        public short TotalLength => (short)Data.Length;
 
         public byte Type => packetType;
 
-        public byte[] Data => data;
+        public byte[] Data { get; protected set; }
 
         #endregion
         #region Fields
         public byte packetType;
-        public List<int> targets = new List<int>();
+        private List<int> targets = new List<int>();
 
-        private byte[] data;
         protected BinaryWriter Amanuensis;
         #endregion
 
         protected PacketBase(byte _packetType) {
-            Amanuensis = new BinaryWriter(new MemoryStream());
+            Amanuensis = new BinaryWriter(new MemoryStream() { Position = 3 });
             packetType = _packetType;
         }
 
@@ -44,25 +43,23 @@ namespace TerraNPCBot {
         /// <param name="stream"></param>
         protected void Packetize(bool bypass = false) { // I will NOT switch to American English
             using (MemoryStream stream = new MemoryStream()) {
-                short packetLength = (short)(Amanuensis.BaseStream.Position + 3);
+                short packetLength = (short)Amanuensis.BaseStream.Position;
+                Amanuensis.BaseStream.Position = 0;
                 Amanuensis.Write(packetLength);
                 Amanuensis.Write(Type);
                 Amanuensis.BaseStream.Position = 0;
                 Amanuensis.BaseStream.CopyTo(stream);
-                data = new byte[packetLength];
-                byte[] temp = stream.ToArray();
-
-                Buffer.BlockCopy(temp, 0, data, 3, temp.Length - 3); // Copies actual packet data
-                Buffer.BlockCopy(temp, packetLength - 3, data, 0, 3); // Copies packet header (length, type)
+                Data = new byte[packetLength];
             }
             if (bypass) {
-                if (targets.Count == 0)
-                    throw new Exception();
                 BypassIgnore();
             }
 
         }
 
+        /// <summary>
+        /// Sends the packet data depending on its overlying type and target list.
+        /// </summary>
         public void Send() { 
             // Force sent packet
             // Must be initialized with a target in the 'targets' list
@@ -81,7 +78,7 @@ namespace TerraNPCBot {
             // Specific targets
             if (targets.Count != 0) {
                 foreach (int i in targets) {
-                    if (Program.Program.Players[i]?.IgnoreBots ?? true)
+                    if (Program.PluginMain.Players[i]?.IgnoreBots ?? true)
                         return;
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(Data, 0, TotalLength, Netplay.Clients[i].ServerWriteCallBack);
@@ -93,13 +90,25 @@ namespace TerraNPCBot {
 
             // Entire server
             for (int i = 0; i < 256; ++i) {
-                if (Netplay.Clients[i].IsConnected() && Program.Program.Bots[i] == null && (!Program.Program.Players[i]?.IgnoreBots ?? false)) {
+                if (Netplay.Clients[i].IsConnected() && Program.PluginMain.Bots[i] == null && (!Program.PluginMain.Players[i]?.IgnoreBots ?? false)) {
                     try {
                         Netplay.Clients[i].Socket.AsyncSend(Data, 0, TotalLength, Netplay.Clients[i].ServerWriteCallBack);
                     }
                     catch { }
                 }
             }
+        }
+
+        public PacketBase AddTargets(params int[] targetArray) {
+            foreach (var target in targetArray) {
+                if (target != -1) {
+                    targets.Clear();
+                    return this;
+                }
+                targets.Add(target);
+            }
+                
+            return this;
         }
 
         /// <summary>
@@ -114,7 +123,7 @@ namespace TerraNPCBot {
         public static void AddPacket(IPacket packet) => packetQueue.Add(packet);
 
         internal static void PacketSendThread(object unused) {
-            while (true) {
+            while (Program.PluginMain.RunThreads) {
                 try {
                     if (!packetQueue.TryTake(out IPacket packet, -1))
                         continue;

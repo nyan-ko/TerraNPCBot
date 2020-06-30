@@ -27,8 +27,8 @@ namespace TerraNPCBot {
 
             public Stopwatch timerBetweenPackets;
             public StreamInfo previousPacket;
-            public Timer delayBetweenPackets;
-            public int PacketIndex;
+            private Timer delayBetweenPackets;
+            private int packetIndex;
         #endregion
 
         private int owner;
@@ -72,6 +72,8 @@ namespace TerraNPCBot {
                 if (EventHooks.NameChange.Invoke(this, new NameChangedEventArgs() { OldName = PlayerData?.Name, NewName = value }))
                     return;
                 PlayerData.Name = value;
+                if (Running)
+                    QueuePackets(new Packets.Packet4(PlayerData));
             }
         }
 
@@ -113,6 +115,9 @@ namespace TerraNPCBot {
                 if (EventHooks.PositionChange.Invoke(this, new PositionChangedEventArgs() { OldPosition = position, NewPosition = value }))
                     return;
                 position = value;
+
+                if (Running)
+                    Actions.Teleport(position);
             }
         }
 
@@ -126,22 +131,35 @@ namespace TerraNPCBot {
         /// <summary>
         /// Gets the bot's chat color based off its group on the server.
         /// </summary>
-        public Microsoft.Xna.Framework.Color ChatColor => new Microsoft.Xna.Framework.Color(AsTSPlayer.Group.R, AsTSPlayer.Group.G, AsTSPlayer.Group.B);
+        public Color ChatColor => new Color(AsTSPlayer.Group.R, AsTSPlayer.Group.G, AsTSPlayer.Group.B);
         #endregion
+
+        internal Bot(DatabaseItems.DBBot dbBot, int _owner, int indexInOwnedBots) {
+            owner = _owner;
+            client = new Client(dbBot.Port, this);
+            Actions = new BotActions(this);
+            EventHooks = new Hooks();
+
+            position = dbBot.Position;
+            PlayerData = dbBot.PlayerData;
+            IndexInOwnerBots = IndexInOwnerBots;
+
+            SetupHeartbeat();
+
+            Initialize();
+        }
 
         public Bot(string name, int _owner, int ownedBotsIndex, int port) {
             owner = _owner;
             client = new Client(port, this);
             Actions = new BotActions(this);
             EventHooks = new Hooks();
-            PlayerData = new Player(name, this);
 
+            PlayerData = new Player(name, this);
             position = new Vector2(Main.spawnTileX * 16, Main.spawnTileY * 16);
             indexInOwnerBots = ownedBotsIndex;
 
-            heartBeat = new Timer(90000); // 1 minute 30 seconds, all players time out after 2 minutes
-            heartBeat.Elapsed += SendAlive;
-            heartBeat.AutoReset = true;
+            SetupHeartbeat();
 
             Initialize();
 
@@ -154,18 +172,26 @@ namespace TerraNPCBot {
             client.Initialize();
         }
 
+        private void SetupHeartbeat() {
+            heartBeat = new Timer(90000); // 1 minute 30 seconds, all players time out after 2 minutes
+            heartBeat.Elapsed += SendAlive;
+            heartBeat.AutoReset = true;
+        }
+
         public bool Start() {
             Client.Start();
+            if (Running)
+                Program.PluginMain.GlobalRunningBots.Add(this);
             return Running;
         }
 
         /// <summary>
-        /// Sends a player inactive packet to all players then tells itself to stop its write thread.
+        /// Sends a player inactive packet to all players then tells itself to stop running.
         /// </summary>
         public void Shutdown() {
             QueuePackets(new Packets.Packet14(ID, false),
                 new Packets.ShutdownPacket());
-            Program.Program.GlobalRunningBots.Remove(this);
+            Program.PluginMain.GlobalRunningBots.Remove(this);
         }
 
         #region Record
@@ -179,18 +205,18 @@ namespace TerraNPCBot {
 
         private void RecordedPacketDelay(object sender, ElapsedEventArgs args) {
             var timer = (Timer)sender;
-            var currentPacket = recordedPackets[PacketIndex];
-            bool lastPacket = PacketIndex == (recordedPackets.Count - 1);
+            var currentPacket = recordedPackets[packetIndex];
+            bool lastPacket = packetIndex == (recordedPackets.Count - 1);
 
             if (lastPacket) {
                 timer.Stop();
                 timer.Dispose();
-                PacketIndex = 0;
+                packetIndex = 0;
                 playingBack = false;
             }
             else {
                 timer.Interval = currentPacket.timeBeforeNextPacket == 0 ? 1 : currentPacket.timeBeforeNextPacket;
-                ++PacketIndex;
+                ++packetIndex;
             }
 
             var packet = RecordedPacket.WriteFromRecorded(currentPacket.stream, this);
@@ -208,6 +234,12 @@ namespace TerraNPCBot {
         private bool ShouldSendAlive => Running && !playingBack;
 
         private void QueuePackets(params IPacket[] packets) => client.QueuePackets(packets);
+
+        public void RequestJoinPackets(int whoAsked) {
+            EventHooks.ClientDirectedStart.Invoke(this, new StartEventArgs() { Bot = this, Port = Port, WhoAsked = whoAsked });
+        }
+
+        public override string ToString() => Name;
     }
 
     public class BotActions {
@@ -217,7 +249,7 @@ namespace TerraNPCBot {
             bot = b;
         }
 
-        private void QueuePackets(params PacketBase[] packets) => bot.Client.QueuePackets(packets);
+        private void QueuePackets(params IPacket[] packets) => bot.Client.QueuePackets(packets);
 
         public virtual void UpdateInventory() {
             short i = 0;

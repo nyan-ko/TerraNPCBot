@@ -6,14 +6,6 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Program {
     public static class Messages {
-        public const string Record =
-            "Sub-command for recording and playing back sequence of player actions through a bot.\\" +
-            "Usage: /bot record start|stop|play\\" +
-            "/bot record start - Starts recording owner's actions.\\" +
-            "/bot record stop - Stops recording owner's actions.\\" +
-            "/bot record play - Plays a recorded sequence of actions.";
-        
-
         public const string Master1 =
             "Command for working with server bots.\\" +
             "Usage: /bot help|new|start|stop|delete|info|save|chat|teleport|select|copy|record\\" +
@@ -26,7 +18,7 @@ namespace TerraNPCBot.Program {
         public const string Master2 = 
             "/bot info - Gives info about yourself or a bot.\\" +
             "/bot save - Saves player and owned bot data.\\" +
-            "/bot chat - Makes selected bot output inputted message; (most) commands work!\\" +
+            "/bot chat - Makes selected bot output inputted message.\\" +
             "/bot teleport - Teleports selected bot to a specified player.\\" +
             "Page (2/3)";
         
@@ -35,15 +27,21 @@ namespace TerraNPCBot.Program {
             "/bot copy - Copies a specified player's inventory to display on selected bot.\\" +
             "/bot record - Records and playsback player actions through selected bot.\\" +
             "Page (3/3)";
-        
+
+        public const string Record =
+            "Sub-command for recording and playing back sequence of player actions through a bot.\\" +
+            "Usage: /bot record start|stop|play\\" +
+            "/bot record start - Starts recording owner's actions.\\" +
+            "/bot record stop - Stops recording owner's actions.\\" +
+            "/bot record play - Plays a recorded sequence of actions.";
 
         #region Delete
         public const string Delete =
             "Sub-command for selecting bots given position or name to delete.\\" +
-            "Usage: /bot delete <number>|<name> - Number or name are optional.\\" +
+            "Usage: /bot delete [index] | [name] - Number or name are optional.\\" +
             "/bot delete - Currently selected bot will be deleted.\\" +
-            "/bot delete <number> - Selects a bot from your owned bots according to its position in the list.\\" +
-            "/bot delete \"<name>\" - Selects a bot with a match or close match to the given name.\\" +
+            "/bot delete [index] - Selects a bot from your owned bots according to its position in the list.\\" +
+            "/bot delete [name] - Selects a bot with a match or close match to the given name.\\" +
             "*Bots will only be deleted upon receiving confirmation through /confirm.";
 
 
@@ -57,8 +55,8 @@ namespace TerraNPCBot.Program {
         #region Select
         public const string Select =
             "Sub-command for selecting bots given position or name.\\" +
-            "Usage: /bot select <number>|<name>\\" +
-            "/bot select <number> - Selects a bot from your owned bots according to its position in the list.\\" +
+            "Usage: /bot select <index> | <name>\\" +
+            "/bot select <index> - Selects a bot from your owned bots according to its position in the list.\\" +
             "/bot select <name> - Selects a bot with a match or close match to the given name.";
 
         public const string SelectExample =
@@ -71,9 +69,9 @@ namespace TerraNPCBot.Program {
         #region New
         public const string New = 
             "Sub-command for creating new bots.\\" +
-            "Usage: /bot new <name> <world>|<port> - Name and world are optional.\\" +
-            "/bot new \"<name>\" - Creates a bot with the given name and selects it.\\" +
-            "/bot new \"<name>\" <world> - Creates a bot with the given name, sets it to target the given world, and selects it.";
+            "Usage: /bot new [name] [world] | [port] - Default creates a bot named Michael Jackson.\\" +
+            "/bot new [name] - Creates a bot with the given name and selects it.\\" +
+            "/bot new [name] [world] - Creates a bot with the given name, sets it to target the given world, and selects it.";
 
         public const string NewExample =
             "Example: /bot new - Will default bot name to \"Michael Jackson\" and world to Nexus.\\" +
@@ -89,17 +87,16 @@ namespace TerraNPCBot.Program {
             "/bot chat <message> - Outputs message into chat through bot. Certain commands supported.";
 
         public const string ChatExample =
-            "Example: /bot chat Hello world! - Bot will say \"Hello world!\".\\" +
-            "Example: /bot chat /i dirt - Bot will execute \"/i dirt\".";
+            "Example: /bot chat Hello world! - Bot will say \"Hello world!\".\\";
         
         #endregion
 
         #region Teleport
         public const string Teleport =
             "Sub-command for teleporting bots.\\" +
-            "Usage: /bot teleport <target name>|<position> - Default target is bot owner.\\" +
-            "/bot teleport <target name> - Teleports bot to online player with a match or close match to the given name*.\\" +
-            "/bot teleport <position> - Teleports bot to specified position in x-y coordinates.\\" +
+            "Usage: /bot teleport [target name] | [position] - Default target is bot owner.\\" +
+            "/bot teleport [target name] - Teleports bot to online player with a match or close match to the given name*.\\" +
+            "/bot teleport [position] - Teleports bot to specified position in x-y coordinates.\\" +
             "*Specificity is recommended for players with similar names (e.g. Cy, CyborgEmperor).";
 
         public const string TeleportExample =
@@ -112,9 +109,9 @@ namespace TerraNPCBot.Program {
         #region Copy
         public const string Copy =
             "Sub-command for copying player inventories and appearance.\\" +
-            "Usage: /bot copy <target name> - Default target is bot owner.\\" +
+            "Usage: /bot copy [target name] - Default target is bot owner.\\" +
             "/bot copy - Copies owner.\\" +
-            "/bot copy <target name> - Copies an online player with a match or close match to the given name*.\\" +
+            "/bot copy [target name] - Copies an online player with a match or close match to the given name*.\\" +
             "*Specificity is recommended for players with similar names (e.g. Cy, CyborgEmperor).";
 
         public const string CopyExample =
@@ -125,16 +122,51 @@ namespace TerraNPCBot.Program {
 
         #region Ignore
         public const string Ignore = 
+            "Sub-command for ignoring bots.\\" +
+            "Usage: /bot ignore\\"+
             "/bot ignore - Toggles visibility of bots for you.";
+        #endregion
+
+        #region Group Bots
+        public const string GroupBots =
+            "Sub-command for grouping a selection of bots together for use with /foreach.\\" +
+            "Usage: /bot groupbots [indexes] - Default selects all owned bots.\\" +
+            "/bot groupbots - Selects all owned bots.\\" + 
+            "/bot groupbots [index1, index2, index3...] - Selects specified bots according to their index.";
+
+        public const string GroupBotsExample =
+            "Example: /bot groupbots - Selects all owned bots.\\" + 
+            "Example: /bot groupbots 1 3 4 - Selects bots at indexes 1, 3, and 4.";
+        #endregion
+
+        #region Foreach
+        public const string Foreach =
+            "Sub-command for executing an action for a group of bots. Used in conjuction with /groupbots.\\" + 
+            "Usage: /bot foreach (<list of commands>)\\" + 
+            "/bot foreach (<list of commands>) - Executes the list of actions for each bot selected with /groupbots*.\\" +
+            "*Only certain commands, such as /stop, /start, /copy, etc. work with foreach.";
+
+        public const string ForeachExample =
+            "Example: /bot foreach stop - Gets all selected bots to stop.\\" + 
+            "Example: /bot foreach copy Cy - Gets all selected bots to copy Cy.";
+        #endregion
+
+        #region Rename
+        public const string Rename =
+            "Sub-command for renaming a bot.\\" +
+            "Usage: /bot rename [new name] - By default, bot names will reset to Michael Jackson.\\" +
+            "/bot rename - Sets bot name to Michael Jackson.\\" +
+            "/bot rename [new name] - Sets bot name to a specified name.";
+
+        public const string RenameExample =
+            "Example: /bot rename - Sets bot name to Michael Jackson.\\" +
+            "Example: /bot rename \"Terraria One Bot\" - Sets bot name to \"Terraria One Bot\".\\" + 
+            "Example: /bot rename Terraria One Bot - Same as the above.";
         #endregion
 
         public const string NoExample =
             "No examples exist for this command.\\" +
             "Follow usage guide.";
-
-        public static List<string> NoHelp = new List<string> {
-            "",
-        };
 
         public const string NoBotsFound = "Could not find specified bot: \"{0}\"";
         public const string MultipleBotsFound = "Multiple bots matched your search criteria: ";

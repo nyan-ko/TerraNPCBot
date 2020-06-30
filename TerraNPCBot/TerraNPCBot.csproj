@@ -12,6 +12,8 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,14 +51,46 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Crc32C.NET, Version=1.0.5.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Crc32C.NET.1.0.5.0\lib\net20\Crc32C.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="DnsClient, Version=1.3.1.0, Culture=neutral, PublicKeyToken=4574bb5573c51424, processorArchitecture=MSIL">
+      <HintPath>..\packages\DnsClient.1.3.1\lib\net45\DnsClient.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Bson, Version=2.10.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Bson.2.10.4\lib\net452\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.10.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Driver.2.10.4\lib\net452\MongoDB.Driver.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Core, Version=2.10.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Driver.Core.2.10.4\lib\net452\MongoDB.Driver.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Libmongocrypt, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Libmongocrypt.1.0.0\lib\net452\MongoDB.Libmongocrypt.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OTAPI, Version=1.4.0.5, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\OTAPI.2.0.0.37\lib\net451\OTAPI.dll</HintPath>
     </Reference>
+    <Reference Include="SharpCompress, Version=0.23.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.23.0\lib\net45\SharpCompress.dll</HintPath>
+    </Reference>
+    <Reference Include="Snappy.NET, Version=1.1.1.8, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Snappy.NET.1.1.1.8\lib\net45\Snappy.NET.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.4.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.InteropServices.RuntimeInformation, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.InteropServices.RuntimeInformation.4.3.0\lib\net45\System.Runtime.InteropServices.RuntimeInformation.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -77,12 +111,16 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="Client.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="DatabaseItems\DBBot.cs" />
+    <Compile Include="DatabaseItems\DBPlayer.cs" />
     <Compile Include="Data\BotCommandArgs.cs" />
     <Compile Include="Data\BTSPlayer.cs" />
     <Compile Include="Data\RecordedPacket.cs" />
     <Compile Include="Packets\IgnorePacket.cs" />
     <Compile Include="Packets\Packet117.cs" />
     <Compile Include="Packets\Packet118.cs" />
+    <Compile Include="Packets\Packet125.cs" />
     <Compile Include="Packets\Packet14.cs" />
     <Compile Include="Packets\Packet16.cs" />
     <Compile Include="Packets\Packet17.cs" />
@@ -104,8 +142,27 @@
     <Compile Include="Packets\Packet96.cs" />
     <Compile Include="Packets\PacketBase.cs" />
     <Compile Include="Data\KoreanPlayer.cs" />
+    <Compile Include="Packets\RawPacket.cs" />
     <Compile Include="Packets\ShutdownPacket.cs" />
     <Compile Include="Program\Commands.cs" />
+    <Compile Include="Program\Commands\Foreach.cs" />
+    <Compile Include="Program\Commands\GroupBots.cs" />
+    <Compile Include="Program\Commands\BaseCommand.cs" />
+    <Compile Include="Program\Commands\Chat.cs" />
+    <Compile Include="Program\Commands\Copy.cs" />
+    <Compile Include="Program\Commands\DeleteBot.cs" />
+    <Compile Include="Program\Commands\Help.cs" />
+    <Compile Include="Program\Commands\Ignore.cs" />
+    <Compile Include="Program\Commands\Info.cs" />
+    <Compile Include="Program\Commands\List.cs" />
+    <Compile Include="Program\Commands\NewBot.cs" />
+    <Compile Include="Program\Commands\Record.cs" />
+    <Compile Include="Program\Commands\RenameBot.cs" />
+    <Compile Include="Program\Commands\Select.cs" />
+    <Compile Include="Program\Commands\StartBot.cs" />
+    <Compile Include="Program\Commands\StopBot.cs" />
+    <Compile Include="Program\Commands\Teleport.cs" />
+    <Compile Include="Program\Config.cs" />
     <Compile Include="Program\Hooks.cs" />
     <Compile Include="Program\Main.cs" />
     <Compile Include="Program\Permissions.cs" />
@@ -114,13 +171,25 @@
     <Compile Include="Utils\ExtensionUtils.cs" />
     <Compile Include="Program\Messages.cs" />
     <Compile Include="Utils\PluginUtils.cs" />
+    <Compile Include="Utils\StringUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>move "TerraNPCBot.dll" "C:\Users\S\Desktop\terraria backup\1.4\1.4.0.5\TShock4.4.0_Pre11_Terraria1.4.0.5\ServerPlugins"
+move "TerraBotLib.dll" "C:\Users\S\Desktop\terraria backup\1.4\1.4.0.5\TShock4.4.0_Pre11_Terraria1.4.0.5\ServerPlugins"</PostBuildEvent>
   </PropertyGroup>
+  <Import Project="..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets'))" />
+    <Error Condition="!Exists('..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets'))" />
+  </Target>
+  <Import Project="..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets" Condition="Exists('..\packages\MongoDB.Libmongocrypt.1.0.0\build\MongoDB.Libmongocrypt.targets')" />
 </Project>

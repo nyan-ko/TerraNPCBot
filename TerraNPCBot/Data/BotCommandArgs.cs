@@ -13,10 +13,20 @@ namespace TerraNPCBot.Data {
         /// </summary>
         public Bot SelectedBot {
             get {
+                if (selectedBotOverride != null) {
+                    return selectedBotOverride;
+                }
                 if (Player.RealPlayer)
-                    return Program.Program.Players[Player.Index]?.SelectedBot;
+                    return Program.PluginMain.Players[Player.Index]?.SelectedBot;
                 return BTSPlayer.BTSServerPlayer.SelectedBot;
             }
+        }
+
+        private Bot selectedBotOverride = null;
+
+        public BotCommandArgs SetSelectedBotOverride(Bot bot) {
+            selectedBotOverride = bot;
+            return this;
         }
 
         /// <summary>
@@ -25,7 +35,7 @@ namespace TerraNPCBot.Data {
         public BTSPlayer BPlayer {
             get {
                 if (Player.RealPlayer)
-                    return Program.Program.Players[Player.Index];
+                    return Program.PluginMain.Players[Player.Index];
                 return BTSPlayer.BTSServerPlayer;
             }
         }
@@ -60,8 +70,16 @@ namespace TerraNPCBot.Data {
             // Add lower bound for splitter sections
             IndicesOfSplitters.Add(-1);
             for (int i = 0; i < Parameters.Count; i++) {
-                if (Parameters[i] == "|")
+                string str = Parameters[i];
+                if (str == "|")
                     IndicesOfSplitters.Add(i);
+                else if (str == "(") {
+                    while (Parameters[i] != ")") {
+                        ++i;
+                        if (i >= Parameters.Count)
+                            return;
+                    }
+                }
             }
             // Add upper bound for splitter sections
             IndicesOfSplitters.Add(Parameters.Count);
@@ -70,21 +88,16 @@ namespace TerraNPCBot.Data {
         public void OffsetToNextSection() {
             indexInSplitterList++;
             if (indexInSplitterList > IndicesOfSplitters.Count - 1) {
-                indexInSplitterList = IndicesOfSplitters.Count - 1;
+                indexInSplitterList--;
             }
-            OffsetParameters = Parameters.Skip(LowerSplitterBound + 1).ToList();
         }
         #endregion
 
-        /// <summary>
-        /// The parameter list with the appropriate offset for linked commands.
-        /// </summary>
-        public List<string> OffsetParameters { get; private set; }
+        public bool FromForeach { get; private set; }
 
-        public BotCommandArgs(CommandArgs baseCommand) : base(baseCommand.Message, baseCommand.Player, baseCommand.Parameters) {
-            OffsetParameters = Parameters;
-
+        public BotCommandArgs(CommandArgs baseCommand, bool fromForeach = false) : base(baseCommand.Message, baseCommand.Player, baseCommand.Parameters) {
             FindSplitters();
+            FromForeach = fromForeach;
         }
     }
 

@@ -25,5 +25,9 @@ namespace TerraNPCBot.Program {
         public const string BotTeleport = "bot.teleport";
 
         public const string BotIgnore = "bot.ignore";
+
+        public const string InfoOtherPlayers = "bot.checkOtherInfo";
+
+        public const string BotForeach = "bot.foreach";
     }
 }

@@ -29,16 +29,67 @@ namespace TerraNPCBot {
             bot = _bot;
             port = _port;
             CanSendPackets = true;
-            //writeThread = new Thread(SendPackets);
-            //writeThread.IsBackground = true;
-
-            //writeQueue = new BlockingCollection<IPacket>();
         }
 
         public void Initialize() {
             bot.EventHooks.ClientStart.Register(InternalStart, HandlerPriority.BelowNormal);
             bot.EventHooks.ClientStart.Register(SendJoinPackets, HandlerPriority.Low);
+            bot.EventHooks.ClientDirectedStart.Register(DirectJoinPackets);
             bot.EventHooks.ClientStop.Register(InternalStop);
+        }
+
+        public void DirectJoinPackets(object source, StartEventArgs args) {
+            byte id = bot.ID;
+            int target = args.WhoAsked;
+            QueuePackets(new Packets.Packet4(bot.PlayerData).AddTargets(target),
+                new Packets.Packet16(id, (short)bot.PlayerData.CurHP, (short)bot.PlayerData.MaxHP).AddTargets(target),
+                new Packets.Packet30(id, false).AddTargets(target),
+                new Packets.Packet42(id, (short)bot.PlayerData.CurMana, (short)bot.PlayerData.MaxMana).AddTargets(target),
+                new Packets.Packet45(id, 0).AddTargets(target),
+                new Packets.Packet50(id, new ushort[22]).AddTargets(target),
+                new Packets.Packet12(id, (short)bot.TilePosition.X, (short)bot.TilePosition.Y, 0, (byte)PlayerSpawnContext.SpawningIntoWorld).AddTargets(target));
+
+            short i = 0;
+            foreach (var current in bot.PlayerData.InventorySlots) {
+                QueuePackets(new Packets.Packet5(bot.ID,
+                    i,
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId).AddTargets(target));
+                ++i;
+            }
+            foreach (var current in bot.PlayerData.ArmorSlots) {
+                QueuePackets(new Packets.Packet5(bot.ID,
+                    i,
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId).AddTargets(target));
+                ++i;
+            }
+            foreach (var current in bot.PlayerData.DyeSlots) {
+                QueuePackets(new Packets.Packet5(bot.ID,
+                    i,
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId).AddTargets(target));
+                ++i;
+            }
+            foreach (var current in bot.PlayerData.MiscEquipSlots) {
+                QueuePackets(new Packets.Packet5(bot.ID,
+                    i,
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId).AddTargets(target));
+                ++i;
+            }
+            foreach (var current in bot.PlayerData.MiscDyeSlots) {
+                QueuePackets(new Packets.Packet5(bot.ID,
+                    i,
+                    (short)current.Stack,
+                    current.PrefixId,
+                    (short)current.NetId).AddTargets(target));
+                ++i;
+            }
         }
 
         private void SendJoinPackets(object source, StartEventArgs args) {
@@ -53,31 +104,9 @@ namespace TerraNPCBot {
             bot.Actions.UpdateInventory();
         }
 
-        //private void SendPackets() { 
-        //    while (running) {
-        //        try {
-        //            if (!writeQueue.TryTake(out IPacket packet, -1))
-        //                continue;
-                   
-        //            if (packet.Type == (byte)ExtendedPacketTypes.Shutdown) {
-        //                // Plugin-exclusive shutdown packet, must follow a player active packet
-        //                // with an inactive flag to both disconnect the bot and stop this write thread
-        //                Stop();
-        //                break;
-        //            }
-        //            if (!sendPackets)
-        //                continue;
-        //            packet.Send();
-        //        }
-        //        catch (OperationCanceledException) {
-        //            continue;
-        //        }
-        //    }
-        //}         
-
         private int FindOpenSlot() {
             for (byte index = 254; index > 0; --index) {
-                if (Program.Program.Bots[index] == null)
+                if (Program.PluginMain.Bots[index] == null)
                     return index;
             }
             return -1;
@@ -94,14 +123,14 @@ namespace TerraNPCBot {
                 #region Slots
                 Main.player[slot] = new Terraria.Player();
                 TShockAPI.TShock.Players[slot] = new TShockAPI.TSPlayer(slot);
-                Program.Program.Bots[slot] = bot;
+                Program.PluginMain.Bots[slot] = bot;
                 #endregion
             }
         }
 
         private void InternalStop(object source, StopEventArgs args) {
             running = false;
-            Program.Program.Bots[bot.ID] = null;
+            Program.PluginMain.Bots[bot.ID] = null;
         }
 
         public bool ToggleSendPackets() {

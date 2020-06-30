@@ -10,20 +10,50 @@ using TerrariaApi.Server;
 namespace TerraNPCBot.Program {
     public class PluginHooks {
         public static void OnJoin(GreetPlayerEventArgs args) {
-            Program.Players[args.Who] = new BTSPlayer(args.Who);          
+            if (TShock.Players[args.Who] == null)
+                return;
+
+            foreach (var bot in PluginMain.GlobalRunningBots) {
+                bot.RequestJoinPackets(args.Who);
+            }
+
+            var db = PluginMain.DB;
+            var id = TShock.Players[args.Who].Account.ID;
+
+            BTSPlayer joiningPlayer = new BTSPlayer(args.Who);
+            if (!db.HasUserEntry(id)) {
+                db.AddUserEntry(joiningPlayer, id);
+            }
+            else {
+                joiningPlayer = db.LoadUserEntry(id, args.Who);
+            }
+
+            PluginMain.Players[args.Who] = joiningPlayer;
         }
 
         public static void OnLeave(LeaveEventArgs args) {
-            if (Program.Players[args.Who] == null)
+            if (TShock.Players[args.Who] == null)
                 return;
-            if (Program.Bots[args.Who] == null && Program.Players[args.Who].autosave) {
-                //Utils.FileWriter.BTSPlayerToStream(Program.Players[args.Who]);
-            }            
-            Program.Players[args.Who] = null;
+
+            var db = PluginMain.DB;
+            var id = TShock.Players[args.Who].Account.ID;
+            var playerLeaving = PluginMain.Players[args.Who];
+
+            if (!db.HasUserEntry(id)) {
+                db.AddUserEntry(playerLeaving, id);
+            }
+            else {
+                db.UpdateUserEntry(playerLeaving, id);
+            }
+
+            foreach (var bot in playerLeaving.OwnedBots) {
+                bot.Shutdown();
+            }
+            playerLeaving = null;
         } 
 
         public static void OnGetData(GetDataEventArgs args) {
-            Bot p = Program.Players[args.Msg.whoAmI]?.OwnedBots?.FirstOrDefault(x => x.recording);
+            Bot p = PluginMain.Players[args.Msg.whoAmI]?.OwnedBots?.FirstOrDefault(x => x.recording);
             if (p != null) {
                 using (MemoryStream m = new MemoryStream(args.Msg.readBuffer, args.Index, args.Length)) {
 
