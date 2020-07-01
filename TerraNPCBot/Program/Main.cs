@@ -67,10 +67,12 @@ namespace TerraNPCBot.Program
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
             TShockAPI.Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.AddServerCommand, "bot"));
+            TShockAPI.Commands.ChatCommands.Add(new Command(PluginCommands.ListCommands, "blist"));
+            TShockAPI.Commands.ChatCommands.Add(new Command(PluginCommands.ToggleFields, "toggle"));
+            TShockAPI.Commands.ChatCommands.Add(new Command(Permissions.ReloadUserDBEntry, PluginCommands.LoadUserDBEntry, "reloaduser"));
 
             Config = Config.Load();
 
-            // Magic numbers so no change pls ^_^
             DB = new Database(Config.DBConnectionString);
 
             // Call PluginCommands.CommandThread on a separate thread to handle commands

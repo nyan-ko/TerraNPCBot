@@ -179,7 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="bin\x86\Debug\mongocrypt.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="bin\x86\Debug\MongoDB.Bson.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -21,7 +21,7 @@ namespace TerraNPCBot.Program.Commands {
             BTSPlayer player = args.BPlayer;
             List<string> currentSection = args.CurrentSection;
             if (currentSection.Count == 1) {
-                args.Player.MultiMsg(Color.Yellow, $"Bot limit: {player.BotLimit}",
+                args.Player.SendMultipleMessage(Color.Yellow, $"Bot limit: {player.BotLimit}",
                     $"Currently owned bots: {player.OwnedBots.Count}",
                     $"Currently selected bot: {player.SelectedBot?.Name ?? "none"}",
                     $"Allow bot copying: {player.CanBeCopied}",
@@ -40,7 +40,7 @@ namespace TerraNPCBot.Program.Commands {
                 if (!PluginMain.ServersByPorts.TryGetValue(foundBot.Port.ToString(), out string serverName)) {
                     serverName = "none..?";
                 }
-                args.Player.MultiMsg(Color.Yellow, $"Bot name: {foundBot.Name}",
+                args.Player.SendMultipleMessage(Color.Yellow, $"Bot name: {foundBot.Name}",
                     $"Bot running: {foundBot.Running}",
                     $"Bot index: {foundBot.ID}",
                     $"Bot index in owned bots: {foundBot.IndexInOwnerBots}",

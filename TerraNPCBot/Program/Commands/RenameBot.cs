@@ -23,7 +23,7 @@ namespace TerraNPCBot.Program.Commands {
 
             var bot = args.SelectedBot;
             if (bot == null) {
-                args.Player?.MultiMsg(Messages.BotErrorNotFound, Color.Yellow);
+                args.Player?.SendMultipleMessage(Messages.BotErrorNotFound, Color.Yellow);
                 return;
             }
 

@@ -15,6 +15,8 @@ using TShockAPI;
 namespace TerraNPCBot.Program {
     public class PluginCommands {
 
+        
+
         /// <summary>
         /// Dictionary of every command and their identifier.
         /// </summary>
@@ -36,6 +38,51 @@ namespace TerraNPCBot.Program {
             { "foreach", new Foreach() }
         };
 
+        public static void ListCommands(CommandArgs args) {
+            args.Player?.SendInfoMessage("Currently available commands for you:");
+            args.Player?.SendMultipleMessage(PluginUtils.GetAvailableCommands(args.Player), Color.Yellow);
+        }
+
+        public static void ToggleFields(CommandArgs arg) {
+            BotCommandArgs args = new BotCommandArgs(arg);
+            if (args.Parameters.Count == 0) {
+                args.Player?.SendMultipleMessage(Messages.ToggleHelp, Color.Yellow);
+            }
+            else {
+                switch (args.Parameters[0].ToLower()) {
+                    case "teleportable":
+                        args.BPlayer.CanBeTeleportedTo = !args.BPlayer.CanBeTeleportedTo;
+                        args.Player?.SendSuccessMessage($"Bots can {(args.BPlayer.CanBeTeleportedTo ? "now" : "no longer")} teleport to you.");
+                        break;
+                    case "copyable":
+                        args.BPlayer.CanBeCopied = !args.BPlayer.CanBeCopied;
+                        args.Player?.SendSuccessMessage($"You can {(args.BPlayer.CanBeCopied ? "now" : "no longer")} be copied by bots.");
+                        break;
+                    case "ignore":
+                        args.BPlayer.ToggleBotVisibility(args.BPlayer.IgnoreBots);
+                        args.Player?.SendSuccessMessage($"You are {(args.BPlayer.IgnoreBots ? "now" : "no longer")} ignoring bots.");
+                        break;
+                    default:
+                        args.Player?.SendMultipleMessage(Messages.ToggleHelp, Color.Yellow);
+                        break;
+                }
+            }
+        }
+
+        public static void LoadUserDBEntry(CommandArgs args) {
+            string nameOrIndex = StringUtils.JoinAndTrimList(args.Parameters);
+            List<TSPlayer> targets = TSPlayer.FindByNameOrID(nameOrIndex);
+
+            if (!args.Player.HandleListFromSearches(nameOrIndex, targets))
+                return;
+
+            TSPlayer target = targets[0];
+
+            PluginMain.Players[target.Index] = PluginMain.DB.LoadUserEntry(target.Account.ID, target.Index);
+
+            args.Player?.SendSuccessMessage($"Successfully reloaded database entry for {target.Name}.");
+        }
+
         private static BlockingCollection<BotCommandArgs> CommandQueue = new BlockingCollection<BotCommandArgs>();
 
         internal static void CommandThread(object state) {
@@ -50,7 +97,7 @@ namespace TerraNPCBot.Program {
                 }
 
                 for (int i = 0; i < args.Parameters.Count; ++i) {
-                    if (CommandsByTag.TryGetValue(args.Parameters[i], out BaseCommand command)) {
+                    if (CommandsByTag.TryGetValue(args.Parameters[i].ToLower(), out BaseCommand command)) {
                         if (args.FromForeach ? !command.ValidForeachAction : false)
                             continue;
                         command.Invoke(args);

@@ -64,14 +64,14 @@ namespace TerraNPCBot.Data {
         public List<string> CurrentSection => Parameters.GetRange(LowerSplitterBound + 1, UpperSplitterBound - LowerSplitterBound - 1);
 
         /// <summary>
-        /// Finds the indices of all splitter ("|") characters in the parameter list.
+        /// Finds the indices of all splitter characters in the parameter list.
         /// </summary>
         private void FindSplitters() {
             // Add lower bound for splitter sections
             IndicesOfSplitters.Add(-1);
             for (int i = 0; i < Parameters.Count; i++) {
                 string str = Parameters[i];
-                if (str == "|")
+                if (str == Program.PluginMain.Config.CommandSplitterCharacter)
                     IndicesOfSplitters.Add(i);
                 else if (str == "(") {
                     while (Parameters[i] != ")") {

@@ -17,6 +17,7 @@ namespace TerraNPCBot {
         private MongoClient client;
         private IMongoDatabase db;
         private IMongoCollection<BsonDocument> playerCollection;
+        //private IMongoCollection<BsonDocument> recordedPacketCollection;  soon
 
         private const string USER_ID = "ID";
         private const string USER_DATA = "Data";
@@ -51,15 +52,11 @@ namespace TerraNPCBot {
         public BTSPlayer LoadUserEntry(int id, int index) {
             var filter = Builders<BsonDocument>.Filter.Eq(USER_ID, id);
 
-            var excludeInternalField = Builders<BsonDocument>.Projection.Exclude("_id");
-            var excludeId = Builders<BsonDocument>.Projection.Exclude(USER_ID);
-            var projection = Builders<BsonDocument>.Projection.Combine(excludeInternalField, excludeId);
+            var entry = playerCollection.Find(filter).FirstOrDefault();
 
-            var entry = playerCollection.Find(filter).Project(excludeInternalField).FirstOrDefault();
+            string data = entry["Data"].ToString();
 
-            string test = entry["Data"].ToString();
-
-            return JsonConvert.DeserializeObject<DBPlayer>(test).ConvertDBItem(index);
+            return JsonConvert.DeserializeObject<DBPlayer>(data).ConvertDBItem(index);
         }
 
         private BsonDocument GenerateUserDocument(BTSPlayer user, int id) {

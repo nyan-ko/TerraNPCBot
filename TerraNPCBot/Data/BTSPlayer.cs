@@ -55,7 +55,9 @@ namespace TerraNPCBot {
             return del;
         }
 
-        public void SetSelectedDelete(int selectedIndex) { selectedDelete = selectedIndex; }
+        public void SetSelectedDelete(int selectedIndex) {
+            selectedDelete = selectedIndex;
+        }
 
         public int BotLimit { get; set; }
         public List<Bot> OwnedBots { get; set; }
@@ -94,7 +96,6 @@ namespace TerraNPCBot {
 
             // Index search
             if (int.TryParse(nameOrIndex, out int index)) {
-                index--;  // Indices specified through commands are not zero-based because front-end shenanigans
                 if (index < OwnedBots.Count && index >= 0 && OwnedBots?[index] != null)
                     return new List<Bot> { OwnedBots[index] };
                 else {

@@ -11,6 +11,7 @@ namespace TerraNPCBot.Program {
     public class Config {
         public string DBConnectionString;
         public int DefaultBotLimit;
+        public string CommandSplitterCharacter;
 
         public void Save() {
             File.WriteAllText(ConfigPath, JsonConvert.SerializeObject(this, Formatting.Indented));
@@ -33,7 +34,9 @@ namespace TerraNPCBot.Program {
         private static Config CreateDefault() {
             return new Config {
                 DBConnectionString = $"mongodb://localhost:27017",
-                DefaultBotLimit = 1
+                DefaultBotLimit = 1,
+                CommandSplitterCharacter = "|",
+                
             };
         }
 

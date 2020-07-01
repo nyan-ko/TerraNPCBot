@@ -33,15 +33,15 @@ namespace TerraNPCBot.Utils {
             return new Color(reader.ReadByte(), reader.ReadByte(), reader.ReadByte());
         }
 
-        public static void MultiMsg(this TSPlayer player, Color color, params string[] msgs) {
+        public static void SendMultipleMessage(this TSPlayer player, Color color, params string[] msgs) {
             foreach (var x in msgs) {
                 player?.SendMessage(x, color);
             }
             player?.SendMessage("Use ↑/↓ to scroll through the message.", Microsoft.Xna.Framework.Color.Yellow);
         }
 
-        public static void MultiMsg(this TSPlayer player, string message, Color color) {
-            MultiMsg(player, color, message.Split('\\'));
+        public static void SendMultipleMessage(this TSPlayer player, string message, Color color) {
+            SendMultipleMessage(player, color, message.Split('\\'));
         }
 
         public static bool HandleListFromSearches(this TSPlayer tp, string searchTerm, IEnumerable<object> list) {

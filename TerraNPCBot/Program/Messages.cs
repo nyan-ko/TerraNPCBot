@@ -6,34 +6,62 @@ using System.Threading.Tasks;
 
 namespace TerraNPCBot.Program {
     public static class Messages {
-        public const string Master1 =
-            "Command for working with server bots.\\" +
-            "Usage: /bot help|new|start|stop|delete|info|save|chat|teleport|select|copy|record\\" +
-            "/bot new - Creates a new bot and automatically selects it.\\" +
-            "/bot start - Starts running selected bot and has it join the server.\\" +
-            "/bot stop - Stops running selected bot and kicks it from the server.\\" +
-            "/bot delete - Deletes the selected bot.\\" +
-            "Page (1/3)";
-        
-        public const string Master2 = 
-            "/bot info - Gives info about yourself or a bot.\\" +
-            "/bot save - Saves player and owned bot data.\\" +
-            "/bot chat - Makes selected bot output inputted message.\\" +
-            "/bot teleport - Teleports selected bot to a specified player.\\" +
-            "Page (2/3)";
-        
-        public const string Master3 =
-            "/bot select - Selects a specified bot from owned bots.\\" +
-            "/bot copy - Copies a specified player's inventory to display on selected bot.\\" +
-            "/bot record - Records and playsback player actions through selected bot.\\" +
-            "Page (3/3)";
 
+        public const string ToggleHelp = 
+            "Command to toggle certain player fields.\\" +
+            "/toggle teleportable - Toggles whether bots can teleport to you.\\" +
+            "/toggle copyable - Toggles whether bots can copy you.\\" +
+            "/toggle ignore - Toggles whether bots are visible for you.";
+
+        #region Help
+        public static string Master =>
+            "Command for working with server bots.\\" +
+            "For a comprehensive list of all subcommands, type /blist.\\" +
+            "-----\\" +
+            "Most commands come with their own usage guide and examples, which can be\\" +
+            "accessed by passing \"help\" or \"example\" to a command.\\" +
+            "Example: /bot new help/example - Get help or examples for the new bot sub-command.\\" +
+            "-----\\" +
+            $"Commands may also be linked together when separated with a splitter parameter: \"{PluginMain.Config.CommandSplitterCharacter}\".\\" +
+            "This will attempt to execute all given commands one after the other.\\" + 
+            $"Example: /bot new \"Terraria Bot\" {PluginMain.Config.CommandSplitterCharacter} start {PluginMain.Config.CommandSplitterCharacter} copy - Creates a new bot, starts it, and copies the owner.";
+        // too lazy to make the string formatting clean :)
+
+        public const string CommandList1 =
+            "/bot new - Creates a new bot.\\" +
+            "/bot start - Starts a bot and has them \"join\" the server.\\" +
+            "/bot stop - Stops a bot and makes them leave.\\" + 
+            "/bot delete - Deletes a bot after confirmation.\\" +
+            "Page (1/4)";
+
+        public const string CommandList2 =
+            "/bot chat - Displays message through bot and above their head; commands do not work.\\" + 
+            "/bot copy - Copies players appearances and inventory and displays on bot.\\" +
+            "/bot teleport - Teleports bot to a player or location in the world.\\" +
+            "/bot rename - Renames a bot.\\" +
+            "Page (2/4)";
+
+        public const string CommandList3 =
+            "/bot select - Selects a specified bot.\\" + 
+            "/bot list - Lists all your bots.\\" +
+            "/bot info - Provides info about yourself or a specific bot.\\" +
+            "/bot record - Allows recordings of player actions and playback through a bot.\\" +
+            "Page (3/4)";
+
+        public const string CommandList4 =
+            "/bot groupbots - Groups a selection of bots for use with /foreach.\\" +
+            "/bot foreach - Executes actions for each bot from /groupbots.\\" +
+            "Page (4/4)";
+        #endregion
+
+        #region Record
         public const string Record =
             "Sub-command for recording and playing back sequence of player actions through a bot.\\" +
-            "Usage: /bot record start|stop|play\\" +
+            "Usage: /bot record start | stop | play\\" +
             "/bot record start - Starts recording owner's actions.\\" +
             "/bot record stop - Stops recording owner's actions.\\" +
             "/bot record play - Plays a recorded sequence of actions.";
+        #endregion
 
         #region Delete
         public const string Delete =
@@ -141,10 +169,10 @@ namespace TerraNPCBot.Program {
 
         #region Foreach
         public const string Foreach =
-            "Sub-command for executing an action for a group of bots. Used in conjuction with /groupbots.\\" + 
-            "Usage: /bot foreach (<list of commands>)\\" + 
+            "Sub-command for executing an action for each selected bot in a group. Used in conjuction with /groupbots.\\" +
+            "Usage: /bot foreach (<list of commands>) - The list of commands must be enclosed in parentheses ().\\" +
             "/bot foreach (<list of commands>) - Executes the list of actions for each bot selected with /groupbots*.\\" +
-            "*Only certain commands, such as /stop, /start, /copy, etc. work with foreach.";
+            "*Only certain actions, such as /stop, /start, /copy, etc. work with foreach.\\";
 
         public const string ForeachExample =
             "Example: /bot foreach stop - Gets all selected bots to stop.\\" + 

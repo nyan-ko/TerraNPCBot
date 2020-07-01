@@ -18,29 +18,7 @@ namespace TerraNPCBot.Program.Commands {
         public override string InitialPermission => string.Empty;
 
         protected override void Execute(BotCommandArgs args) {
-            List<string> currentSection = args.CurrentSection;
-            if (currentSection.Count == 1) {
-                args.Player.MultiMsg(Messages.Master1, Color.Yellow);
-            }
-            else if (currentSection.Count == 2) {
-                switch (currentSection[1]) {
-                    case "1":
-                        args.Player.MultiMsg(Messages.Master1, Color.Yellow);
-                        break;
-                    case "2":
-                        args.Player.MultiMsg(Messages.Master2, Color.Yellow);
-                        break;
-                    case "3":
-                        args.Player.MultiMsg(Messages.Master3, Color.Yellow);
-                        break;
-                    default:
-                        args.Player.MultiMsg(Messages.Master1, Color.Yellow);
-                        break;
-                }
-            }
-            else {
-                args.Player.MultiMsg(Messages.Master1, Color.Yellow);
-            }
+            args.Player?.SendMultipleMessage(Messages.Master, Color.Yellow);
         }
     }
 }

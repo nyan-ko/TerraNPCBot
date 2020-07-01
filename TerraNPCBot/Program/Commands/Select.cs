@@ -33,10 +33,10 @@ namespace TerraNPCBot.Program.Commands {
                 if (!args.Player.HandleListFromSearches(nameOrIndex, foundbots))
                     return;
                 player.Selected = foundbots[0].IndexInOwnerBots;
-                args.Player?.SendSuccessMessage($"Selected bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots + 1}.");
+                args.Player?.SendSuccessMessage($"Selected bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots}.");
             }
             else {
-                args.Player.MultiMsg(Messages.Select, Color.Yellow);
+                args.Player.SendMultipleMessage(Messages.Select, Color.Yellow);
             }
         }
     }

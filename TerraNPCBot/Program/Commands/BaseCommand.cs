@@ -44,10 +44,10 @@ namespace TerraNPCBot.Program.Commands {
             bool example = NeedsExample(args.CurrentSection);
 
             if (help) {
-                args.Player.MultiMsg(helpmsg, Color.Orange);
+                args.Player.SendMultipleMessage(helpmsg, Color.Orange);
             }
             else if (example) {
-                args.Player.MultiMsg(examplemsg, Color.Orange);
+                args.Player.SendMultipleMessage(examplemsg, Color.Orange);
             }
 
             return help || example;

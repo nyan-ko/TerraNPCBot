@@ -48,7 +48,7 @@ namespace TerraNPCBot.Program.Commands {
                 args.Player?.AddResponse("deny", new Action<object>(RefuseDelete));
             }
             else {
-                args.Player?.MultiMsg(Messages.Delete, Color.Yellow);
+                args.Player?.SendMultipleMessage(Messages.Delete, Color.Yellow);
             }
         }
 

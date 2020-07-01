@@ -13,14 +13,13 @@ namespace TerraNPCBot.Program {
 
         public const string BotChat = "bot.chat";
 
+        public const string TogglePlayerFields = "bot.toggle";
+
         public const string BotCopy = "bot.copy";
         public const string BotCopyOther = "bot.copy.other";
 
-        public const string BotBypassCopy = "bot.bypass.copy"; // bypass BTSPlayer.canBeCopied
-        public const string BotBypassTeleport = "bot.bypass.teleportation"; // bypass BTSPlayer.canBeTeleportedTo
-
-        public const string BotSave = "bot.save";
-        public const string BotSavePruning = "bot.save.prune";
+        public const string BotBypassCopy = "bot.bypass.copy"; // bypass BTSPlayer.CanBeCopied
+        public const string BotBypassTeleport = "bot.bypass.teleportation"; // bypass BTSPlayer.CanBeTeleportedTo
 
         public const string BotTeleport = "bot.teleport";
 
@@ -29,5 +28,7 @@ namespace TerraNPCBot.Program {
         public const string InfoOtherPlayers = "bot.checkOtherInfo";
 
         public const string BotForeach = "bot.foreach";
+
+        public const string ReloadUserDBEntry = "bot.admin.db.reload";
     }
 }

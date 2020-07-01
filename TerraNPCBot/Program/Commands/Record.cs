@@ -30,12 +30,12 @@ namespace TerraNPCBot.Program.Commands {
                         PlayRecording(args);
                         break;
                     default:
-                        args.Player.MultiMsg(Messages.Record, Color.Yellow);
+                        args.Player.SendMultipleMessage(Messages.Record, Color.Yellow);
                         break;
                 }
             }
             else {
-                args.Player.MultiMsg(Messages.Record, Color.Yellow);
+                args.Player.SendMultipleMessage(Messages.Record, Color.Yellow);
             }
         }
 

@@ -41,7 +41,7 @@ namespace TerraNPCBot.Program.Commands {
                 return;
             }
             foreach (Bot bot in target.OwnedBots) {
-                args.Player.SendInfoMessage($"[{bot.IndexInOwnerBots + 1}] {bot.Name} | Currently running: {bot.Running}");
+                args.Player.SendInfoMessage($"[{bot.IndexInOwnerBots}] {bot.Name} | Currently running: {bot.Running}");
             }
             args.Player.SendInfoMessage($"Owned bots: ({target.OwnedBots.Count}/{target.BotLimit})");
         }
