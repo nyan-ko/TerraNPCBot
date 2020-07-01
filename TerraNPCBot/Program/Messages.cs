@@ -91,20 +91,18 @@ namespace TerraNPCBot.Program {
             "Example: /bot select 2 - Will select 2nd bot in owned bots.\\" +
             "Example: /bot select Terraria Bot - Will select bot named Terraria Bot.\\" +
             "Example: /bot select Terrar - Will similarly select bot named Terraria Bot.";
-        
+
         #endregion
 
         #region New
-        public const string New = 
+        public const string New =
             "Sub-command for creating new bots.\\" +
-            "Usage: /bot new [name] [world] | [port] - Default creates a bot named Michael Jackson.\\" +
-            "/bot new [name] - Creates a bot with the given name and selects it.\\" +
-            "/bot new [name] [world] - Creates a bot with the given name, sets it to target the given world, and selects it.";
+            "Usage: /bot new [name] - Default creates a bot named Michael Jackson.\\" +
+            "/bot new [name] - Creates a bot with the given name and selects it.";
 
         public const string NewExample =
             "Example: /bot new - Will default bot name to \"Michael Jackson\" and world to Nexus.\\" +
-            "Example: /bot new \"New Bot\" - Will create bot with name New Bot.\\" +
-            "Example: /bot new \"New Bot\" fb - Will create bot with name New Bot that will join Freebuild when started.";
+            "Example: /bot new \"New Bot\" - Will create bot with name New Bot.";
         
         #endregion
 

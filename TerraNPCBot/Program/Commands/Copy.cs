@@ -19,41 +19,43 @@ namespace TerraNPCBot.Program.Commands {
 
         protected override void Execute(BotCommandArgs args) {
             TSPlayer tstarget;
+
+            TSPlayer sPlayer = args.Player;
             List<string> currentSection = args.CurrentSection;
 
             var bot = args.SelectedBot;
             if (bot == null) {
-                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
+                sPlayer?.SendErrorMessage(Messages.BotErrorNotFound);
                 return;
             }
 
             if (currentSection.Count > 1) {
-                if (!args.Player.HasPermission(Permissions.BotCopyOther)) {
-                    args.Player?.SendErrorMessage("You do not have permission to copy other players.");
+                if (!sPlayer.HasPermission(Permissions.BotCopyOther)) {
+                    sPlayer?.SendErrorMessage("You do not have permission to copy other players.");
                     return;
                 }
 
                 string nameOrIndex = StringUtils.JoinAndTrimList(currentSection.Skip(1));
 
                 var found = TSPlayer.FindByNameOrID(nameOrIndex);
-                if (!args.Player.HandleListFromSearches(nameOrIndex, found))
+                if (!sPlayer.HandleListFromSearches(nameOrIndex, found))
                     return;
                 tstarget = found[0];
             }
             else {
-                tstarget = args.Player;
+                tstarget = sPlayer;
             }
 
-            if (tstarget.Index != args.Player.Index &&
+            if (tstarget.Index != sPlayer.Index &&
                 !PluginMain.Players[tstarget.Index].CanBeCopied
-                && !args.Player.HasPermission(Permissions.BotBypassCopy)) {
-                args.Player?.SendErrorMessage("This player has disabled inventory copying.");
+                && !sPlayer.HasPermission(Permissions.BotBypassCopy)) {
+                sPlayer?.SendErrorMessage("This player has disabled inventory copying.");
                 return;
             }
 
             bot.Actions.FullCopy(tstarget.TPlayer);
 
-            args.Player?.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
+            sPlayer?.SendSuccessMessage($"Selected bot \"{bot.Name}\" is now copying \"{tstarget.Name}\".");
         }
     }
 }

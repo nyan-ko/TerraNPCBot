@@ -9,7 +9,7 @@ namespace TerraNPCBot.Data {
     public class BotCommandArgs : CommandArgs {
 
         /// <summary>
-        /// Gets the player who did the command's selected bot.
+        /// Gets the selected bot of the player who did the command, returns null if it does not exist.
         /// </summary>
         public Bot SelectedBot {
             get {

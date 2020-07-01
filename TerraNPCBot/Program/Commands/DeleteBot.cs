@@ -24,31 +24,32 @@ namespace TerraNPCBot.Program.Commands {
                 return;
             }
 
-            var player = PluginMain.Players[args.Player.Index];
+            BTSPlayer bPlayer = args.BPlayer;
+            TSPlayer sPlayer = args.Player;
             List<string> currentSection = args.CurrentSection;
-            if (currentSection.Count == 1 && player.Selected != -1) {
+            if (currentSection.Count == 1 && bPlayer.Selected != -1) {
                 // Default selected bot
-                player.SetSelectedDelete(player.Selected);
-                args.Player?.SendSuccessMessage("Currently selected bot will be deleted upon confirmation: /confirm or /deny.");
+                bPlayer.SetSelectedDelete(bPlayer.Selected);
+                sPlayer?.SendSuccessMessage("Currently selected bot will be deleted upon confirmation: /confirm or /deny.");
 
-                args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
-                args.Player?.AddResponse("deny", new Action<object>(RefuseDelete));
+                sPlayer?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
+                sPlayer?.AddResponse("deny", new Action<object>(RefuseDelete));
             }
             else if (currentSection.Count > 1) {
                 // User specified bot
                 string nameOrIndex = StringUtils.JoinAndTrimList(currentSection.Skip(1));
-                List<Bot> foundbots = player.GetBotFromIndexOrName(nameOrIndex);
+                List<Bot> foundbots = bPlayer.GetBotFromIndexOrName(nameOrIndex);
 
-                if (!args.Player.HandleListFromSearches(nameOrIndex, foundbots))
+                if (!sPlayer.HandleListFromSearches(nameOrIndex, foundbots))
                     return;
-                player.SetSelectedDelete(foundbots[0].IndexInOwnerBots);
-                args.Player?.SendSuccessMessage($"Selecting bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots} to delete: /confirm or /deny.");
+                bPlayer.SetSelectedDelete(foundbots[0].IndexInOwnerBots);
+                sPlayer?.SendSuccessMessage($"Selecting bot \"{foundbots[0].Name}\" with index {foundbots[0].IndexInOwnerBots} to delete: /confirm or /deny.");
 
-                args.Player?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
-                args.Player?.AddResponse("deny", new Action<object>(RefuseDelete));
+                sPlayer?.AddResponse("confirm", new Action<object>(ConfirmedDelete));
+                sPlayer?.AddResponse("deny", new Action<object>(RefuseDelete));
             }
             else {
-                args.Player?.SendMultipleMessage(Messages.Delete, Color.Yellow);
+                sPlayer?.SendMultipleMessage(Messages.Delete, Color.Yellow);
             }
         }
 

@@ -16,15 +16,6 @@ namespace TerraNPCBot {
             timeBeforeNextPacket = time;
         }        
 
-        public override string ToString() {
-            string s = "";
-
-            s += "Packet: " + (PacketTypes)stream.Type;
-            s += $", {timeBeforeNextPacket} milliseconds until next packet.";
-
-            return s;
-        }
-
         public static PacketBase WriteFromRecorded(StreamInfo r, Bot b) {
             PacketBase packet = null;
 

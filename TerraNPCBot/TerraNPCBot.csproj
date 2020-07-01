@@ -154,6 +154,7 @@
     <Compile Include="Program\Commands\Help.cs" />
     <Compile Include="Program\Commands\Ignore.cs" />
     <Compile Include="Program\Commands\Info.cs" />
+    <Compile Include="Program\Commands\BotInventory.cs" />
     <Compile Include="Program\Commands\List.cs" />
     <Compile Include="Program\Commands\NewBot.cs" />
     <Compile Include="Program\Commands\Record.cs" />
@@ -197,8 +198,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>move "TerraNPCBot.dll" "C:\Users\S\Desktop\terraria backup\1.4\1.4.0.5\TShock4.4.0_Pre11_Terraria1.4.0.5\ServerPlugins"
+move "TerraBotLib.dll" "C:\Users\S\Desktop\terraria backup\1.4\1.4.0.5\TShock4.4.0_Pre11_Terraria1.4.0.5\ServerPlugins"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.113.1\build\net46\System.Data.SQLite.Core.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

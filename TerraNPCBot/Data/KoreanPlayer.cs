@@ -46,6 +46,8 @@ namespace TerraNPCBot {
         public NetItem[] DyeSlots { get; set; }
         public NetItem[] MiscEquipSlots { get; set; }
         public NetItem[] MiscDyeSlots { get; set; }
+        // JSON won't serialize the custom slotcollection class I made for inventory slots so I have to use NetItem arrays
+        // please use SetSlotItem() when setting values for arrays so it triggers the hook and sends packets :)
 
         private Bot internalBot;
 
@@ -54,6 +56,8 @@ namespace TerraNPCBot {
                 return;
 
             slots[index] = item;
+            if (internalBot.Running)
+                internalBot.Client.QueuePackets(new Packets.Packet5(internalBot.ID, (short)index, (short)item.Stack, item.PrefixId, (short)item.NetId));
         }
         /// <summary>
         /// Initializes the default bot player with a given name.

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TShockAPI;
+using TerraNPCBot.Utils;
 using Microsoft.Xna.Framework;
 using TerraNPCBot.Data;
 
@@ -32,21 +33,13 @@ namespace TerraNPCBot.Program.Commands {
                         return;
                     }
 
-                    string namewithspaces = string.Join(" ", currentSection.Skip(1)).Trim('"');
+                    string nameOrIndex = StringUtils.JoinAndTrimList(currentSection.Skip(1));
 
-                    var found = TSPlayer.FindByNameOrID(namewithspaces);
-                    if (found.Count == 0 || found == null) {
-                        args.Player?.SendErrorMessage($"No matches found for \"{namewithspaces}\".");
+                    var found = TSPlayer.FindByNameOrID(nameOrIndex);
+                    if (!args.Player.HandleListFromSearches(nameOrIndex, found))
                         return;
-                    }
-                    else if (found.Count > 1) {
-                        string multiple = string.Join(", ", found);
-                        args.Player?.SendErrorMessage($"Multiple matches found for \"{namewithspaces}\": {multiple}");
-                        return;
-                    }
-                    else {
-                        tstarget = found[0];
-                    }
+                    tstarget = found[0];
+
                 }
                 else {
                     tstarget = args.Player;

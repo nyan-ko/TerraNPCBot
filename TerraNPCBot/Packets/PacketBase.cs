@@ -34,6 +34,7 @@ namespace TerraNPCBot {
 
         protected PacketBase(byte _packetType) {
             Amanuensis = new BinaryWriter(new MemoryStream() { Position = 3 });
+
             packetType = _packetType;
         }
 
@@ -42,15 +43,12 @@ namespace TerraNPCBot {
         /// </summary>
         /// <param name="stream"></param>
         protected void Packetize(bool bypass = false) { // I will NOT switch to American English
-            using (MemoryStream stream = new MemoryStream()) {
-                short packetLength = (short)Amanuensis.BaseStream.Position;
-                Amanuensis.BaseStream.Position = 0;
-                Amanuensis.Write(packetLength);
-                Amanuensis.Write(Type);
-                Amanuensis.BaseStream.Position = 0;
-                Amanuensis.BaseStream.CopyTo(stream);
-                Data = new byte[packetLength];
-            }
+            short packetLength = (short)Amanuensis.BaseStream.Position;
+            Amanuensis.BaseStream.Position = 0;
+            Amanuensis.Write(packetLength);
+            Amanuensis.Write(Type);
+            Amanuensis.BaseStream.Position = 0;
+            Data = ((MemoryStream)Amanuensis.BaseStream).ToArray();
             if (bypass) {
                 BypassIgnore();
             }
@@ -112,7 +110,7 @@ namespace TerraNPCBot {
         }
 
         /// <summary>
-        /// Changes packet type so it is forcefully sent and bypasses player ignores. Only call after Packetize() pweez
+        /// Changes overlying packet type so it is forcefully sent and bypasses player ignores. Only call after Packetize() pweez
         /// </summary>
         protected void BypassIgnore() {
             packetType = 254;

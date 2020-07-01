@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TShockAPI;
 using TerraNPCBot.Data;
 
 namespace TerraNPCBot.Program.Commands {
@@ -16,18 +17,19 @@ namespace TerraNPCBot.Program.Commands {
         public override string InitialPermission => Permissions.Bot;
 
         protected override void Execute(BotCommandArgs args) {
+            TSPlayer sPlayer = args.Player;
             var bot = args.SelectedBot;
             if (bot == null) {
-                args.Player?.SendErrorMessage(Messages.BotErrorNotFound);
+                sPlayer?.SendErrorMessage(Messages.BotErrorNotFound);
             }
             else if (bot.Running) {
-                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
+                sPlayer?.SendErrorMessage(string.Format(Messages.BotErrorAlreadyRunning, bot.Name));
             }
             else if (!bot.Start()) {
-                args.Player?.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));
+                sPlayer?.SendErrorMessage(string.Format(Messages.BotErrorCouldNotStart, bot.Name));
             }
             else {
-                args.Player?.SendSuccessMessage(string.Format(Messages.BotSuccessStarted, bot.Name));
+                sPlayer?.SendSuccessMessage(string.Format(Messages.BotSuccessStarted, bot.Name));
             }
         }
     }

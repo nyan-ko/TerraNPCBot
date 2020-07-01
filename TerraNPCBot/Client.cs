@@ -20,14 +20,12 @@ namespace TerraNPCBot {
     public class Client : IClient {
         #region Fields
         public bool running;
-        public int port;
 
         private Bot bot;
 #endregion
 
-        public Client (int _port, Bot _bot) {
+        public Client (Bot _bot) {
             bot = _bot;
-            port = _port;
             CanSendPackets = true;
         }
 

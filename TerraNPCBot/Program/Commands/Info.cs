@@ -27,7 +27,7 @@ namespace TerraNPCBot.Program.Commands {
                     $"Allow bot copying: {player.CanBeCopied}",
                     $"Allow bot teleport: {player.CanBeTeleportedTo}");
             }
-            else if (currentSection.Count > 2) {
+            else if (currentSection.Count > 1) {
                 if (player.OwnedBots.Count == 0) {
                     args.Player.SendErrorMessage(Messages.NoOwnedBots);
                     return;
@@ -37,15 +37,11 @@ namespace TerraNPCBot.Program.Commands {
                 if (!args.Player.HandleListFromSearches(nameOrIndex, bots))
                     return;
                 Bot foundBot = bots[0];
-                if (!PluginMain.ServersByPorts.TryGetValue(foundBot.Port.ToString(), out string serverName)) {
-                    serverName = "none..?";
-                }
                 args.Player.SendMultipleMessage(Color.Yellow, $"Bot name: {foundBot.Name}",
                     $"Bot running: {foundBot.Running}",
                     $"Bot index: {foundBot.ID}",
                     $"Bot index in owned bots: {foundBot.IndexInOwnerBots}",
-                    $"Bot position: ({foundBot.TilePosition.X}, {foundBot.TilePosition.Y})",
-                    $"Bot server: {serverName}");
+                    $"Bot position: ({foundBot.TilePosition.X}, {foundBot.TilePosition.Y})");
             }
         }
     }

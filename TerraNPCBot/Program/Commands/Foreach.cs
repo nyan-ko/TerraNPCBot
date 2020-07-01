@@ -23,24 +23,24 @@ namespace TerraNPCBot.Program.Commands {
             // /bot foreach (copy "Cy")
             // All selected bots with /groupbots now copy cy
 
-            BTSPlayer player = args.BPlayer;
+            BTSPlayer bPlayer = args.BPlayer;
+            TSPlayer sPlayer = args.Player;
             List<string> currentSection = args.CurrentSection;
 
-            if (player.GroupedBots.Count == 0) {
-                args.Player?.SendErrorMessage("No grouped bots found. Use the /group subcommand.");
+            if (bPlayer.GroupedBots.Count == 0) {
+                sPlayer?.SendErrorMessage("No grouped bots found. Use the /group subcommand.");
                 return;
             }
             if (currentSection.Count == 1) {
-                args.Player?.SendErrorMessage("No actions for bots found.");
+                sPlayer?.SendErrorMessage("No actions for bots found.");
                 return;
             }
             string message = StringUtils.JoinAndTrimList(currentSection);
             List<string> parameters = StringUtils.JoinAndTrimList(currentSection.Skip(1)).Trim('(', ')', ' ').Split(' ').ToList();
-            TSPlayer tsplayer = args.Player;
 
-            foreach (var selected in player.GroupedBots) {
+            foreach (var selected in bPlayer.GroupedBots) {
                 PluginCommands.AddInternalCommand(new BotCommandArgs(
-                    new CommandArgs(message, tsplayer, parameters), true).SetSelectedBotOverride(player.OwnedBots[selected]));
+                    new CommandArgs(message, sPlayer, parameters), true).SetSelectedBotOverride(bPlayer.OwnedBots[selected]));
             }
         }
     }

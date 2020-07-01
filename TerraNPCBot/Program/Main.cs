@@ -31,25 +31,6 @@ namespace TerraNPCBot.Program
         public static Database DB { get; private set; }
         public static Config Config { get; private set; }
 
-        public static Dictionary<string, string> ServersByPorts = new Dictionary<string, string> {
-            { "7777", "Nexus" },
-            { "7770", "Items" },
-            { "7771", "Freebuild" },
-            { "7779", "Freebuild+" },
-            { "7773", "PvP" },
-            { "7772", "PvE" },
-            { "7774", "CTF" }
-        };
-        public static Dictionary<string, int> PortsByServers = new Dictionary<string, int> {
-            { "nexus", 7777 },
-            { "items", 7770 },
-            { "freebuild", 7771 }, { "fb", 7771 },
-            { "freebuild+", 7779 }, { "fb+", 7779 },
-            { "pvp", 7773 },
-            { "pve", 7772 },
-            { "ctf", 7774 }
-        };
-
         public static bool RunThreads { get; private set; }
 
         public PluginMain(Main game) : base(game) {
@@ -66,7 +47,7 @@ namespace TerraNPCBot.Program
             ServerApi.Hooks.ServerLeave.Register(this, PluginHooks.OnLeave);
             ServerApi.Hooks.NetGetData.Register(this, PluginHooks.OnGetData);
 
-            TShockAPI.Commands.ChatCommands.Add(new Command(Permissions.Bot, PluginCommands.AddServerCommand, "bot"));
+            TShockAPI.Commands.ChatCommands.Add(new Command(PluginCommands.AddServerCommand, "bot"));
             TShockAPI.Commands.ChatCommands.Add(new Command(PluginCommands.ListCommands, "blist"));
             TShockAPI.Commands.ChatCommands.Add(new Command(PluginCommands.ToggleFields, "toggle"));
             TShockAPI.Commands.ChatCommands.Add(new Command(Permissions.ReloadUserDBEntry, PluginCommands.LoadUserDBEntry, "reloaduser"));

@@ -15,27 +15,34 @@ using TShockAPI;
 namespace TerraNPCBot.Program {
     public class PluginCommands {
 
-        
+
 
         /// <summary>
         /// Dictionary of every command and their identifier.
         /// </summary>
         public static Dictionary<string, BaseCommand> CommandsByTag = new Dictionary<string, BaseCommand> {
             { "help", new Help() },
-            { "ignore", new Ignore() },
             { "list", new List() },
             { "info", new Info() },
             { "select", new Select() },
             { "new", new NewBot() },
             { "start", new StartBot() },
             { "stop", new StopBot() },
-            { "delete", new DeleteBot() }, { "del", new DeleteBot() },
+            { "delete", new DeleteBot() },
             { "record", new Record() },
             { "copy", new Copy() },
             { "chat", new Chat() },
-            { "teleport", new Teleport() }, { "tp", new Teleport() },
+            { "teleport", new Teleport() },
             { "groupbots", new GroupBots() },
-            { "foreach", new Foreach() }
+            { "foreach", new Foreach() },
+            { "rename", new RenameBot() }
+        };
+
+        public static Dictionary<string, string> CommandAliases = new Dictionary<string, string>() {
+            { "del", "delete" },
+            { "tp", "teleport" },
+            { "gb", "groupbots" },
+            { "fe", "foreach" }
         };
 
         public static void ListCommands(CommandArgs args) {
@@ -91,13 +98,17 @@ namespace TerraNPCBot.Program {
                     continue;
                 }
 
-                if (args.Parameters.Count == 0 || !CommandsByTag.ContainsKey(args.Parameters[0])) {
+                if (args.Parameters.Count == 0 || (!CommandsByTag.ContainsKey(args.Parameters[0]) && !CommandAliases.ContainsKey(args.Parameters[0]))) {
                     CommandsByTag["help"].Invoke(args);
                     continue;
                 }
 
                 for (int i = 0; i < args.Parameters.Count; ++i) {
-                    if (CommandsByTag.TryGetValue(args.Parameters[i].ToLower(), out BaseCommand command)) {
+                    string commandIdentifier = args.Parameters[i].ToLower();
+                    if (CommandAliases.ContainsKey(commandIdentifier)) {
+                        commandIdentifier = CommandAliases[commandIdentifier];
+                    }
+                    if (CommandsByTag.TryGetValue(commandIdentifier, out BaseCommand command)) {
                         if (args.FromForeach ? !command.ValidForeachAction : false)
                             continue;
                         command.Invoke(args);

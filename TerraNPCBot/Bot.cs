@@ -17,7 +17,6 @@ namespace TerraNPCBot {
         #region Fields
         #region Interface Fields
         private Client client;
-        private int port = 0;
             #endregion
         #region Record Packets
             public bool recording;
@@ -45,15 +44,6 @@ namespace TerraNPCBot {
 
         public Player PlayerData { get; private set; }
         public BotActions Actions { get; private set; }
-
-        public int Port {
-            get => port;
-            set {
-                if (EventHooks.PortChange.Invoke(this, new PortChangedEventArgs() { OldPort = port, NewPort = value }))
-                    return;
-                port = value;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the bot's server index.
@@ -117,7 +107,7 @@ namespace TerraNPCBot {
                 position = value;
 
                 if (Running)
-                    Actions.Teleport(position);
+                    QueuePackets(new Packets.Packet13(ID, 0, 0, 0, 0, (byte)AsTSPlayer.TPlayer.selectedItem, position.X, position.Y));
             }
         }
 
@@ -136,22 +126,22 @@ namespace TerraNPCBot {
 
         internal Bot(DatabaseItems.DBBot dbBot, int _owner, int indexInOwnedBots) {
             owner = _owner;
-            client = new Client(dbBot.Port, this);
+            client = new Client(this);
             Actions = new BotActions(this);
             EventHooks = new Hooks();
 
             position = dbBot.Position;
             PlayerData = dbBot.PlayerData;
-            IndexInOwnerBots = IndexInOwnerBots;
+            IndexInOwnerBots = indexInOwnedBots;
 
             SetupHeartbeat();
 
             Initialize();
         }
 
-        public Bot(string name, int _owner, int ownedBotsIndex, int port) {
+        public Bot(string name, int _owner, int ownedBotsIndex) {
             owner = _owner;
-            client = new Client(port, this);
+            client = new Client(this);
             Actions = new BotActions(this);
             EventHooks = new Hooks();
 
@@ -236,7 +226,7 @@ namespace TerraNPCBot {
         private void QueuePackets(params IPacket[] packets) => client.QueuePackets(packets);
 
         public void RequestJoinPackets(int whoAsked) {
-            EventHooks.ClientDirectedStart.Invoke(this, new StartEventArgs() { Bot = this, Port = Port, WhoAsked = whoAsked });
+            EventHooks.ClientDirectedStart.Invoke(this, new StartEventArgs() { Bot = this, WhoAsked = whoAsked });
         }
 
         public override string ToString() => Name;
@@ -295,7 +285,7 @@ namespace TerraNPCBot {
             }
         }
 
-        public virtual void Teleport(Microsoft.Xna.Framework.Vector2 pos) => QueuePackets(new Packets.Packet13(bot.ID, 0, 0, 0, 0, (byte)bot.AsTSPlayer.TPlayer.selectedItem, pos.X, pos.Y));
+        public virtual void Teleport(Microsoft.Xna.Framework.Vector2 pos) => bot.Position = pos;
         
         public virtual void PlayNote(float note) => QueuePackets(new Packets.Packet58(bot.ID, note));
 
